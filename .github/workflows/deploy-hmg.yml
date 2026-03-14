@@ -1,0 +1,51 @@
+name: Nodejs Build
+
+on:
+  push:
+    branches: [ "hmg" ]
+  workflow_dispatch:
+
+env:
+  PROJECT_NAME: util-lar
+  DIST_DIR: ./dist/product-frontend/browser
+
+jobs:
+  build:
+    runs-on: self-hosted
+    environment: 'hmg'
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build project
+        run: npx ng build -c stage
+     
+  deploy:
+    needs: build
+    runs-on: self-hosted
+    environment: 'hmg'
+    steps:
+      - name: Define dynamic envs
+        run: |
+          echo "DEPLOY_DIR=/var/www/front-ends/${PROJECT_NAME}/browser" >> $GITHUB_ENV
+
+      - name: Configure SSH keys
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H ${{ secrets.SSH_IP }} >> ~/.ssh/known_hosts
+
+      - name: Send files with rsync
+        run: |
+          rsync -avrc --delete \
+          -e "ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=yes" \
+          $DIST_DIR/ frontend@${{ secrets.SSH_IP }}:$DEPLOY_DIR

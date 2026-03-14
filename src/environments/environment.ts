@@ -1,6 +1,5 @@
 export const environment = {
-
-  production: false,
-  apiUrl: 'http://localhost:8080',
-  authUrl: 'http://localhost:8080'
+  production: true,
+  apiUrl: 'https://api.nextagecode.com/util-lar',
+  authUrl: 'https://api.nextagecode.com/util-lar'
 };
