@@ -1,5 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ProductService } from '../../services/product.service';
 import { Product, ProductResponse, ProductFormData } from '../../models/product.model';
@@ -15,7 +16,7 @@ import { finalize, Subject, takeUntil } from 'rxjs';
   selector: 'app-dashboard',
   standalone: true,
   templateUrl: './dashboard.component.html',
-  imports: [CommonModule, ProductFormModalComponent, AdminLoginModalComponent, WelcomeModalComponent, CapitalizePipe]
+  imports: [CommonModule, FormsModule, ProductFormModalComponent, AdminLoginModalComponent, WelcomeModalComponent, CapitalizePipe]
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   errorMessage = '';
@@ -24,16 +25,33 @@ export class DashboardComponent implements OnInit, OnDestroy {
   isAdmin = false;
   private readonly destroy$ = new Subject<void>();
   
-  // Filtros por categoria
-  selectedCategory: string | null = null;
+  // Filtros
+  selectedCategory: string = 'Todas';
+  selectedCondition: string = 'Todas';
+  selectedSort: string = 'populares';
+  searchQuery: string = '';
+  
   categories = [
-    { label: 'Todos', value: null, icon: '🏠' },
-    { label: 'Sofás', value: 'Sofá', icon: '🛋️' },
-    { label: 'Mesas', value: 'Mesa', icon: '🪑' },
-    { label: 'Armários', value: 'Guarda-Roupa', icon: '🚪' },
-    { label: 'Cadeiras', value: 'Cadeira', icon: '💺' },
-    { label: 'Racks', value: 'Rack', icon: '📺' },
-    { label: 'Eletros', value: 'Eletrodoméstico', icon: '⚡' }
+    { label: 'Todas', value: 'Todas' },
+    { label: 'Sofás', value: 'Sofá' },
+    { label: 'Mesas', value: 'Mesa' },
+    { label: 'Armários', value: 'Guarda-Roupa' },
+    { label: 'Cadeiras', value: 'Cadeira' },
+    { label: 'Racks', value: 'Rack' },
+    { label: 'Eletrodomésticos', value: 'Eletrodoméstico' }
+  ];
+  
+  conditions = [
+    { label: 'Todas', value: 'Todas' },
+    { label: 'Novo', value: 'novo' },
+    { label: 'Seminovo', value: 'seminovo' }
+  ];
+  
+  sortOptions = [
+    { label: 'Mais populares', value: 'populares' },
+    { label: 'Menor preço', value: 'menor-preco' },
+    { label: 'Maior preço', value: 'maior-preco' },
+    { label: 'Mais recentes', value: 'recentes' }
   ];
   
   // Modais
@@ -110,24 +128,62 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return produto.id;
   }
 
-  // Filtro de categorias
+  // Filtros combinados
   get filteredProducts(): ProductResponse[] {
-    if (!this.selectedCategory) {
-      return this.produtos;
+    let filtered = [...this.produtos];
+    
+    // Filtro de busca
+    if (this.searchQuery.trim()) {
+      const query = this.searchQuery.toLowerCase();
+      filtered = filtered.filter(p => 
+        p.name.toLowerCase().includes(query) || 
+        p.category.toLowerCase().includes(query)
+      );
     }
-    return this.produtos.filter(p => p.category === this.selectedCategory);
-  }
-
-  get categoryTitle(): string {
-    if (!this.selectedCategory) {
-      return 'Nossos Produtos';
+    
+    // Filtro de categoria
+    if (this.selectedCategory !== 'Todas') {
+      filtered = filtered.filter(p => p.category === this.selectedCategory);
     }
-    const category = this.categories.find(c => c.value === this.selectedCategory);
-    return category ? category.label : 'Produtos';
+    
+    // Filtro de condição
+    if (this.selectedCondition !== 'Todas') {
+      filtered = filtered.filter(p => p.condition === this.selectedCondition);
+    }
+    
+    // Ordenação
+    switch (this.selectedSort) {
+      case 'menor-preco':
+        filtered.sort((a, b) => a.price - b.price);
+        break;
+      case 'maior-preco':
+        filtered.sort((a, b) => b.price - a.price);
+        break;
+      case 'recentes':
+        filtered.sort((a, b) => b.id - a.id);
+        break;
+      case 'populares':
+      default:
+        // Mantém ordem padrão (featured primeiro, depois por ID)
+        filtered.sort((a, b) => {
+          if (a.featured && !b.featured) return -1;
+          if (!a.featured && b.featured) return 1;
+          return b.id - a.id;
+        });
+    }
+    
+    return filtered;
   }
-
-  selectCategory(category: string | null): void {
-    this.selectedCategory = category;
+  
+  // Gerar avaliação fictícia baseada no ID do produto (para consistência)
+  getProductRating(productId: number): number {
+    return 5; // Sempre 5 estrelas para simplicidade
+  }
+  
+  getProductReviewCount(productId: number): number {
+    // Gera número de avaliações baseado no ID (para ser consistente)
+    const counts = [45, 42, 34, 28, 56, 38, 51];
+    return counts[productId % counts.length];
   }
 
   checkWelcomeModal(): void {

@@ -1,0 +1,8 @@
+{
+  "/util-lar": {
+    "target": "https://api-hmg.nextagecode.com",
+    "secure": true,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  }
+}
