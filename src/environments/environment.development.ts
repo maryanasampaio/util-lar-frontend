@@ -1,6 +1,5 @@
 export const environment = {
-
   production: false,
-  apiUrl: '/util-lar',
-  authUrl: '/util-lar'
+  apiUrl: 'http://localhost:8080',
+  authUrl: 'http://localhost:8080'
 };
