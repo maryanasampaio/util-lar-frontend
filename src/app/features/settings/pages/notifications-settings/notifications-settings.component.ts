@@ -34,6 +34,16 @@ interface NotificationSettings {
       </header>
 
       <div class="max-w-4xl mx-auto px-4 py-8">
+        <!-- Loading -->
+        <div *ngIf="isLoading" class="flex justify-center items-center py-20">
+          <div class="text-center">
+            <div class="animate-spin rounded-full h-16 w-16 border-b-4 mx-auto mb-4" style="border-color: #7588A8;"></div>
+            <p class="text-lg" style="color: #6B7785;">Carregando preferências...</p>
+          </div>
+        </div>
+
+        <!-- Conteúdo (só exibe após carregar) -->
+        <div *ngIf="!isLoading">
         <!-- Mensagem de Erro -->
         <div *ngIf="errorMessage" class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-lg animate-fade-in">
           <div class="flex items-center gap-3">
@@ -173,6 +183,7 @@ interface NotificationSettings {
             </div>
           </div>
         </div>
+        </div>
 
         <!-- Save confirmation -->
         <div *ngIf="showSaveConfirmation" 
@@ -218,6 +229,7 @@ export class NotificationsSettingsComponent implements OnInit {
 
   showSaveConfirmation = false;
   errorMessage = '';
+  isLoading = true;
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -254,6 +266,7 @@ export class NotificationsSettingsComponent implements OnInit {
   }
 
   loadSettings(): void {
+    this.isLoading = true;
     this.notificationService.getPreferences().subscribe({
       next: (prefs) => {
         this.settings = {
@@ -261,9 +274,11 @@ export class NotificationsSettingsComponent implements OnInit {
           email: prefs.email,
           push: prefs.push
         };
+        this.isLoading = false;
       },
       error: (error) => {
         console.error('Erro ao carregar preferências:', error);
+        this.isLoading = false;
         // Continuar com valores padrão
       }
     });

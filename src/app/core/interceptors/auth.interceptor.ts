@@ -33,6 +33,7 @@ import { Observable, catchError, throwError } from 'rxjs';
 import { getToken } from '../../features/auth/utils/storage.util';
 import { AuthService } from '../../features/auth/services/auth.service';
 import { Router } from '@angular/router';
+import { AlertService } from '../../shared/services/alert.service';
 
 /**
  * @Injectable()
@@ -42,7 +43,11 @@ import { Router } from '@angular/router';
  */
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+    private alertService: AlertService
+  ) {}
   /**
    * ========================================================================
    * INTERCEPT - Interceptar Requisição HTTP
@@ -157,9 +162,11 @@ export class AuthInterceptor implements HttpInterceptor {
       
       // Redireciona para dashboard (sem modo admin)
       if (typeof window !== 'undefined') {
-        alert('⚠️ Sessão expirada ou sem permissão. Faça login novamente.');
-        // Força reload para resetar estado
-        window.location.href = '/dashboard';
+        this.alertService.warning('Sessão Expirada', 'Sua sessão expirou ou você não tem permissão. Faça login novamente.');
+        setTimeout(() => {
+          // Força reload para resetar estado
+          window.location.href = '/dashboard';
+        }, 2000);
       }
     }
     

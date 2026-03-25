@@ -8,6 +8,7 @@ import {
   CardBrand,
   SimulationState,
 } from '../../models/simulation.model';
+import { AlertService } from '../../../../shared/services/alert.service';
 
 @Component({
   selector: 'app-simulation-card',
@@ -46,7 +47,8 @@ export class SimulationCardComponent implements OnInit {
 
   constructor(
     private readonly simulationService: SimulationService,
-    private readonly cdr: ChangeDetectorRef
+    private readonly cdr: ChangeDetectorRef,
+    private readonly alertService: AlertService
   ) {}
 
   ngOnInit(): void {
@@ -140,13 +142,13 @@ export class SimulationCardComponent implements OnInit {
    */
   printComparison(): void {
     if (!this.comparisonData.withRepasse || !this.comparisonData.withoutRepasse) {
-      alert('Execute uma comparação primeiro!');
+      this.alertService.warning('Comparação Necessária', 'Execute uma comparação primeiro!');
       return;
     }
 
     const printWindow = window.open('', '_blank');
     if (!printWindow) {
-      alert('Habilite pop-ups para imprimir');
+      this.alertService.warning('Pop-ups Bloqueados', 'Habilite pop-ups para imprimir');
       return;
     }
 
@@ -338,13 +340,13 @@ export class SimulationCardComponent implements OnInit {
    */
   printResult(): void {
     if (!this.state.result) {
-      alert('Execute uma simulação primeiro!');
+      this.alertService.warning('Simulação Necessária', 'Execute uma simulação primeiro!');
       return;
     }
 
     const printWindow = window.open('', '_blank');
     if (!printWindow) {
-      alert('Habilite pop-ups para imprimir');
+      this.alertService.warning('Pop-ups Bloqueados', 'Habilite pop-ups para imprimir');
       return;
     }
 
@@ -495,7 +497,7 @@ export class SimulationCardComponent implements OnInit {
    */
   async generateImage(): Promise<void> {
     if (!this.state.result) {
-      alert('Execute uma simulação primeiro!');
+      this.alertService.warning('Simulação Necessária', 'Execute uma simulação primeiro!');
       return;
     }
 
@@ -600,7 +602,7 @@ export class SimulationCardComponent implements OnInit {
       link.href = dataUrl;
       link.click();
       
-      alert('✅ Imagem gerada com sucesso!');
+      this.alertService.success('Imagem Gerada', 'Imagem gerada com sucesso!');
       
     } catch (error: any) {
       console.error('Erro ao gerar imagem:', error);

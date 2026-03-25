@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AdminModeService } from '../../../core/services/admin-mode.service';
 import { SidebarService } from '../../../core/services/sidebar.service';
+import { AlertService } from '../../services/alert.service';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({
@@ -134,7 +135,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
   constructor(
     public readonly adminModeService: AdminModeService,
     private readonly sidebarService: SidebarService,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly alertService: AlertService
   ) {}
 
   ngOnInit(): void {
@@ -163,9 +165,13 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   onLogoutAdmin(): void {
-    if (confirm('Deseja realmente sair do modo admin?')) {
-      this.adminModeService.disableAdminMode();
-    }
+    this.alertService.confirm(
+      'Sair do Modo Admin',
+      'Deseja realmente sair do modo administrador?',
+      () => {
+        this.adminModeService.disableAdminMode();
+      }
+    );
   }
 
   isActiveRoute(route: string): boolean {

@@ -9,6 +9,7 @@ import { ProductFormModalComponent } from '../../components/product-form-modal/p
 import { AdminLoginModalComponent } from '../../../../shared/components/admin-login-modal/admin-login-modal.component';
 import { WelcomeModalComponent } from '../../../../shared/components/welcome-modal/welcome-modal.component';
 import { CapitalizePipe } from '../../../../shared/pipes/capitalize.pipe';
+import { AlertService } from '../../../../shared/services/alert.service';
 import { finalize, Subject, takeUntil } from 'rxjs';
 
 
@@ -67,7 +68,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private readonly productService: ProductService,
     private readonly cdr: ChangeDetectorRef,
     private readonly router: Router,
-    public readonly adminModeService: AdminModeService
+    public readonly adminModeService: AdminModeService,
+    private readonly alertService: AlertService
   ) {}
 
   ngOnInit(): void {
@@ -221,16 +223,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
           let message = 'Erro ao fazer login.';
           
           if (error?.status === 401) {
-            message = '❌ Senha incorreta ou usuário sem permissão de administrador.';
+            message = 'Senha incorreta ou usuário sem permissão de administrador.';
           } else if (error?.message) {
             message = error.message;
           } else if (!navigator.onLine) {
-            message = '⚠️ Verifique sua conexão com a internet.';
+            message = 'Verifique sua conexão com a internet.';
           } else {
-            message = '⚠️ Erro ao conectar com o servidor. Verifique se o backend está rodando.';
+            message = 'Erro ao conectar com o servidor. Verifique se o backend está rodando.';
           }
           
-          alert(message);
+          this.alertService.error('Erro ao fazer login', message);
         }
       });
     } else {
@@ -294,9 +296,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
       next: () => {
         this.closeCreateModal();
         this.loadProdutos();
+        this.alertService.success('Produto Criado', 'O produto foi adicionado com sucesso!');
       },
       error: (err) => {
-        alert('Erro ao criar produto: ' + err.message);
+        this.alertService.error('Erro ao criar produto', err.message || 'Não foi possível criar o produto.');
       }
     });
   }
@@ -308,59 +311,74 @@ export class DashboardComponent implements OnInit, OnDestroy {
       next: () => {
         this.closeEditModal();
         this.loadProdutos();
+        this.alertService.success('Produto Atualizado', 'As alterações foram salvas com sucesso!');
       },
       error: (err) => {
-        alert('Erro ao atualizar produto: ' + err.message);
+        this.alertService.error('Erro ao atualizar produto', err.message || 'Não foi possível atualizar o produto.');
       }
     });
   }
 
   removerProduto(id: number, event: Event): void {
     event.stopPropagation();
-    if (confirm('Tem certeza que deseja remover este produto?')) {
-      this.productService.removerProduto(id).subscribe({
-        next: () => {
-          this.loadProdutos();
-        },
-        error: (err) => {
-          alert('Erro ao remover produto: ' + err.message);
-        }
-      });
-    }
+    this.alertService.confirm(
+      'Remover Produto',
+      'Tem certeza que deseja remover este produto? Esta ação não pode ser desfeita.',
+      () => {
+        this.productService.removerProduto(id).subscribe({
+          next: () => {
+            this.loadProdutos();
+            this.alertService.success('Produto Removido', 'O produto foi removido com sucesso!');
+          },
+          error: (err) => {
+            this.alertService.error('Erro ao remover produto', err.message || 'Não foi possível remover o produto.');
+          }
+        });
+      }
+    );
   }
 
   marcarComoVendido(id: number, event: Event): void {
     event.stopPropagation();
-    if (confirm('Marcar este produto como vendido?')) {
-      this.productService.marcarComoVendido(id).subscribe({
-        next: () => {
-          console.log('[Dashboard] Produto marcado como vendido');
-          this.loadProdutos();
-        },
-        error: (err) => {
-          console.error('[Dashboard] Erro ao marcar como vendido:', err);
-          alert('❌ Erro ao marcar como vendido. Verifique sua conexão e permissões.');
-        }
-      });
-    }
+    this.alertService.confirm(
+      'Marcar como Vendido',
+      'Confirma que este produto foi vendido?',
+      () => {
+        this.productService.marcarComoVendido(id).subscribe({
+          next: () => {
+            console.log('[Dashboard] Produto marcado como vendido');
+            this.loadProdutos();
+            this.alertService.success('Produto Vendido', 'O produto foi marcado como vendido!');
+          },
+          error: (err) => {
+            console.error('[Dashboard] Erro ao marcar como vendido:', err);
+            this.alertService.error('Erro', 'Não foi possível marcar como vendido. Verifique sua conexão e permissões.');
+          }
+        });
+      }
+    );
   }
 
   reativarProduto(id: number, event: Event): void {
     event.stopPropagation();
     
-    if (confirm('Reativar este produto para venda?')) {
-      this.productService.reativarProduto(id).subscribe({
-        next: () => {
-          console.log('[Dashboard] Produto reativado');
-          alert('✅ Produto reativado com sucesso!');
-          this.loadProdutos();
-        },
-        error: (err) => {
-          console.error('[Dashboard] Erro ao reativar produto:', err);
-          alert('❌ Erro ao reativar produto. Verifique sua conexão e permissões.');
-        }
-      });
-    }
+    this.alertService.confirm(
+      'Reativar Produto',
+      'Deseja reativar este produto para venda?',
+      () => {
+        this.productService.reativarProduto(id).subscribe({
+          next: () => {
+            console.log('[Dashboard] Produto reativado');
+            this.loadProdutos();
+            this.alertService.success('Produto Reativado', 'O produto está disponível novamente para venda!');
+          },
+          error: (err) => {
+            console.error('[Dashboard] Erro ao reativar produto:', err);
+            this.alertService.error('Erro', 'Não foi possível reativar o produto. Verifique sua conexão e permissões.');
+          }
+        });
+      }
+    );
   }
 
   formatarPreco(preco: number): string {
