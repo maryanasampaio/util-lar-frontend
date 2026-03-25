@@ -71,6 +71,8 @@ export const routes: Routes = [
   // ============================================================================
   {
     path: 'simulacao',
+    canActivate: [roleGuard],
+    data: { requiredPermission: 'ADMIN' },
     loadComponent: () =>
       import('./shared/layouts/app-layout/app-layout.component').then((m) => m.AppLayoutComponent),
     children: [

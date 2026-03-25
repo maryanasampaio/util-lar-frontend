@@ -13,32 +13,32 @@ import { Product, ProductFormData } from '../../models/product.model';
       <form (ngSubmit)="onSubmit()" class="space-y-4">
         <!-- Nome -->
         <div>
-          <label class="block text-sm font-semibold text-gray-700 mb-2">Nome do Produto *</label>
+          <label class="block text-sm font-semibold mb-2" style="color: #23292A;">Nome do Produto *</label>
           <input 
             type="text" 
             [(ngModel)]="formData.name" 
             name="name"
             required
             placeholder="Ex: Sofá 3 Lugares Retrátil"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+            class="w-full px-4 py-2 rounded-lg focus:ring-2 focus:outline-none" style="border: 1px solid #D7DDE3; background-color: #EDF1F4;" onfocus="this.style.boxShadow='0 0 0 2px #7588A8'" onblur="this.style.boxShadow='none'">
         </div>
 
         <!-- Descrição -->
         <div>
-          <label class="block text-sm font-semibold text-gray-700 mb-2">Descrição *</label>
+          <label class="block text-sm font-semibold mb-2" style="color: #23292A;">Descrição *</label>
           <textarea 
             [(ngModel)]="formData.description" 
             name="description"
             required
             rows="3"
             placeholder="Descreva o produto..."
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"></textarea>
+            class="w-full px-4 py-2 rounded-lg focus:ring-2 focus:outline-none" style="border: 1px solid #D7DDE3; background-color: #EDF1F4;"></textarea>
         </div>
 
         <!-- Preço e Custo -->
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Preço de Venda (R$) *</label>
+            <label class="block text-sm font-semibold mb-2" style="color: #23292A;">Preço de Venda (R$) *</label>
             <input 
               type="number" 
               [(ngModel)]="formData.price" 
@@ -46,96 +46,96 @@ import { Product, ProductFormData } from '../../models/product.model';
               required
               step="0.01"
               placeholder="0.00"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+              class="w-full px-4 py-2 rounded-lg focus:ring-2 focus:outline-none" style="border: 1px solid #D7DDE3; background-color: #EDF1F4;">
           </div>
           <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Preço de Custo (R$)</label>
+            <label class="block text-sm font-semibold mb-2" style="color: #23292A;">Preço de Custo (R$)</label>
             <input 
               type="number" 
               [(ngModel)]="formData.costPrice" 
               name="costPrice"
               step="0.01"
               placeholder="0.00"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+              class="w-full px-4 py-2 rounded-lg focus:ring-2 focus:outline-none" style="border: 1px solid #D7DDE3; background-color: #EDF1F4;">
           </div>
         </div>
 
         <!-- Condição e Categoria -->
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Condição *</label>
+            <label class="block text-sm font-semibold mb-2" style="color: #23292A;">Condição *</label>
             <select 
               [(ngModel)]="formData.condition" 
               name="condition"
               required
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+              class="w-full px-4 py-2 rounded-lg focus:ring-2 focus:outline-none" style="border: 1px solid #D7DDE3; background-color: #EDF1F4;">
               <option value="novo">Novo</option>
               <option value="seminovo">Seminovo</option>
             </select>
           </div>
           <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Categoria *</label>
+            <label class="block text-sm font-semibold mb-2" style="color: #23292A;">Categoria *</label>
             <input 
               type="text" 
               [(ngModel)]="formData.category" 
               name="category"
               required
               placeholder="Ex: Sofá, Mesa, Cadeira"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+              class="w-full px-4 py-2 rounded-lg focus:ring-2 focus:outline-none" style="border: 1px solid #D7DDE3; background-color: #EDF1F4;">
           </div>
         </div>
 
         <!-- Material, Cor, Marca -->
         <div class="grid grid-cols-3 gap-4">
           <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Material</label>
+            <label class="block text-sm font-semibold mb-2" style="color: #23292A;">Material</label>
             <input 
               type="text" 
               [(ngModel)]="formData.material" 
               name="material"
               placeholder="Ex: Madeira"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+              class="w-full px-4 py-2 rounded-lg focus:ring-2 focus:outline-none" style="border: 1px solid #D7DDE3; background-color: #EDF1F4;">
           </div>
           <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Cor</label>
+            <label class="block text-sm font-semibold mb-2" style="color: #23292A;">Cor</label>
             <input 
               type="text" 
               [(ngModel)]="formData.color" 
               name="color"
               placeholder="Ex: Marrom"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+              class="w-full px-4 py-2 rounded-lg focus:ring-2 focus:outline-none" style="border: 1px solid #D7DDE3; background-color: #EDF1F4;">
           </div>
           <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Marca</label>
+            <label class="block text-sm font-semibold mb-2" style="color: #23292A;">Marca</label>
             <input 
               type="text" 
               [(ngModel)]="formData.brand" 
               name="brand"
               placeholder="Ex: Util Lar"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+              class="w-full px-4 py-2 rounded-lg focus:ring-2 focus:outline-none" style="border: 1px solid #D7DDE3; background-color: #EDF1F4;">
           </div>
         </div>
 
         <!-- Estoque e Garantia -->
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Estoque *</label>
+            <label class="block text-sm font-semibold mb-2" style="color: #23292A;">Estoque *</label>
             <input 
               type="number" 
               [(ngModel)]="formData.stock" 
               name="stock"
               required
               min="0"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+              class="w-full px-4 py-2 rounded-lg focus:ring-2 focus:outline-none" style="border: 1px solid #D7DDE3; background-color: #EDF1F4;">
           </div>
           <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Garantia</label>
+            <label class="block text-sm font-semibold mb-2" style="color: #23292A;">Garantia</label>
             <input 
               type="text" 
               [(ngModel)]="formData.warranty" 
               name="warranty"
               placeholder="Ex: 90 dias"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+              class="w-full px-4 py-2 rounded-lg focus:ring-2 focus:outline-none" style="border: 1px solid #D7DDE3; background-color: #EDF1F4;">
           </div>
         </div>
 
@@ -158,7 +158,7 @@ import { Product, ProductFormData } from '../../models/product.model';
               <button 
                 type="button"
                 (click)="fileInput.click()"
-                class="w-full px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg hover:border-orange-400 transition-colors text-gray-600 hover:text-orange-600 font-medium flex items-center justify-center gap-2">
+                class="w-full px-4 py-3 border-2 border-dashed rounded-lg transition-colors font-medium flex items-center justify-center gap-2" style="border-color: #D7DDE3; color: #6B7785;" onmouseenter="this.style.borderColor='#7588A8'; this.style.color='#7588A8'" onmouseleave="this.style.borderColor='#D7DDE3'; this.style.color='#6B7785'">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
@@ -178,7 +178,7 @@ import { Product, ProductFormData } from '../../models/product.model';
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
-                <div *ngIf="i === 0" class="absolute bottom-0 left-0 right-0 bg-orange-500 text-white text-xs font-bold py-1 text-center">
+                <div *ngIf="i === 0" class="absolute bottom-0 left-0 right-0 text-white text-xs font-bold py-1 text-center" style="background-color: #7588A8;">
                   Principal
                 </div>
               </div>
@@ -197,7 +197,7 @@ import { Product, ProductFormData } from '../../models/product.model';
             [(ngModel)]="formData.featured" 
             name="featured"
             id="featured"
-            class="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500">
+            class="w-4 h-4 border-gray-300 rounded" style="accent-color: #7588A8;">
           <label for="featured" class="ml-2 text-sm font-medium text-gray-700">Produto em destaque</label>
         </div>
 
@@ -206,12 +206,12 @@ import { Product, ProductFormData } from '../../models/product.model';
           <button 
             type="button"
             (click)="close()"
-            class="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
+            class="flex-1 px-6 py-3 rounded-lg transition-colors font-medium" style="border: 1px solid #D7DDE3; color: #6B7785;">
             Cancelar
           </button>
           <button 
             type="submit"
-            class="flex-1 px-6 py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-lg hover:from-orange-600 hover:to-red-700 transition-colors font-bold shadow-lg">
+            class="flex-1 px-6 py-3 text-white rounded-lg transition-colors font-bold shadow-lg" style="background-color: #7588A8;">
             {{ editMode ? 'Atualizar' : 'Criar' }} Produto
           </button>
         </div>

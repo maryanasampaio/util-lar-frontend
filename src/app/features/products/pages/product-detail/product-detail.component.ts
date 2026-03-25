@@ -11,13 +11,13 @@ import { CapitalizePipe } from '../../../../shared/pipes/capitalize.pipe';
   standalone: true,
   imports: [CommonModule, CapitalizePipe],
   template: `
-    <div class="min-h-screen bg-gradient-to-br from-gray-50 to-orange-50">
+    <div class="min-h-screen" style="background: linear-gradient(135deg, #EEF2F5, #E6EBEF);">
       <!-- Header com voltar -->
-      <div class="bg-white border-b sticky top-0 z-10 shadow-sm">
+      <div class="bg-white sticky top-0 z-10 shadow-sm" style="border-bottom: 1px solid #D7DDE3;">
         <div class="max-w-6xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
           <button 
             (click)="voltar()"
-            class="flex items-center gap-2 text-gray-700 hover:text-orange-600 transition-colors font-medium text-sm sm:text-base">
+            class="flex items-center gap-2 transition-colors font-medium text-sm sm:text-base" style="color: #23292A;" onmouseenter="this.style.color='#7588A8'" onmouseleave="this.style.color='#23292A'">
             <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
             </svg>
@@ -29,22 +29,22 @@ import { CapitalizePipe } from '../../../../shared/pipes/capitalize.pipe';
 
       <!-- Loading -->
       <div *ngIf="isLoading" class="flex justify-center items-center py-20">
-        <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-orange-500"></div>
+        <div class="animate-spin rounded-full h-16 w-16 border-b-4" style="border-color: #7588A8;"></div>
       </div>
 
       <!-- Produto não encontrado -->
       <div *ngIf="!isLoading && !produto" class="max-w-6xl mx-auto px-3 sm:px-4 py-12 sm:py-20 text-center">
-        <h2 class="text-xl sm:text-2xl font-bold text-gray-900 mb-4">Produto não encontrado</h2>
+        <h2 class="text-xl sm:text-2xl font-bold mb-4" style="color: #23292A;">Produto não encontrado</h2>
         <button 
           (click)="voltar()"
-          class="text-orange-500 hover:text-orange-600 font-medium text-sm sm:text-base">
+          class="font-medium text-sm sm:text-base" style="color: #7588A8;">
           Voltar para página inicial
         </button>
       </div>
 
       <!-- Detalhes do Produto -->
       <div *ngIf="!isLoading && produto" class="max-w-6xl mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8">
-        <div class="bg-white rounded-xl sm:rounded-2xl shadow-xl overflow-hidden">
+        <div class="bg-white rounded-xl sm:rounded-2xl shadow-xl overflow-hidden" style="border: 1px solid #D7DDE3;">
           <div class="grid md:grid-cols-2 gap-4 sm:gap-6 p-4 sm:p-6 md:p-8">
             <!-- Galeria de Imagens -->
             <div class="space-y-2 sm:space-y-3">
@@ -69,8 +69,9 @@ import { CapitalizePipe } from '../../../../shared/pipes/capitalize.pipe';
                   *ngFor="let img of produto.images.slice(0, 4); let i = index" 
                   (click)="selecionarImagem(i)"
                   [class.ring-4]="i === imagemPrincipalIndex"
-                  [class.ring-orange-400]="i === imagemPrincipalIndex"
-                  class="aspect-square rounded-lg overflow-hidden bg-gray-100 cursor-pointer hover:ring-2 hover:ring-orange-300 transition-all shadow-md hover:shadow-lg transform hover:scale-105">
+                  class="aspect-square rounded-lg overflow-hidden bg-gray-100 cursor-pointer hover:ring-2 transition-all shadow-md hover:shadow-lg transform hover:scale-105"
+                  [style.--tw-ring-color]="'#7588A8'"
+                  [style.border]="i === imagemPrincipalIndex ? '3px solid #7588A8' : '1px solid #D7DDE3'">
                   <img [src]="img" [alt]="produto.name" class="w-full h-full object-cover">
                 </button>
               </div>
@@ -80,67 +81,71 @@ import { CapitalizePipe } from '../../../../shared/pipes/capitalize.pipe';
             <div class="space-y-3 sm:space-y-4 md:space-y-5">
               <!-- Badges -->
               <div class="flex flex-wrap gap-1.5 sm:gap-2">
-                <span [class]="produto.condition === 'novo' ? 'bg-green-50 text-green-600' : 'bg-amber-50 text-amber-600'"
-                  class="px-2 py-1 sm:px-3 sm:py-1.5 rounded-full text-xs sm:text-sm font-bold">
-                  {{ produto.condition === 'novo' ? '✨ Novo' : '♻️ Seminovo' }}
+                <span *ngIf="produto.condition === 'novo'"
+                  class="px-2 py-1 sm:px-3 sm:py-1.5 rounded-full text-xs sm:text-sm font-bold" style="background-color: #d4f4dd; color: #2d6a3f;">
+                  ✨ Novo
                 </span>
-                <span class="px-2 py-1 sm:px-3 sm:py-1.5 bg-orange-50 text-orange-600 rounded-full text-xs sm:text-sm font-bold">
+                <span *ngIf="produto.condition !== 'novo'"
+                  class="px-2 py-1 sm:px-3 sm:py-1.5 rounded-full text-xs sm:text-sm font-bold" style="background-color: #f5ebd4; color: #8b6914;">
+                  ♻️ Seminovo
+                </span>
+                <span class="px-2 py-1 sm:px-3 sm:py-1.5 rounded-full text-xs sm:text-sm font-bold" style="background-color: #EEF2F5; color: #7588A8;">
                   {{ produto.category | capitalize }}
                 </span>
               </div>
 
               <!-- Nome -->
-              <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight">{{ produto.name | capitalize }}</h1>
+              <h1 class="text-2xl sm:text-3xl font-bold leading-tight" style="color: #23292A;">{{ produto.name | capitalize }}</h1>
 
               <!-- Preço -->
-              <div class="bg-gradient-to-r from-gray-50 to-orange-50 p-4 sm:p-5 rounded-lg sm:rounded-xl border-2 border-gray-200">
-                <div class="text-xs sm:text-sm text-gray-600 mb-1">Preço</div>
-                <div class="text-3xl sm:text-4xl font-extrabold text-orange-500">
+              <div class="p-4 sm:p-5 rounded-lg sm:rounded-xl" style="background: linear-gradient(to right, #EEF2F5, #E6EBEF); border: 2px solid #D7DDE3;">
+                <div class="text-xs sm:text-sm mb-1" style="color: #6B7785;">Preço</div>
+                <div class="text-3xl sm:text-4xl font-extrabold" style="color: #7588A8;">
                   R$ {{ formatarPreco(produto.price) }}
                 </div>
               </div>
 
               <!-- Descrição -->
               <div>
-                <h2 class="text-base sm:text-lg font-bold text-gray-900 mb-2">Descrição</h2>
-                <p class="text-sm sm:text-base text-gray-700 leading-relaxed">{{ produto.description | capitalize }}</p>
+                <h2 class="text-base sm:text-lg font-bold mb-2" style="color: #23292A;">Descrição</h2>
+                <p class="text-sm sm:text-base leading-relaxed" style="color: #6B7785;">{{ produto.description | capitalize }}</p>
               </div>
 
               <!-- Especificações -->
               <div *ngIf="produto.material || produto.color || produto.brand || produto.warranty">
-                <h2 class="text-base sm:text-lg font-bold text-gray-900 mb-2">Especificações</h2>
+                <h2 class="text-base sm:text-lg font-bold mb-2" style="color: #23292A;">Especificações</h2>
                 <div class="grid grid-cols-2 gap-2 sm:gap-3">
-                  <div *ngIf="produto.material" class="bg-gray-50 p-2.5 sm:p-3 rounded-lg border border-gray-200">
-                    <div class="text-xs text-gray-600 mb-0.5 sm:mb-1">Material</div>
-                    <div class="font-semibold text-gray-900 text-xs sm:text-sm">{{ produto.material | capitalize }}</div>
+                  <div *ngIf="produto.material" class="p-2.5 sm:p-3 rounded-lg" style="background-color: #EEF2F5; border: 1px solid #D7DDE3;">
+                    <div class="text-xs mb-0.5 sm:mb-1" style="color: #6B7785;">Material</div>
+                    <div class="font-semibold text-xs sm:text-sm" style="color: #23292A;">{{ produto.material | capitalize }}</div>
                   </div>
-                  <div *ngIf="produto.color" class="bg-gray-50 p-2.5 sm:p-3 rounded-lg border border-gray-200">
-                    <div class="text-xs text-gray-600 mb-0.5 sm:mb-1">Cor</div>
-                    <div class="font-semibold text-gray-900 text-xs sm:text-sm">{{ produto.color | capitalize }}</div>
+                  <div *ngIf="produto.color" class="p-2.5 sm:p-3 rounded-lg" style="background-color: #EEF2F5; border: 1px solid #D7DDE3;">
+                    <div class="text-xs mb-0.5 sm:mb-1" style="color: #6B7785;">Cor</div>
+                    <div class="font-semibold text-xs sm:text-sm" style="color: #23292A;">{{ produto.color | capitalize }}</div>
                   </div>
-                  <div *ngIf="produto.brand" class="bg-gray-50 p-2.5 sm:p-3 rounded-lg border border-gray-200">
-                    <div class="text-xs text-gray-600 mb-0.5 sm:mb-1">Marca</div>
-                    <div class="font-semibold text-gray-900 text-xs sm:text-sm">{{ produto.brand | capitalize }}</div>
+                  <div *ngIf="produto.brand" class="p-2.5 sm:p-3 rounded-lg" style="background-color: #EEF2F5; border: 1px solid #D7DDE3;">
+                    <div class="text-xs mb-0.5 sm:mb-1" style="color: #6B7785;">Marca</div>
+                    <div class="font-semibold text-xs sm:text-sm" style="color: #23292A;">{{ produto.brand | capitalize }}</div>
                   </div>
-                  <div *ngIf="produto.warranty" class="bg-gray-50 p-2.5 sm:p-3 rounded-lg border border-gray-200">
-                    <div class="text-xs text-gray-600 mb-0.5 sm:mb-1">Garantia</div>
-                    <div class="font-semibold text-gray-900 text-xs sm:text-sm">{{ produto.warranty | capitalize }}</div>
+                  <div *ngIf="produto.warranty" class="p-2.5 sm:p-3 rounded-lg" style="background-color: #EEF2F5; border: 1px solid #D7DDE3;">
+                    <div class="text-xs mb-0.5 sm:mb-1" style="color: #6B7785;">Garantia</div>
+                    <div class="font-semibold text-xs sm:text-sm" style="color: #23292A;">{{ produto.warranty | capitalize }}</div>
                   </div>
                 </div>
               </div>
 
               <!-- Botões Admin -->
-              <div *ngIf="isAdmin" class="flex flex-col sm:flex-row gap-2 sm:gap-3 p-3 sm:p-4 bg-orange-50 rounded-lg sm:rounded-xl border-2 border-orange-200">
+              <div *ngIf="isAdmin" class="flex flex-col sm:flex-row gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg sm:rounded-xl" style="background-color: #EEF2F5; border: 2px solid #D7DDE3;">
                 <button 
                   *ngIf="produto.disponivel === 1"
                   (click)="marcarComoVendido()"
-                  class="flex-1 py-2.5 sm:py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-bold transition-all shadow-md hover:shadow-lg text-xs sm:text-sm">
+                  class="flex-1 py-2.5 sm:py-3 text-white rounded-lg font-bold transition-all shadow-md hover:shadow-lg text-xs sm:text-sm" style="background-color: #d4a650;" onmouseover="this.style.backgroundColor='#c49640'" onmouseout="this.style.backgroundColor='#d4a650'">
                   ✓ Marcar como Vendido
                 </button>
                 <button 
                   *ngIf="produto.disponivel === 0"
                   (click)="reativarProduto()"
-                  class="flex-1 py-2.5 sm:py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg font-bold transition-all shadow-md hover:shadow-lg text-xs sm:text-sm">
+                  class="flex-1 py-2.5 sm:py-3 text-white rounded-lg font-bold transition-all shadow-md hover:shadow-lg text-xs sm:text-sm" style="background-color: #5a8a6a;" onmouseover="this.style.backgroundColor='#4a7a5a'" onmouseout="this.style.backgroundColor='#5a8a6a'">
                   ↻ Reativar Produto
                 </button>
               </div>
@@ -161,8 +166,8 @@ import { CapitalizePipe } from '../../../../shared/pipes/capitalize.pipe';
               </div>
 
               <!-- Produto Vendido -->
-              <div *ngIf="produto.disponivel === 0" class="text-center p-4 sm:p-6 bg-gray-100 rounded-lg sm:rounded-xl border-2 border-gray-300">
-                <span class="text-lg sm:text-2xl font-bold text-gray-700">✓ PRODUTO VENDIDO</span>
+              <div *ngIf="produto.disponivel === 0" class="text-center p-4 sm:p-6 rounded-lg sm:rounded-xl" style="background-color: #EEF2F5; border: 2px solid #D7DDE3;">
+                <span class="text-lg sm:text-2xl font-bold" style="color: #6B7785;">✓ PRODUTO VENDIDO</span>
               </div>
             </div>
           </div>

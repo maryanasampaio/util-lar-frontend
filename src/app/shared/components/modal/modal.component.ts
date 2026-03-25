@@ -18,7 +18,7 @@ import { CommonModule } from '@angular/common';
           (click)="$event.stopPropagation()">
           
           <!-- Header -->
-          <div class="sticky top-0 bg-gradient-to-r from-orange-500 to-red-600 text-white px-6 py-4 rounded-t-2xl flex items-center justify-between z-10">
+          <div class="sticky top-0 text-white px-6 py-4 rounded-t-2xl flex items-center justify-between z-10" style="background-color: #7588A8;">
             <h2 class="text-2xl font-bold">{{ title }}</h2>
             <button 
               (click)="close()"

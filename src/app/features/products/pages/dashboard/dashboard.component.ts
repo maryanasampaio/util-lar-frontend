@@ -198,26 +198,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Admin login (ativado por triple-click na logo)
-  private logoClickCount = 0;
-  private logoClickTimeout?: any;
-
-  onLogoClick(): void {
-    this.logoClickCount++;
-    
-    if (this.logoClickTimeout) {
-      clearTimeout(this.logoClickTimeout);
-    }
-
-    if (this.logoClickCount === 3) {
-      // Triple-click detectado - mostrar modal de admin
+  // Admin login (ativado por double-click na logo)
+  onLogoDoubleClick(): void {
+    // Double-click detectado - mostrar modal de admin
+    if (!this.isAdmin) {
       this.showAdminLoginModal = true;
-      this.logoClickCount = 0;
-    } else {
-      // Reset após 1 segundo
-      this.logoClickTimeout = setTimeout(() => {
-        this.logoClickCount = 0;
-      }, 1000);
     }
   }
 

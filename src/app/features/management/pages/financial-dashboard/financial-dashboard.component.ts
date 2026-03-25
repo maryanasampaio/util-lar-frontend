@@ -54,19 +54,19 @@ interface ProductWithMargin {
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="min-h-screen bg-gradient-to-br from-gray-50 to-orange-50 p-4 md:p-8">
+    <div class="min-h-screen p-4 md:p-8" style="background: linear-gradient(135deg, #EEF2F5, #E6EBEF);">
       <div class="max-w-7xl mx-auto">
         <!-- Header -->
         <div class="mb-8 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 class="text-4xl font-bold text-gray-900 mb-2">📊 Visão Geral do Negócio</h1>
-            <p class="text-gray-600">Tudo o que você precisa saber em 10 segundos</p>
-            <p *ngIf="lastUpdatedLabel" class="text-xs text-gray-500 mt-1">Atualizado em {{ lastUpdatedLabel }}</p>
+            <h1 class="text-4xl font-bold mb-2" style="color: #23292A;">📊 Visão Geral do Negócio</h1>
+            <p style="color: #6B7785;">Tudo o que você precisa saber em 10 segundos</p>
+            <p *ngIf="lastUpdatedLabel" class="text-xs mt-1" style="color: #6B7785;">Atualizado em {{ lastUpdatedLabel }}</p>
           </div>
           <button
             type="button"
             (click)="refreshNow()"
-            class="inline-flex items-center justify-center gap-2 rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600 transition-colors disabled:opacity-50"
+            class="inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white transition-colors disabled:opacity-50" style="background-color: #7588A8;"
             [disabled]="loading">
             <span>↻</span>
             <span>Atualizar agora</span>
@@ -77,7 +77,7 @@ interface ProductWithMargin {
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           
           <!-- 💰 Lucro do Mês -->
-          <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-6 text-white shadow-xl">
+          <div class="rounded-2xl p-6 text-white shadow-xl" style="background: linear-gradient(135deg, #5a8a6a, #4a7a5a);">
             <div class="flex items-center justify-between mb-3">
               <h3 class="text-sm font-medium opacity-90">💰 Lucro do Mês</h3>
               <svg class="w-8 h-8 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -96,7 +96,7 @@ interface ProductWithMargin {
           </div>
 
           <!-- 📦 Vendas do Mês -->
-          <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 text-white shadow-xl">
+          <div class="rounded-2xl p-6 text-white shadow-xl" style="background: linear-gradient(135deg, #4a6fa5, #6889b5);">
             <div class="flex items-center justify-between mb-3">
               <h3 class="text-sm font-medium opacity-90">📦 Vendas do Mês</h3>
               <svg class="w-8 h-8 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -111,7 +111,7 @@ interface ProductWithMargin {
           </div>
 
           <!-- 📊 Margem Média -->
-          <div class="bg-gradient-to-br from-orange-400 to-orange-500 rounded-2xl p-6 text-white shadow-xl">
+          <div class="rounded-2xl p-6 text-white shadow-xl" style="background: linear-gradient(135deg, #5a9e8f, #3d7a6e);">
             <div class="flex items-center justify-between mb-3">
               <h3 class="text-sm font-medium opacity-90">📊 Margem Geral</h3>
               <svg class="w-8 h-8 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -126,7 +126,7 @@ interface ProductWithMargin {
           </div>
 
           <!-- 🧊 Estoque Atual -->
-          <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-6 text-white shadow-xl">
+          <div class="rounded-2xl p-6 text-white shadow-xl" style="background: linear-gradient(135deg, #6B7785, #394049);">
             <div class="flex items-center justify-between mb-3">
               <h3 class="text-sm font-medium opacity-90">🧊 Estoque</h3>
               <svg class="w-8 h-8 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -146,7 +146,7 @@ interface ProductWithMargin {
           
           <!-- 📈 Evolução Mensal -->
           <div class="bg-white rounded-2xl shadow-lg p-6">
-            <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+            <h2 class="text-xl font-bold mb-6 flex items-center gap-2" style="color: #23292A;">
               <span>📈</span> Evolução de Lucro
             </h2>
             <div class="space-y-3">
@@ -160,8 +160,8 @@ interface ProductWithMargin {
                     <span *ngIf="stat.lucro > 0">R$ {{ formatarPreco(stat.lucro) }}</span>
                   </div>
                 </div>
-                <div class="w-16 text-right text-sm font-semibold" 
-                  [class]="stat.margem >= 15 ? 'text-green-600' : 'text-orange-600'">
+                <div class="text-sm font-semibold" 
+                  [class]="stat.margem >= 15 ? 'text-green-600' : ''" [style.color]="stat.margem < 15 ? '#7588A8' : ''">
                   {{ stat.margem }}%
                 </div>
               </div>
@@ -170,15 +170,17 @@ interface ProductWithMargin {
 
           <!-- 🔥 Top 3 Mais Vendidos -->
           <div class="bg-white rounded-2xl shadow-lg p-6">
-            <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+            <h2 class="text-xl font-bold mb-6 flex items-center gap-2" style="color: #23292A;">
               <span>🔥</span> Top 3 Produtos
             </h2>
             <div class="space-y-4">
               <div *ngFor="let item of topProducts; let i = index; trackBy: trackByProdutoFinanceiro" 
                 class="flex items-center gap-4 p-4 rounded-xl"
-                [class]="i === 0 ? 'bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-orange-200' : 'bg-gray-50'">
+                [class]="i === 0 ? 'border-2' : 'bg-gray-50'"
+                [style.background]="i === 0 ? 'linear-gradient(to right, #EEF2F5, #E6EBEF)' : ''"
+                [style.border-color]="i === 0 ? '#D7DDE3' : ''">
                 <div class="text-3xl font-bold" 
-                  [class]="i === 0 ? 'text-orange-500' : 'text-gray-400'">
+                  [style.color]="i === 0 ? '#7588A8' : '#9CA3AF'">
                   #{{ i + 1 }}
                 </div>
                 <div class="flex-1">
@@ -202,7 +204,7 @@ interface ProductWithMargin {
           
           <!-- 💸 Valor em Estoque -->
           <div class="bg-white rounded-2xl shadow-lg p-6">
-            <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+            <h2 class="text-xl font-bold mb-6 flex items-center gap-2" style="color: #23292A;">
               <span>💸</span> Capital em Estoque
             </h2>
             <div class="space-y-4">
@@ -216,17 +218,17 @@ interface ProductWithMargin {
                 <div class="text-2xl font-bold text-green-700">R$ {{ formatarPreco(stockPotentialValue) }}</div>
                 <div class="text-xs text-green-600 mt-1">Lucro potencial: R$ {{ formatarPreco(stockPotentialProfit) }}</div>
               </div>
-              <div *ngIf="oldStockCount > 0" class="bg-orange-50 rounded-xl p-4 border-2 border-orange-200">
-                <div class="text-sm text-orange-600 font-medium mb-1">⚠️ Atenção: Produtos Parados</div>
-                <div class="text-2xl font-bold text-orange-700">{{ oldStockCount }}</div>
-                <div class="text-xs text-orange-600 mt-1">Considere fazer promoção</div>
+              <div *ngIf="oldStockCount > 0" class="rounded-xl p-4" style="background-color: #EEF2F5; border: 2px solid #D7DDE3;">
+                <div class="text-sm font-medium mb-1" style="color: #7588A8;">⚠️ Atenção: Produtos Parados</div>
+                <div class="text-2xl font-bold" style="color: #7588A8;">{{ oldStockCount }}</div>
+                <div class="text-xs mt-1" style="color: #6B7785;">Considere fazer promoção</div>
               </div>
             </div>
           </div>
 
           <!-- 📉 Produtos com Menor Margem -->
           <div class="bg-white rounded-2xl shadow-lg p-6">
-            <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+            <h2 class="text-xl font-bold mb-6 flex items-center gap-2" style="color: #23292A;">
               <span>📉</span> Produtos com Menor Margem
             </h2>
             <div class="space-y-3">
@@ -238,7 +240,7 @@ interface ProductWithMargin {
                 </div>
                 <div class="text-right">
                   <div class="text-lg font-bold" 
-                    [class]="produto.margem < 10 ? 'text-red-600' : 'text-orange-600'">
+                    [class]="produto.margem < 10 ? 'text-red-600' : ''" [style.color]="produto.margem >= 10 ? '#7588A8' : ''">
                     {{ produto.margem }}%
                   </div>
                   <div class="text-xs text-gray-500">margem</div>
@@ -254,7 +256,7 @@ interface ProductWithMargin {
         <!-- LINHA 4: Histórico Detalhado -->
         <div class="bg-white rounded-2xl shadow-lg p-6">
           <div class="mb-6">
-            <h2 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+            <h2 class="text-xl font-bold flex items-center gap-2" style="color: #23292A;">
               <span>📋</span> Histórico Completo
             </h2>
             <p class="text-xs text-gray-500 mt-1">Clique em um mês para ver os produtos vendidos.</p>

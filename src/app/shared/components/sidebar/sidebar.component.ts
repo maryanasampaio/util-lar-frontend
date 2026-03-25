@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { AdminModeService } from '../../../core/services/admin-mode.service';
 import { SidebarService } from '../../../core/services/sidebar.service';
 import { Subject, takeUntil } from 'rxjs';
@@ -14,11 +14,11 @@ import { Subject, takeUntil } from 'rxjs';
     <aside 
       [class.translate-x-0]="isOpen"
       [class.-translate-x-full]="!isOpen"
-      class="fixed left-0 top-0 h-full w-64 bg-white shadow-xl z-30 border-r border-gray-200 transition-transform duration-300 ease-in-out">
+      class="fixed left-0 top-0 h-full w-64 shadow-xl z-30 transition-transform duration-300 ease-in-out" style="background-color: #EEF2F4; border-right: 1px solid #D7DDE3;">
       
       <!-- Header com botão de fechar -->
-      <div class="p-6 border-b border-gray-200 bg-gradient-to-r from-orange-300 to-orange-200 flex items-center justify-between">
-        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+      <div class="p-6 flex items-center justify-between" style="border-bottom: 1px solid #D7DDE3; background: linear-gradient(to right, #E6EBEF, #EEF2F5);">
+        <h2 class="text-xl font-bold flex items-center gap-2" style="color: #23292A;">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
           </svg>
@@ -26,7 +26,7 @@ import { Subject, takeUntil } from 'rxjs';
         </h2>
         <button
           (click)="closeSidebar()"
-          class="text-white hover:bg-white/20 rounded-lg p-2 transition-colors">
+          class="rounded-lg p-2 transition-colors" style="color: #6B7785;" onmouseover="this.style.backgroundColor='#E6EBEF'" onmouseout="this.style.backgroundColor='transparent'">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
@@ -37,10 +37,11 @@ import { Subject, takeUntil } from 'rxjs';
       <nav class="p-4 space-y-2">
         <a 
           routerLink="/dashboard" 
-          routerLinkActive="bg-orange-50 text-orange-600 font-bold"
+          routerLinkActive="font-bold"
+          [ngClass]="{'active-link': isActiveRoute('/dashboard')}"
           [routerLinkActiveOptions]="{exact: true}"
           (click)="onMobileClose()"
-          class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+          class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors" style="color: #23292A;" onmouseover="this.style.backgroundColor='#E6EBEF'" onmouseout="if(!this.classList.contains('active-link')) this.style.backgroundColor='transparent'">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
           </svg>
@@ -49,10 +50,12 @@ import { Subject, takeUntil } from 'rxjs';
 
         <!-- Simulação de Vendas -->
         <a 
+            *ngIf="(adminModeService.isAdmin$ | async)"
           routerLink="/simulacao" 
-          routerLinkActive="bg-orange-50 text-orange-600 font-bold"
+          routerLinkActive="font-bold"
+          [ngClass]="{'active-link': isActiveRoute('/simulacao')}"
           (click)="onMobileClose()"
-          class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+          class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors" style="color: #23292A;" onmouseover="this.style.backgroundColor='#E6EBEF'" onmouseout="if(!this.classList.contains('active-link')) this.style.backgroundColor='transparent'">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
           </svg>
@@ -63,9 +66,10 @@ import { Subject, takeUntil } from 'rxjs';
         <a 
           *ngIf="(adminModeService.isAdmin$ | async)"
           routerLink="/gerenciamento" 
-          routerLinkActive="bg-orange-50 text-orange-600 font-bold"
+          routerLinkActive="font-bold"
+          [ngClass]="{'active-link': isActiveRoute('/gerenciamento')}"
           (click)="onMobileClose()"
-          class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+          class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors" style="color: #23292A;" onmouseover="this.style.backgroundColor='#E6EBEF'" onmouseout="if(!this.classList.contains('active-link')) this.style.backgroundColor='transparent'">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
           </svg>
@@ -74,7 +78,7 @@ import { Subject, takeUntil } from 'rxjs';
       </nav>
 
       <!-- Divider -->
-      <div class="border-t border-gray-200 my-4"></div>
+      <div class="my-4" style="border-top: 1px solid #D7DDE3;"></div>
 
       <!-- Configurações -->
       <nav class="p-4 space-y-2">
@@ -82,9 +86,10 @@ import { Subject, takeUntil } from 'rxjs';
         <a 
           *ngIf="!(adminModeService.isAdmin$ | async)"
           routerLink="/configuracoes" 
-          routerLinkActive="bg-orange-50 text-orange-600 font-bold"
+          routerLinkActive="font-bold"
+          [ngClass]="{'active-link': isActiveRoute('/configuracoes')}"
           (click)="onMobileClose()"
-          class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+          class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors" style="color: #23292A;" onmouseover="this.style.backgroundColor='#E6EBEF'" onmouseout="if(!this.classList.contains('active-link')) this.style.backgroundColor='transparent'">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
           </svg>
@@ -108,14 +113,19 @@ import { Subject, takeUntil } from 'rxjs';
     <button
       *ngIf="!isOpen"
       (click)="toggleSidebar()"
-      class="fixed left-6 top-6 z-20 bg-white/90 backdrop-blur-sm text-gray-600 hover:text-orange-500 shadow-md rounded-lg p-2.5 hover:shadow-lg transition-all"
+      class="fixed left-6 top-6 z-20 shadow-md rounded-lg p-2.5 hover:shadow-lg transition-all" style="background-color: #FFFFFF; border: 1px solid #D7DDE3; color: #6B7785;" onmouseover="this.style.backgroundColor='#EDF1F4'; this.style.borderColor='#9AB6C8'" onmouseout="this.style.backgroundColor='#FFFFFF'; this.style.borderColor='#D7DDE3'"
       title="Abrir Menu">
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
       </svg>
     </button>
   `,
-  styles: []
+  styles: [`
+    .active-link {
+      background-color: #E6EBEF !important;
+      color: #7588A8 !important;
+    }
+  `]
 })
 export class SidebarComponent implements OnInit, OnDestroy {
   isOpen = false;
@@ -123,7 +133,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   constructor(
     public readonly adminModeService: AdminModeService,
-    private readonly sidebarService: SidebarService
+    private readonly sidebarService: SidebarService,
+    private readonly router: Router
   ) {}
 
   ngOnInit(): void {
@@ -155,5 +166,9 @@ export class SidebarComponent implements OnInit, OnDestroy {
     if (confirm('Deseja realmente sair do modo admin?')) {
       this.adminModeService.disableAdminMode();
     }
+  }
+
+  isActiveRoute(route: string): boolean {
+    return this.router.url === route;
   }
 }

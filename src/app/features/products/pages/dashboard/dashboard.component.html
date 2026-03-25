@@ -1,37 +1,43 @@
-<div class="min-h-screen bg-gray-50">
-  <!-- Header Laranja -->
-  <header class="bg-gradient-to-r from-orange-500 to-orange-400">
-    <div class="max-w-7xl mx-auto px-4 py-6">
-      <!-- Topo: Logo e Notificações -->
-      <div class="flex items-center justify-between mb-6">
-        <!-- Logo e Nome -->
-        <div class="flex items-center gap-3" (click)="onLogoClick()" (keypress)="onLogoClick()" role="button" tabindex="0">
-          <div class="bg-white rounded-xl p-3 shadow-lg cursor-pointer hover:shadow-xl transition-shadow">
-            <span class="text-orange-500 font-bold text-2xl">M</span>
-          </div>
-          <span class="text-white font-semibold text-lg">Móveis</span>
-        </div>
-        
+<div class="min-h-screen" style="background-color: #EEF2F5;">
+  <!-- Header + Hero unificado -->
+  <header style="background: linear-gradient(to right, #7588A8, #7588A8, #95A7C1);">
+    <div class="max-w-7xl mx-auto px-3 pt-1 pb-20 sm:px-4">
+      <!-- Topo: Notificações -->
+      <div class="flex items-center justify-end mb-6">
         <!-- Ícone de Notificação -->
-        <button class="relative p-2 text-white hover:bg-white/10 rounded-lg transition-colors">
+        <button class="relative p-2 rounded-lg transition-colors text-white/80 hover:text-white hover:bg-white/10">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
           </svg>
           <span *ngIf="isAdmin" class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
         </button>
       </div>
-      
-      <!-- Título e Subtítulo -->
-      <div class="text-white mb-4">
-        <h1 class="text-3xl font-bold mb-2">Móveis e Eletrodomésticos</h1>
-        <p class="text-white/90 text-sm">Novos e usados de qualidade</p>
+
+      <!-- Hero Content -->
+      <div class="flex flex-col md:flex-row items-start gap-8 py-6">
+        <!-- Logo Grande -->
+        <div class="bg-white rounded-2xl p-3 shadow-2xl border-2 border-white/20 flex-shrink-0 cursor-pointer" (dblclick)="onLogoDoubleClick()" title="Duplo clique para modo admin">
+          <img src="logo-utilar.png" alt="Util Lar" class="w-24 h-24 object-contain">
+        </div>
+        
+        <!-- Conteúdo Principal -->
+        <div class="flex-1 py-2">
+          <h1 class="text-3xl md:text-4xl font-bold text-white mb-4">Móveis e Eletrodomésticos</h1>
+          <p class="text-white/90 text-base mb-4 leading-relaxed">
+            Bem-vindo à Util Lar! Somos especializados em móveis e eletros novos e seminovos de alta qualidade. 
+            Oferecemos desde sofás confortáveis até mesas elegantes e os melhores eletrodomésticos, tudo para transformar sua casa em um lar acolhedor.
+          </p>
+          <p class="text-white/95 text-base leading-relaxed font-medium">
+            📱 Encontrou o produto perfeito? Clique no produto para ver todos os detalhes e entre em contato via WhatsApp para reservar!
+          </p>
+        </div>
       </div>
       
       <!-- Botão Admin (se logado) -->
-      <div *ngIf="isAdmin" class="mt-4">
+      <div *ngIf="isAdmin" class="flex justify-end mt-4">
         <button 
           (click)="openCreateModal()"
-          class="bg-white text-orange-500 px-6 py-2.5 rounded-lg font-semibold text-sm shadow-md hover:shadow-lg transition-all">
+          class="px-5 py-2.5 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all text-sm" style="background-color: #FFFFFF; color: #23292A;" onmouseover="this.style.backgroundColor='#EDF1F4'" onmouseout="this.style.backgroundColor='#FFFFFF'">
           + Adicionar Produto
         </button>
       </div>
@@ -40,7 +46,7 @@
 
   <div class="max-w-7xl mx-auto px-4 py-6">
     <!-- Barra de Busca -->
-    <div class="mb-6">
+    <div class="mb-5">
       <div class="relative">
         <svg class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
@@ -50,41 +56,41 @@
           [(ngModel)]="searchQuery"
           placeholder="Buscar produtos..."
           aria-label="Buscar produtos"
-          class="w-full pl-12 pr-4 py-3 bg-white rounded-lg shadow-sm border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+          class="w-full pl-12 pr-4 py-3 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:border-transparent" style="background-color: #EDF1F4; border: 1px solid #D7DDE3; color: #23292A;" onfocus="this.style.borderColor='#7588A8'; this.style.outline='2px solid #7588A8';" onblur="this.style.borderColor='#D7DDE3'; this.style.outline='none';">
       </div>
     </div>
 
     <!-- Filtros em Linha -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
       <!-- Categoria -->
       <div>
-        <label for="filter-category" class="block text-sm font-medium text-gray-700 mb-2">Categoria</label>
+        <label for="filter-category" class="block text-sm font-semibold mb-1.5" style="color: #23292A;">Categoria</label>
         <select 
           id="filter-category"
           [(ngModel)]="selectedCategory"
-          class="w-full px-4 py-2.5 bg-white rounded-lg shadow-sm border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent appearance-none cursor-pointer">
+          class="w-full px-4 py-2.5 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:border-transparent appearance-none cursor-pointer" style="background-color: #FFFFFF; border: 1px solid #D7DDE3; color: #23292A;">
           <option *ngFor="let cat of categories" [value]="cat.value">{{ cat.label }}</option>
         </select>
       </div>
       
       <!-- Condição -->
       <div>
-        <label for="filter-condition" class="block text-sm font-medium text-gray-700 mb-2">Condição</label>
+        <label for="filter-condition" class="block text-sm font-semibold mb-1.5" style="color: #23292A;">Condição</label>
         <select 
           id="filter-condition"
           [(ngModel)]="selectedCondition"
-          class="w-full px-4 py-2.5 bg-white rounded-lg shadow-sm border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent appearance-none cursor-pointer">
+          class="w-full px-4 py-2.5 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:border-transparent appearance-none cursor-pointer" style="background-color: #FFFFFF; border: 1px solid #D7DDE3; color: #23292A;">
           <option *ngFor="let cond of conditions" [value]="cond.value">{{ cond.label }}</option>
         </select>
       </div>
       
       <!-- Ordenar por -->
       <div>
-        <label for="filter-sort" class="block text-sm font-medium text-gray-700 mb-2">Ordenar por</label>
+        <label for="filter-sort" class="block text-sm font-semibold mb-1.5" style="color: #23292A;">Ordenar por</label>
         <select 
           id="filter-sort"
           [(ngModel)]="selectedSort"
-          class="w-full px-4 py-2.5 bg-white rounded-lg shadow-sm border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent appearance-none cursor-pointer">
+          class="w-full px-4 py-2.5 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:border-transparent appearance-none cursor-pointer" style="background-color: #FFFFFF; border: 1px solid #D7DDE3; color: #23292A;">
           <option *ngFor="let sort of sortOptions" [value]="sort.value">{{ sort.label }}</option>
         </select>
       </div>
@@ -93,7 +99,7 @@
     <!-- Loading -->
     <div *ngIf="isLoading" class="flex justify-center items-center py-20">
       <div class="text-center">
-        <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-orange-500 mx-auto mb-4"></div>
+        <div class="animate-spin rounded-full h-16 w-16 border-b-4 mx-auto mb-4" style="border-color: #7588A8;"></div>
         <p class="text-gray-600 text-lg">Carregando produtos...</p>
       </div>
     </div>
@@ -116,18 +122,31 @@
 
     <!-- Grid de Produtos -->
     <div *ngIf="!isLoading && filteredProducts.length > 0" 
-      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-5">
       
       <article 
-        *ngFor="let produto of filteredProducts; trackBy: trackByProductId" 
+        *ngFor="let produto of filteredProducts; trackBy: trackByProductId"
         (click)="verDetalhes(produto.id)"
-        (keypress)="verDetalhes(produto.id)"
-        role="button"
-        tabindex="0"
-        class="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden cursor-pointer group">
+        class="rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer" style="background-color: #FFFFFF; border: 1px solid #D7DDE3;">
         
         <!-- Imagem -->
-        <div class="aspect-square bg-gray-100 relative overflow-hidden">
+        <div class="aspect-[4/3] bg-gray-100 relative overflow-hidden">
+          <!-- Badge Condição (Novo/Seminovo) -->
+          <div class="absolute top-2 left-2 z-10">
+            <span 
+              *ngIf="produto.condition === 'novo'"
+              class="px-3 py-1 rounded-full text-xs font-bold uppercase shadow-md"
+              style="background-color: #d4f4dd; color: #2d6a3f;">
+              Novo
+            </span>
+            <span 
+              *ngIf="produto.condition === 'seminovo'"
+              class="px-3 py-1 rounded-full text-xs font-bold uppercase shadow-md"
+              style="background-color: #f5ebd4; color: #8b6914;">
+              Seminovo
+            </span>
+          </div>
+
           <!-- Badge Vendido -->
           <div *ngIf="produto.disponivel === 0" 
             class="absolute inset-0 bg-black/60 z-20 flex items-center justify-center">
@@ -152,32 +171,50 @@
         
         <!-- Conteúdo -->
         <div class="p-4">
-          <!-- Nome do Produto -->
-          <h3 class="text-gray-900 font-semibold text-base mb-2 line-clamp-2 group-hover:text-orange-500 transition-colors">
-            {{ produto.name | capitalize }}
-          </h3>
+          <!-- Título e Categoria na mesma linha -->
+          <div class="flex items-start justify-between gap-2 mb-2">
+            <h3 class="font-bold text-lg flex-1 line-clamp-2" style="color: #23292A;">
+              {{ produto.name | capitalize }}
+            </h3>
+            <span class="px-2.5 py-1 rounded-md text-xs font-semibold whitespace-nowrap flex-shrink-0" style="background-color: #E6EBEF; color: #23292A;">
+              {{ produto.category | capitalize }}
+            </span>
+          </div>
           
           <!-- Avaliação (Estrelas) -->
-          <div class="flex items-center gap-2 mb-3">
-            <!-- 5 Estrelas -->
-            <div class="flex text-orange-400">
-              <svg *ngFor="let star of [1,2,3,4,5]" class="w-4 h-4 fill-current" viewBox="0 0 20 20">
+          <div class="flex items-center mb-3">
+            <div class="flex" style="color: #9AB6C8;">
+              <svg *ngFor="let star of [1,2,3,4,5]" class="w-3.5 h-3.5 fill-current" viewBox="0 0 20 20">
                 <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
               </svg>
             </div>
-            <span class="text-gray-600 text-sm">({{ getProductReviewCount(produto.id) }})</span>
           </div>
           
-          <!-- Preço -->
-          <div class="text-2xl font-bold text-gray-900 mb-3">
-            R$ {{ formatarPreco(produto.price) }}
+          <!-- Preço e Lucro -->
+          <div class="mb-3 space-y-1">
+            <div class="text-xl font-bold" style="color: #23292A;">
+              R$ {{ formatarPreco(produto.price) }}
+            </div>
+            <div *ngIf="isAdmin && produto.costPrice" class="text-sm font-semibold" style="color: #5a8a6a;">
+              💰 Lucro: R$ {{ formatarPreco(produto.price - produto.costPrice) }}
+            </div>
           </div>
+          
+          <!-- Botão Ver Detalhes -->
+          <button 
+            (click)="verDetalhes(produto.id)"
+            class="w-full font-semibold py-2 rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm" style="background-color: #7588A8; color: #FFFFFF;" onmouseover="this.style.backgroundColor='#95A7C1'" onmouseout="this.style.backgroundColor='#7588A8'">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+            </svg>
+            Ver detalhes
+          </button>
           
           <!-- Botões Admin -->
-          <div *ngIf="isAdmin" class="grid grid-cols-3 gap-2 pt-3 border-t border-gray-100" (click)="$event.stopPropagation()" (keypress)="$event.stopPropagation()">
+          <div *ngIf="isAdmin" class="grid grid-cols-3 gap-2 mt-2 pt-2" style="border-top: 1px solid #E6EBEF;">
             <button 
-              (click)="openEditModal(produto)"
-              class="bg-blue-50 hover:bg-blue-100 text-blue-600 py-2 rounded-lg text-sm font-medium transition-colors"
+              (click)="openEditModal(produto); $event.stopPropagation()"
+              class="text-white py-1.5 rounded-lg text-sm font-medium transition-colors shadow-sm" style="background-color: #8b7ba8;" onmouseover="this.style.backgroundColor='#7a6a97'" onmouseout="this.style.backgroundColor='#8b7ba8'"
               title="Editar">
               ✏️
             </button>
@@ -185,7 +222,7 @@
             <button 
               *ngIf="produto.disponivel === 1"
               (click)="marcarComoVendido(produto.id, $event)"
-              class="bg-green-50 hover:bg-green-100 text-green-600 py-2 rounded-lg text-sm font-medium transition-colors"
+              class="text-white py-1.5 rounded-lg text-sm font-medium transition-colors shadow-sm" style="background-color: #5a8a6a;" onmouseover="this.style.backgroundColor='#4a7a5a'" onmouseout="this.style.backgroundColor='#5a8a6a'"
               title="Vender">
               ✓
             </button>
@@ -193,14 +230,14 @@
             <button 
               *ngIf="produto.disponivel === 0"
               (click)="reativarProduto(produto.id, $event)"
-              class="bg-amber-50 hover:bg-amber-100 text-amber-600 py-2 rounded-lg text-sm font-medium transition-colors"
+              class="text-white py-1.5 rounded-lg text-sm font-medium transition-colors shadow-sm" style="background-color: #d4a650;" onmouseover="this.style.backgroundColor='#c49640'" onmouseout="this.style.backgroundColor='#d4a650'"
               title="Reativar">
               ↻
             </button>
             
             <button 
               (click)="removerProduto(produto.id, $event)"
-              class="bg-red-50 hover:bg-red-100 text-red-600 py-2 rounded-lg text-sm font-medium transition-colors"
+              class="text-white py-1.5 rounded-lg text-sm font-medium transition-colors shadow-sm" style="background-color: #c85a54;" onmouseover="this.style.backgroundColor='#b84a44'" onmouseout="this.style.backgroundColor='#c85a54'"
               title="Deletar">
               🗑️
             </button>

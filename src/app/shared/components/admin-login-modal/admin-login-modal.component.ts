@@ -17,7 +17,7 @@ import { FormsModule } from '@angular/forms';
         
         <!-- Header -->
         <div class="flex items-center justify-between mb-6">
-          <h2 class="text-2xl font-bold text-gray-900">Acesso Admin</h2>
+          <h2 class="text-2xl font-bold" style="color: #23292A;">Acesso Admin</h2>
           <button 
             (click)="onClose()"
             class="text-gray-400 hover:text-gray-600 transition-colors">
@@ -38,7 +38,7 @@ import { FormsModule } from '@angular/forms';
               [(ngModel)]="password"
               name="password"
               placeholder="Digite a senha secreta"
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+              class="w-full px-4 py-3 rounded-lg focus:ring-2 focus:outline-none" style="border: 1px solid #D7DDE3; background-color: #EDF1F4;"
               autofocus>
           </div>
 
@@ -51,7 +51,7 @@ import { FormsModule } from '@angular/forms';
             [disabled]="isLoading"
             [class.opacity-50]="isLoading"
             [class.cursor-not-allowed]="isLoading"
-            class="w-full bg-gradient-to-r from-orange-400 to-orange-500 text-white font-bold py-3 px-6 rounded-lg hover:from-orange-500 hover:to-orange-600 transition-all">
+            class="w-full text-white font-bold py-3 px-6 rounded-lg transition-all" style="background-color: #7588A8;">
             {{ isLoading ? 'Verificando...' : 'Entrar como Admin' }}
           </button>
         </form>

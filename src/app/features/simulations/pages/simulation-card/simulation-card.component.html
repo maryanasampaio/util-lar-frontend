@@ -1,6 +1,6 @@
-<div class="min-h-screen bg-gradient-to-br from-gray-50 via-white to-orange-50">
+<div class="min-h-screen" style="background: linear-gradient(135deg, #EEF2F5, #FFFFFF, #E6EBEF);">
   <!-- Header -->
-  <div class="bg-gradient-to-r from-orange-300 to-orange-200 text-white">
+  <div style="background: linear-gradient(to right, #7588A8, #95A7C1, #9AB6C8);" class="text-white">
     <div class="max-w-7xl mx-auto px-6 py-12 text-center">
       <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight drop-shadow-lg mb-3">💳 Simulação de Vendas no Cartão</h1>
       <p class="text-xl font-light text-white/90">Simule vendas com ou sem repasse de juros ao cliente</p>
@@ -10,15 +10,15 @@
   <div class="max-w-7xl mx-auto px-6 py-12">
     <!-- Formulário de Simulação -->
     <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
-      <h2 class="text-2xl font-bold text-gray-800 mb-6">Dados da Simulação</h2>
+      <h2 class="text-2xl font-bold mb-6" style="color: #23292A;">Dados da Simulação</h2>
       
       <!-- Informação Infinity Pay -->
-      <div class="bg-orange-50 border-l-4 border-orange-500 p-4 mb-6 rounded-r-lg">
+      <div class="p-4 mb-6 rounded-r-lg" style="background-color: #EEF2F5; border-left: 4px solid #7588A8;">
         <div class="flex items-center gap-3">
           <span class="text-2xl">💳</span>
           <div>
-            <p class="text-sm font-bold text-orange-800">Link de Pagamento Infinity</p>
-            <p class="text-xs text-orange-700">Simulação baseada nas taxas do sistema Infinity Pay</p>
+            <p class="text-sm font-bold" style="color: #23292A;">Link de Pagamento Infinity</p>
+            <p class="text-xs" style="color: #6B7785;">Simulação baseada nas taxas do sistema Infinity Pay</p>
           </div>
         </div>
       </div>
@@ -26,7 +26,7 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Valor Base -->
         <div>
-          <label for="amount" class="block text-sm font-semibold text-gray-700 mb-2">Valor Base (R$)</label>
+          <label for="amount" class="block text-sm font-semibold mb-2" style="color: #23292A;">Valor Base (R$)</label>
           <input
             type="number"
             id="amount"
@@ -34,19 +34,19 @@
             [disabled]="state.loading"
             min="0"
             step="0.01"
-            class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all disabled:bg-gray-100 disabled:cursor-not-allowed"
+            class="w-full px-4 py-3 rounded-xl border-2 transition-all disabled:bg-gray-100 disabled:cursor-not-allowed" style="border-color: #D7DDE3; background-color: #EDF1F4;"
             placeholder="Ex: 1000.00"
           />
         </div>
 
         <!-- Parcelas -->
         <div>
-          <label for="installments" class="block text-sm font-semibold text-gray-700 mb-2">Número de Parcelas</label>
+          <label for="installments" class="block text-sm font-semibold mb-2" style="color: #23292A;">Número de Parcelas</label>
           <select
             id="installments"
             [(ngModel)]="state.installments"
             [disabled]="state.loading"
-            class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all disabled:bg-gray-100 disabled:cursor-not-allowed"
+            class="w-full px-4 py-3 rounded-xl border-2 transition-all disabled:bg-gray-100 disabled:cursor-not-allowed" style="border-color: #D7DDE3; background-color: #EDF1F4;"
           >
             <option *ngFor="let option of installmentOptions" [value]="option">
               {{ option }}x
@@ -56,7 +56,7 @@
 
         <!-- Toggle Com/Sem Repasse -->
         <div>
-          <label for="repasseToggle" class="block text-sm font-semibold text-gray-700 mb-2">Tipo de Repasse</label>
+          <label for="repasseToggle" class="block text-sm font-semibold mb-2" style="color: #23292A;">Tipo de Repasse</label>
           <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
             <div 
               class="relative inline-flex items-center cursor-pointer" 
@@ -76,9 +76,9 @@
                 class="sr-only peer"
                 tabindex="-1"
               />
-              <span class="w-14 h-7 bg-gray-300 peer-focus:ring-4 peer-focus:ring-orange-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-orange-500 block pointer-events-none"></span>
+              <span class="w-14 h-7 bg-gray-300 peer-focus:ring-4 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all block pointer-events-none" [style.background-color]="state.repasse ? '#7588A8' : ''" style="--tw-ring-color: #9AB6C8;"></span>
             </div>
-            <span class="text-sm font-bold" [class.text-orange-600]="state.repasse" [class.text-gray-600]="!state.repasse">
+            <span class="text-sm font-bold" [style.color]="state.repasse ? '#7588A8' : '#6B7785'">
               {{ state.repasse ? 'Com Repasse' : 'Sem Repasse' }}
             </span>
           </div>
@@ -98,7 +98,7 @@
         <button
           (click)="simulate()"
           [disabled]="state.loading"
-          class="flex-1 min-w-[200px] bg-orange-300 hover:bg-orange-400 text-gray-800 font-bold py-3 px-6 rounded-xl shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+          class="flex-1 min-w-[200px] text-white font-bold py-3 px-6 rounded-xl shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none" style="background-color: #7588A8;"
         >
           <span *ngIf="!state.loading">🔍 Simular</span>
           <span *ngIf="state.loading">⏳ Calculando...</span>
@@ -107,7 +107,7 @@
         <button
           (click)="compareScenarios()"
           [disabled]="state.loading"
-          class="flex-1 min-w-[200px] bg-blue-300 hover:bg-blue-400 text-gray-800 font-bold py-3 px-6 rounded-xl shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+          class="flex-1 min-w-[200px] text-white font-bold py-3 px-6 rounded-xl shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none" style="background-color: #95A7C1;"
         >
           📊 Comparar Cenários
         </button>
@@ -115,7 +115,7 @@
         <button
           (click)="reset()"
           [disabled]="state.loading"
-          class="bg-white hover:bg-gray-50 text-gray-700 border-2 border-gray-300 font-bold py-3 px-6 rounded-xl shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+          class="bg-white font-bold py-3 px-6 rounded-xl shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none" style="color: #6B7785; border: 2px solid #D7DDE3;"
         >
           🔄 Limpar
         </button>
@@ -130,7 +130,7 @@
     <!-- Resultado da Simulação -->
     <div *ngIf="state.result && !showComparison" class="animate-fade-in" id="simulationResult">
       <!-- Header Profissional -->
-      <div class="bg-gradient-to-r from-slate-700 to-slate-600 text-white rounded-t-3xl p-8 shadow-2xl">
+      <div class="text-white rounded-t-3xl p-8 shadow-2xl" style="background: linear-gradient(to right, #7588A8, #95A7C1);">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h3 class="text-3xl font-bold mb-2 flex items-center gap-3">
@@ -152,17 +152,17 @@
 
       <div class="bg-white rounded-b-3xl shadow-2xl overflow-hidden">
         <!-- Cartão de Destaque Principal -->
-        <div class="bg-gradient-to-br from-slate-50 via-white to-slate-50 p-8 border-b-4 border-slate-200">
+        <div class="p-8" style="background: linear-gradient(135deg, #EEF2F5, #FFFFFF, #EEF2F5); border-bottom: 4px solid #D7DDE3;">
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <!-- Valor que o Cliente Paga -->
-            <div class="bg-white rounded-2xl p-6 shadow-lg border border-slate-200 transform hover:scale-105 transition-all duration-300">
+            <div class="bg-white rounded-2xl p-6 shadow-lg transform hover:scale-105 transition-all duration-300" style="border: 1px solid #D7DDE3;">
               <div class="flex items-center gap-3 mb-3">
-                <div class="bg-slate-100 p-3 rounded-xl">
+                <div class="p-3 rounded-xl" style="background-color: #EEF2F5;">
                   <span class="text-2xl">💳</span>
                 </div>
                 <div>
-                  <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Cliente Paga</p>
-                  <p class="text-2xl font-bold text-slate-700">{{ formatCurrency(state.result.final_amount) }}</p>
+                  <p class="text-xs font-semibold uppercase tracking-wider" style="color: #6B7785;">Cliente Paga</p>
+                  <p class="text-2xl font-bold" style="color: #23292A;">{{ formatCurrency(state.result.final_amount) }}</p>
                 </div>
               </div>
               <div class="text-sm text-gray-600 font-medium">
@@ -171,14 +171,14 @@
             </div>
 
             <!-- Valor Base -->
-            <div class="bg-white rounded-2xl p-6 shadow-lg border border-slate-200 transform hover:scale-105 transition-all duration-300">
+            <div class="bg-white rounded-2xl p-6 shadow-lg transform hover:scale-105 transition-all duration-300" style="border: 1px solid #D7DDE3;">
               <div class="flex items-center gap-3 mb-3">
-                <div class="bg-slate-100 p-3 rounded-xl">
+                <div class="p-3 rounded-xl" style="background-color: #EEF2F5;">
                   <span class="text-2xl">🏷️</span>
                 </div>
                 <div>
-                  <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Valor Base</p>
-                  <p class="text-2xl font-bold text-slate-700">{{ formatCurrency(state.result.base_amount) }}</p>
+                  <p class="text-xs font-semibold uppercase tracking-wider" style="color: #6B7785;">Valor Base</p>
+                  <p class="text-2xl font-bold" style="color: #23292A;">{{ formatCurrency(state.result.base_amount) }}</p>
                 </div>
               </div>
               <div class="text-sm text-gray-600 font-medium">
@@ -187,17 +187,17 @@
             </div>
 
             <!-- Valor que o Vendedor Recebe -->
-            <div class="bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl p-6 shadow-xl border-2 border-slate-300 transform hover:scale-105 transition-all duration-300">
+            <div class="rounded-2xl p-6 shadow-xl transform hover:scale-105 transition-all duration-300" style="background: linear-gradient(135deg, #EEF2F5, #E6EBEF); border: 2px solid #D7DDE3;">
               <div class="flex items-center gap-3 mb-3">
-                <div class="bg-slate-200 p-3 rounded-xl">
+                <div class="p-3 rounded-xl" style="background-color: #D7DDE3;">
                   <span class="text-2xl">✅</span>
                 </div>
                 <div>
-                  <p class="text-xs font-bold text-slate-700 uppercase tracking-wider">Você Recebe</p>
-                  <p class="text-3xl font-black text-slate-800">{{ formatCurrency(state.result.net_amount) }}</p>
+                  <p class="text-xs font-bold uppercase tracking-wider" style="color: #7588A8;">Você Recebe</p>
+                  <p class="text-3xl font-black" style="color: #23292A;">{{ formatCurrency(state.result.net_amount) }}</p>
                 </div>
               </div>
-              <div class="text-sm text-slate-700 font-bold">
+              <div class="text-sm font-bold" style="color: #23292A;">
                 💰 Valor líquido garantido
               </div>
             </div>
@@ -206,40 +206,40 @@
 
         <!-- Detalhes Financeiros -->
         <div class="p-8">
-          <h4 class="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
+          <h4 class="text-lg font-bold mb-6 flex items-center gap-2" style="color: #23292A;">
             <span class="text-xl">📋</span>
             Detalhes da Operação
           </h4>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- Juros / Taxa Retida -->
-            <div *ngIf="state.result.repasse" class="bg-gradient-to-r from-slate-50 to-slate-100 rounded-xl p-5 border border-slate-200">
+            <div *ngIf="state.result.repasse" class="rounded-xl p-5" style="background: linear-gradient(to right, #EEF2F5, #E6EBEF); border: 1px solid #D7DDE3;">
               <div class="flex justify-between items-center">
                 <div class="flex items-center gap-3">
-                  <div class="bg-slate-200 p-2 rounded-lg">
+                  <div class="p-2 rounded-lg" style="background-color: #D7DDE3;">
                     <span class="text-xl">💰</span>
                   </div>
                   <div>
-                    <p class="text-xs font-semibold text-slate-700 uppercase">Juros Total</p>
-                    <p class="text-sm text-slate-600 font-medium">Pago pelo cliente</p>
+                    <p class="text-xs font-semibold uppercase" style="color: #23292A;">Juros Total</p>
+                    <p class="text-sm font-medium" style="color: #6B7785;">Pago pelo cliente</p>
                   </div>
                 </div>
-                <span class="text-xl font-bold text-slate-700">{{ formatCurrency(state.result.interest_total) }}</span>
+                <span class="text-xl font-bold" style="color: #23292A;">{{ formatCurrency(state.result.interest_total) }}</span>
               </div>
             </div>
 
-            <div *ngIf="!state.result.repasse" class="bg-gradient-to-r from-slate-50 to-slate-100 rounded-xl p-5 border border-slate-200">
+            <div *ngIf="!state.result.repasse" class="rounded-xl p-5" style="background: linear-gradient(to right, #EEF2F5, #E6EBEF); border: 1px solid #D7DDE3;">
               <div class="flex justify-between items-center">
                 <div class="flex items-center gap-3">
-                  <div class="bg-slate-200 p-2 rounded-lg">
+                  <div class="p-2 rounded-lg" style="background-color: #D7DDE3;">
                     <span class="text-xl">💸</span>
                   </div>
                   <div>
-                    <p class="text-xs font-semibold text-slate-700 uppercase">Taxa Retida</p>
-                    <p class="text-sm text-slate-600 font-medium">Pela operadora</p>
+                    <p class="text-xs font-semibold uppercase" style="color: #23292A;">Taxa Retida</p>
+                    <p class="text-sm font-medium" style="color: #6B7785;">Pela operadora</p>
                   </div>
                 </div>
-                <span class="text-xl font-bold text-slate-700">-{{ formatCurrency(state.result.operator_fee) }}</span>
+                <span class="text-xl font-bold" style="color: #23292A;">-{{ formatCurrency(state.result.operator_fee) }}</span>
               </div>
             </div>
 
@@ -266,9 +266,9 @@
         </div>
 
         <!-- Ação de Exportar -->
-        <div class="bg-gradient-to-r from-gray-50 to-gray-100 p-6 border-t border-gray-200">
+          <div class="bg-gradient-to-r from-gray-50 to-gray-100 p-6" style="border-top: 1px solid #D7DDE3;">
           <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <button (click)="generateImage()" class="w-full sm:w-auto bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 text-white font-bold py-4 px-8 rounded-xl shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-200 flex items-center justify-center gap-3">
+            <button (click)="generateImage()" class="w-full sm:w-auto text-white font-bold py-4 px-8 rounded-xl shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-200 flex items-center justify-center gap-3" style="background-color: #7588A8;">
               <span class="text-xl">📸</span>
               <span>Gerar Imagem para Cliente</span>
             </button>
@@ -283,7 +283,7 @@
     <!-- Comparação de Cenários -->
     <div *ngIf="showComparison" class="animate-fade-in space-y-8">
       <!-- Header da Comparação -->
-      <div class="bg-gradient-to-r from-slate-700 to-slate-600 rounded-3xl p-8 text-white shadow-2xl">
+      <div class="rounded-3xl p-8 text-white shadow-2xl" style="background: linear-gradient(to right, #7588A8, #95A7C1);">
         <h3 class="text-4xl font-bold mb-2 flex items-center gap-3">
           <span class="text-5xl">⚖️</span>
           Comparação de Cenários
@@ -293,8 +293,8 @@
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Sem Repasse -->
-        <div *ngIf="comparisonData.withoutRepasse" class="bg-white rounded-xl shadow-lg overflow-hidden border-2 border-slate-200">
-          <div class="bg-slate-600 text-white p-6">
+        <div *ngIf="comparisonData.withoutRepasse" class="bg-white rounded-xl shadow-lg overflow-hidden" style="border: 2px solid #D7DDE3;">
+          <div class="text-white p-6" style="background-color: #7588A8;">
             <h4 class="text-2xl font-bold flex items-center gap-2">
               <span>💼</span> Sem Repasse
             </h4>
@@ -330,8 +330,8 @@
         </div>
 
         <!-- Com Repasse -->
-        <div *ngIf="comparisonData.withRepasse" class="bg-white rounded-xl shadow-lg overflow-hidden border-2 border-slate-200">
-          <div class="bg-slate-600 text-white p-6">
+        <div *ngIf="comparisonData.withRepasse" class="bg-white rounded-xl shadow-lg overflow-hidden" style="border: 2px solid #D7DDE3;">
+          <div class="text-white p-6" style="background-color: #95A7C1;">
             <h4 class="text-2xl font-bold flex items-center gap-2">
               <span>✨</span> Com Repasse
             </h4>
@@ -368,17 +368,17 @@
       </div>
 
       <!-- Análise de Diferença -->
-      <div *ngIf="comparisonData.withRepasse && comparisonData.withoutRepasse" class="bg-slate-100 rounded-xl p-6 text-center border border-slate-300">
-        <p class="text-sm text-slate-600 mb-2">Vantagem Financeira</p>
-        <p class="text-3xl font-bold text-slate-800">
+      <div *ngIf="comparisonData.withRepasse && comparisonData.withoutRepasse" class="rounded-xl p-6 text-center" style="background-color: #EEF2F5; border: 1px solid #D7DDE3;">
+        <p class="text-sm mb-2" style="color: #6B7785;">Vantagem Financeira</p>
+        <p class="text-3xl font-bold" style="color: #23292A;">
           {{ formatCurrency(comparisonData.withRepasse.net_amount - comparisonData.withoutRepasse.net_amount) }}
         </p>
-        <p class="text-sm text-slate-600 mt-1">a mais com repasse para o cliente</p>
+        <p class="text-sm mt-1" style="color: #6B7785;">a mais com repasse para o cliente</p>
       </div>
 
       <!-- Ações da Comparação -->
       <div class="flex justify-center">
-        <button (click)="showComparison = false" class="bg-white hover:bg-slate-50 text-slate-800 border-2 border-slate-300 font-bold py-3 px-8 rounded-xl shadow-lg transition-colors flex items-center gap-2">
+        <button (click)="showComparison = false" class="bg-white font-bold py-3 px-8 rounded-xl shadow-lg transition-colors flex items-center gap-2" style="color: #23292A; border: 2px solid #D7DDE3;">
           <span class="text-xl">🔙</span>
           <span>Voltar para Simulação</span>
         </button>

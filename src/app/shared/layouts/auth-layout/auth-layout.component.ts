@@ -24,7 +24,7 @@ import { RouterOutlet } from '@angular/router';
   standalone: true,
   imports: [RouterOutlet],
   template: `
-    <div class="min-h-screen flex items-center justify-center bg-gray-100">
+    <div class="min-h-screen flex items-center justify-center" style="background-color: #EEF2F5;">
       <router-outlet />
     </div>
   `

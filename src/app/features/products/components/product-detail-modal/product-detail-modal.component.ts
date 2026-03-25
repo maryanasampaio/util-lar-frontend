@@ -16,8 +16,8 @@ import { Product } from '../../models/product.model';
             <img [src]="img" [alt]="product.name" class="w-full h-full object-cover">
           </div>
           <div *ngIf="!product.images || product.images.length === 0" 
-            class="aspect-square rounded-lg bg-gradient-to-br from-orange-100 to-red-100 flex items-center justify-center col-span-2">
-            <svg class="h-32 w-32 text-orange-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            class="aspect-square rounded-lg bg-gradient-to-br flex items-center justify-center col-span-2" style="background: linear-gradient(135deg, #EEF2F5, #E6EBEF);">
+            <svg class="h-32 w-32" style="color: #9AB6C8;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
           </div>
@@ -29,18 +29,18 @@ import { Product } from '../../models/product.model';
             class="px-4 py-2 text-white rounded-full text-sm font-bold">
             {{ product.condition === 'novo' ? '✨ Novo' : '♻️ Seminovo' }}
           </span>
-          <span *ngIf="product.featured" class="px-4 py-2 bg-red-500 text-white rounded-full text-sm font-bold">
+          <span *ngIf="product.featured" class="px-4 py-2 text-white rounded-full text-sm font-bold" style="background-color: #7588A8;">
             ⭐ Destaque
           </span>
-          <span class="px-4 py-2 bg-orange-500 text-white rounded-full text-sm font-bold">
+          <span class="px-4 py-2 text-white rounded-full text-sm font-bold" style="background-color: #9AB6C8;">
             {{ product.category }}
           </span>
         </div>
 
         <!-- Preço -->
-        <div class="bg-gradient-to-r from-orange-50 to-red-50 p-6 rounded-xl">
-          <div class="text-sm text-gray-600 mb-1">Preço</div>
-          <div class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-red-600">
+        <div class="p-6 rounded-xl" style="background: linear-gradient(to right, #EEF2F5, #E6EBEF);">
+          <div class="text-sm mb-1" style="color: #6B7785;">Preço</div>
+          <div class="text-4xl font-bold" style="color: #7588A8;">
             R$ {{ formatarPreco(product.price) }}
           </div>
         </div>
@@ -97,8 +97,8 @@ import { Product } from '../../models/product.model';
           Entre em Contato e Reserve Agora
         </button>
 
-        <div *ngIf="product.disponivel === 0" class="text-center p-6 bg-red-50 rounded-xl">
-          <span class="text-2xl font-bold text-red-600">✓ PRODUTO VENDIDO</span>
+        <div *ngIf="product.disponivel === 0" class="text-center p-6 rounded-xl" style="background-color: #EEF2F5; border: 2px solid #D7DDE3;">
+          <span class="text-2xl font-bold" style="color: #6B7785;">✓ PRODUTO VENDIDO</span>
         </div>
       </div>
     </app-modal>

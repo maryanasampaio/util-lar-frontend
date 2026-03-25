@@ -1,5 +1,8 @@
-<div class="max-w-md w-[400px] bg-white rounded-lg shadow-md p-8">
-  <h2 class="text-2xl font-bold text-center mb-6">Login</h2>
+<div class="max-w-md w-[400px] bg-white rounded-lg shadow-md p-8" style="border: 1px solid #D7DDE3;">
+  <div class="flex justify-center mb-4">
+    <img src="logo-utilar.png" alt="Util Lar" class="w-16 h-16 object-contain">
+  </div>
+  <h2 class="text-2xl font-bold text-center mb-6" style="color: #23292A;">Login</h2>
 
   @if (errorMessage) {
     <div class="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-md">
@@ -9,7 +12,7 @@
 
   <form (ngSubmit)="onSubmit()" onsubmit="return false;" class="space-y-4">
     <div>
-      <label for="username" class="block text-sm font-medium text-gray-700 mb-1">
+      <label for="username" class="block text-sm font-medium mb-1" style="color: #23292A;">
         Usuário
       </label>
       <input
@@ -19,13 +22,13 @@
         name="username"
         required
         [disabled]="isLoading"
-        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+        class="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 disabled:bg-gray-100" style="border: 1px solid #D7DDE3; background-color: #EDF1F4;"
         placeholder="Usuário"
       />
     </div>
 
     <div>
-      <label for="password" class="block text-sm font-medium text-gray-700 mb-1">
+      <label for="password" class="block text-sm font-medium mb-1" style="color: #23292A;">
         Senha
       </label>
       <input
@@ -35,14 +38,14 @@
         name="password"
         required
         [disabled]="isLoading"
-        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+        class="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 disabled:bg-gray-100" style="border: 1px solid #D7DDE3; background-color: #EDF1F4;"
         placeholder="••••••••"
       />
     </div>
     <button
       type="submit"
       [disabled]="isLoading"
-      class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:bg-blue-400 disabled:cursor-not-allowed"
+      class="w-full text-white py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" style="background-color: #7588A8;"
     >
       @if (isLoading) {
         <span>Entrando...</span>

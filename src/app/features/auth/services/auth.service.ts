@@ -197,7 +197,7 @@ export class AuthService {
     } else {
       // Node/SSR
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const buf: any = (global as any).Buffer || (globalThis as any).Buffer;
+      const buf: any = (globalThis as any).Buffer;
       if (!buf) return null;
       const bin = buf.from(padded, 'base64').toString('binary');
       json = decodeURIComponent(
