@@ -5,11 +5,14 @@
       <!-- Topo: Notificações -->
       <div class="flex items-center justify-end mb-6">
         <!-- Ícone de Notificação -->
-        <button class="relative p-2 rounded-lg transition-colors text-white/80 hover:text-white hover:bg-white/10">
+        <button 
+          (click)="openNotificationModal()"
+          class="relative p-2 rounded-lg transition-colors text-white/80 hover:text-white hover:bg-white/10">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
           </svg>
-          <span *ngIf="isAdmin" class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+          <span *ngIf="hasNewProducts" class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+          <span *ngIf="hasNewProducts && newProductsCount > 0" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">{{ newProductsCount > 9 ? '9+' : newProductsCount }}</span>
         </button>
       </div>
 
@@ -214,7 +217,7 @@
           <div *ngIf="isAdmin" class="grid grid-cols-3 gap-2 mt-2 pt-2" style="border-top: 1px solid #E6EBEF;">
             <button 
               (click)="openEditModal(produto); $event.stopPropagation()"
-              class="text-white py-1.5 rounded-lg text-sm font-medium transition-colors shadow-sm" style="background-color: #8b7ba8;" onmouseover="this.style.backgroundColor='#7a6a97'" onmouseout="this.style.backgroundColor='#8b7ba8'"
+              class="py-1.5 rounded-lg text-sm font-medium transition-colors border" style="color: #23292A; background-color: transparent; border-color: #D7DDE3;" onmouseover="this.style.backgroundColor='#F5F7FA'; this.style.borderColor='#7588A8';" onmouseout="this.style.backgroundColor='transparent'; this.style.borderColor='#D7DDE3';"
               title="Editar">
               ✏️
             </button>
@@ -222,7 +225,7 @@
             <button 
               *ngIf="produto.disponivel === 1"
               (click)="marcarComoVendido(produto.id, $event)"
-              class="text-white py-1.5 rounded-lg text-sm font-medium transition-colors shadow-sm" style="background-color: #5a8a6a;" onmouseover="this.style.backgroundColor='#4a7a5a'" onmouseout="this.style.backgroundColor='#5a8a6a'"
+              class="py-1.5 rounded-lg text-sm font-medium transition-colors border" style="color: #23292A; background-color: transparent; border-color: #D7DDE3;" onmouseover="this.style.backgroundColor='#F5F7FA'; this.style.borderColor='#7588A8';" onmouseout="this.style.backgroundColor='transparent'; this.style.borderColor='#D7DDE3';"
               title="Vender">
               ✓
             </button>
@@ -230,14 +233,14 @@
             <button 
               *ngIf="produto.disponivel === 0"
               (click)="reativarProduto(produto.id, $event)"
-              class="text-white py-1.5 rounded-lg text-sm font-medium transition-colors shadow-sm" style="background-color: #d4a650;" onmouseover="this.style.backgroundColor='#c49640'" onmouseout="this.style.backgroundColor='#d4a650'"
+              class="py-1.5 rounded-lg text-sm font-medium transition-colors border" style="color: #23292A; background-color: transparent; border-color: #D7DDE3;" onmouseover="this.style.backgroundColor='#F5F7FA'; this.style.borderColor='#7588A8';" onmouseout="this.style.backgroundColor='transparent'; this.style.borderColor='#D7DDE3';"
               title="Reativar">
               ↻
             </button>
             
             <button 
               (click)="removerProduto(produto.id, $event)"
-              class="text-white py-1.5 rounded-lg text-sm font-medium transition-colors shadow-sm" style="background-color: #c85a54;" onmouseover="this.style.backgroundColor='#b84a44'" onmouseout="this.style.backgroundColor='#c85a54'"
+              class="py-1.5 rounded-lg text-sm font-medium transition-colors border" style="color: #23292A; background-color: transparent; border-color: #D7DDE3;" onmouseover="this.style.backgroundColor='#F5F7FA'; this.style.borderColor='#7588A8';" onmouseout="this.style.backgroundColor='transparent'; this.style.borderColor='#D7DDE3';"
               title="Deletar">
               🗑️
             </button>
@@ -249,7 +252,7 @@
 
   <!-- Botão Flutuante WhatsApp -->
   <a 
-    href="https://wa.me/5511999999999?text=Ol%C3%A1!%20Gostaria%20de%20mais%20informa%C3%A7%C3%B5es%20sobre%20os%20produtos."
+    href="https://wa.me/5582996572843?text=Ol%C3%A1!%20Gostaria%20de%20mais%20informa%C3%A7%C3%B5es%20sobre%20os%20produtos."
     target="_blank"
     rel="noopener noreferrer"
     class="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 p-4 bg-green-600 hover:bg-green-700 text-white rounded-full shadow-2xl hover:shadow-3xl transition-all transform hover:scale-110 z-50 group"
@@ -289,3 +292,10 @@
   *ngIf="showWelcomeModal"
   (closeModal)="closeWelcomeModal()">
 </app-welcome-modal>
+
+<!-- Modal de Notificações -->
+<app-notification-modal
+  [isOpen]="showNotificationModal"
+  (closeModal)="closeNotificationModal()"
+  (settingsSaved)="onNotificationSettingsSaved()">
+</app-notification-modal>

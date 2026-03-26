@@ -5,9 +5,11 @@ import { Router } from '@angular/router';
 import { ProductService } from '../../services/product.service';
 import { Product, ProductResponse, ProductFormData } from '../../models/product.model';
 import { AdminModeService } from '../../../../core/services/admin-mode.service';
+import { ProductTrackerService } from '../../../../core/services/product-tracker.service';
 import { ProductFormModalComponent } from '../../components/product-form-modal/product-form-modal.component';
 import { AdminLoginModalComponent } from '../../../../shared/components/admin-login-modal/admin-login-modal.component';
 import { WelcomeModalComponent } from '../../../../shared/components/welcome-modal/welcome-modal.component';
+import { NotificationModalComponent } from '../../../../shared/components/notification-modal/notification-modal.component';
 import { CapitalizePipe } from '../../../../shared/pipes/capitalize.pipe';
 import { AlertService } from '../../../../shared/services/alert.service';
 import { finalize, Subject, takeUntil } from 'rxjs';
@@ -17,7 +19,7 @@ import { finalize, Subject, takeUntil } from 'rxjs';
   selector: 'app-dashboard',
   standalone: true,
   templateUrl: './dashboard.component.html',
-  imports: [CommonModule, FormsModule, ProductFormModalComponent, AdminLoginModalComponent, WelcomeModalComponent, CapitalizePipe]
+  imports: [CommonModule, FormsModule, ProductFormModalComponent, AdminLoginModalComponent, WelcomeModalComponent, NotificationModalComponent, CapitalizePipe]
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   errorMessage = '';
@@ -60,7 +62,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
   showEditModal = false;
   showAdminLoginModal = false;
   showWelcomeModal = false;
+  showNotificationModal = false;
   selectedProduct?: Product;
+  
+  // Notificações
+  hasNewProducts = false;
+  newProductsCount = 0;
   
   // Contador de cliques para admin (triple-click na logo)
 
@@ -69,7 +76,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private readonly cdr: ChangeDetectorRef,
     private readonly router: Router,
     public readonly adminModeService: AdminModeService,
-    private readonly alertService: AlertService
+    private readonly alertService: AlertService,
+    private readonly productTracker: ProductTrackerService
   ) {}
 
   ngOnInit(): void {
@@ -81,6 +89,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
       .subscribe((isAdmin: boolean) => {
         console.log('[Dashboard] Admin mode alterado:', isAdmin);
         this.isAdmin = isAdmin;
+        this.cdr.detectChanges();
+      });
+
+    // Inscrever para atualizações de produtos
+    this.productTracker.getUpdates()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(updates => {
+        this.newProductsCount = updates.length;
+        this.hasNewProducts = updates.length > 0;
         this.cdr.detectChanges();
       });
 
@@ -116,6 +133,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         next: (resp: ProductResponse[]) => {
           console.log('[Dashboard] loadProdutos - produtos recebidos:', resp.length);
           this.produtos = resp;
+          this.checkForNewProducts();
           this.cdr.detectChanges();
         },
         error: (err) => {
@@ -200,6 +218,22 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
   }
 
+  checkForNewProducts(): void {
+    // Usar o ProductTrackerService para verificar novos produtos e mudanças de preço
+    const updates = this.productTracker.checkForUpdates(this.produtos);
+    
+    if (updates.length > 0) {
+      console.log(`[Dashboard] ${updates.length} atualizações encontradas`, updates);
+    }
+  }
+
+  markNotificationsAsRead(): void {
+    // Marcar todas as notificações como lidas
+    this.productTracker.markAllAsRead();
+    this.hasNewProducts = false;
+    this.newProductsCount = 0;
+  }
+
   // Admin login (ativado por double-click na logo)
   onLogoDoubleClick(): void {
     // Double-click detectado - mostrar modal de admin
@@ -246,6 +280,22 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   closeWelcomeModal(): void {
     this.showWelcomeModal = false
+  }
+
+  // Modal de notificações
+  openNotificationModal(): void {
+    this.showNotificationModal = true;
+    // Marcar notificações como lidas quando usuário abrir o modal
+    this.markNotificationsAsRead();
+  }
+
+  closeNotificationModal(): void {
+    this.showNotificationModal = false;
+  }
+
+  onNotificationSettingsSaved(): void {
+    this.alertService.success('Notificações Configuradas', 'Você será avisado sobre novos produtos e atualizações de preços!');
+    this.checkForNewProducts();
   }
 
   toggleAdminMode(): void {
