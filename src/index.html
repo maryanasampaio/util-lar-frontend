@@ -30,6 +30,14 @@
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="Util Lar - Móveis e Eletrodomésticos">
   <meta name="twitter:description" content="Móveis e eletrodomésticos novos e seminovos de alta qualidade">
+  <script>
+    // Captura o evento de instalação do PWA antes do Angular carregar
+    window.addEventListener('beforeinstallprompt', function(e) {
+      e.preventDefault();
+      window.__pwaInstallPrompt = e;
+      console.log('[PWA] beforeinstallprompt capturado cedo');
+    });
+  </script>
 </head>
 <body>
   <app-root></app-root>

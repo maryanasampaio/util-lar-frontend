@@ -67,6 +67,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
   // PWA Installation
   canInstallPwa = false;
   private deferredPrompt: any = null;
+
+  private get isRunningAsStandalone(): boolean {
+    return globalThis.matchMedia?.('(display-mode: standalone)').matches
+      || (globalThis.navigator as any)?.standalone === true;
+  }
   
   // Contador de cliques para admin (triple-click na logo)
 
@@ -96,7 +101,19 @@ export class DashboardComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe();
 
-    // Configurar listener para instalação do PWA
+    // Verificar se prompt foi capturado antes do Angular carregar
+    const earlyPrompt = (globalThis as any).__pwaInstallPrompt;
+    if (earlyPrompt) {
+      this.deferredPrompt = earlyPrompt;
+      delete (globalThis as any).__pwaInstallPrompt;
+    }
+
+    // Mostrar botão se o app não estiver instalado
+    if (!this.isRunningAsStandalone) {
+      this.canInstallPwa = true;
+    }
+
+    // Capturar evento se ainda não tiver sido disparado
     globalThis.addEventListener('beforeinstallprompt', (e: any) => {
       console.log('[Dashboard] beforeinstallprompt event capturado');
       e.preventDefault();
@@ -105,7 +122,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       this.cdr.detectChanges();
     });
 
-    // Verificar se o app já está instalado
+    // Ocultar botão após instalação
     globalThis.addEventListener('appinstalled', () => {
       console.log('[Dashboard] App instalado com sucesso');
       this.canInstallPwa = false;
@@ -220,26 +237,26 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   // Instalar PWA
   async installPwa(): Promise<void> {
-    if (!this.deferredPrompt) {
-      console.log('[Dashboard] Nenhum prompt de instalação disponível');
-      return;
-    }
+    if (this.deferredPrompt) {
+      // Navegadores que suportam o prompt nativo (Chrome, Edge, Android)
+      console.log('[Dashboard] Mostrando prompt de instalação do PWA');
+      this.deferredPrompt.prompt();
 
-    console.log('[Dashboard] Mostrando prompt de instalação do PWA');
-    this.deferredPrompt.prompt();
+      const { outcome } = await this.deferredPrompt.userChoice;
+      console.log('[Dashboard] Usuário escolheu:', outcome);
 
-    const { outcome } = await this.deferredPrompt.userChoice;
-    console.log('[Dashboard] Usuário escolheu:', outcome);
-
-    if (outcome === 'accepted') {
-      console.log('[Dashboard] Usuário aceitou a instalação');
+      this.deferredPrompt = null;
+      if (outcome === 'accepted') {
+        this.canInstallPwa = false;
+        this.cdr.detectChanges();
+      }
     } else {
-      console.log('[Dashboard] Usuário recusou a instalação');
+      // iOS Safari ou navegadores sem suporte ao prompt automático
+      this.alertService.success(
+        'Como instalar o app',
+        'No iPhone/iPad: toque em Compartilhar → "Adicionar à Tela de Início". No Android: menu do navegador → "Adicionar à tela inicial".'
+      );
     }
-
-    this.deferredPrompt = null;
-    this.canInstallPwa = false;
-    this.cdr.detectChanges();
   }
 
   checkWelcomeModal(): void {
