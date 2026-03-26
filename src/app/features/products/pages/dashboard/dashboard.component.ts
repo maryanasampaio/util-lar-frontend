@@ -9,7 +9,7 @@ import { ProductTrackerService } from '../../../../core/services/product-tracker
 import { ProductFormModalComponent } from '../../components/product-form-modal/product-form-modal.component';
 import { AdminLoginModalComponent } from '../../../../shared/components/admin-login-modal/admin-login-modal.component';
 import { WelcomeModalComponent } from '../../../../shared/components/welcome-modal/welcome-modal.component';
-import { NotificationModalComponent } from '../../../../shared/components/notification-modal/notification-modal.component';
+import { PwaInstallPromptComponent } from '../../../../shared/components/pwa-install-prompt/pwa-install-prompt.component';
 import { CapitalizePipe } from '../../../../shared/pipes/capitalize.pipe';
 import { AlertService } from '../../../../shared/services/alert.service';
 import { finalize, Subject, takeUntil } from 'rxjs';
@@ -19,7 +19,7 @@ import { finalize, Subject, takeUntil } from 'rxjs';
   selector: 'app-dashboard',
   standalone: true,
   templateUrl: './dashboard.component.html',
-  imports: [CommonModule, FormsModule, ProductFormModalComponent, AdminLoginModalComponent, WelcomeModalComponent, NotificationModalComponent, CapitalizePipe]
+  imports: [CommonModule, FormsModule, ProductFormModalComponent, AdminLoginModalComponent, WelcomeModalComponent, PwaInstallPromptComponent, CapitalizePipe]
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   errorMessage = '';
@@ -62,12 +62,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
   showEditModal = false;
   showAdminLoginModal = false;
   showWelcomeModal = false;
-  showNotificationModal = false;
   selectedProduct?: Product;
-  
-  // Notificações
-  hasNewProducts = false;
-  newProductsCount = 0;
+
+  // PWA Installation
+  canInstallPwa = false;
+  private deferredPrompt: any = null;
   
   // Contador de cliques para admin (triple-click na logo)
 
@@ -92,14 +91,27 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.cdr.detectChanges();
       });
 
-    // Inscrever para atualizações de produtos
+    // Verificar atualizações de produtos (notificações automáticas)
     this.productTracker.getUpdates()
       .pipe(takeUntil(this.destroy$))
-      .subscribe(updates => {
-        this.newProductsCount = updates.length;
-        this.hasNewProducts = updates.length > 0;
-        this.cdr.detectChanges();
-      });
+      .subscribe();
+
+    // Configurar listener para instalação do PWA
+    globalThis.addEventListener('beforeinstallprompt', (e: any) => {
+      console.log('[Dashboard] beforeinstallprompt event capturado');
+      e.preventDefault();
+      this.deferredPrompt = e;
+      this.canInstallPwa = true;
+      this.cdr.detectChanges();
+    });
+
+    // Verificar se o app já está instalado
+    globalThis.addEventListener('appinstalled', () => {
+      console.log('[Dashboard] App instalado com sucesso');
+      this.canInstallPwa = false;
+      this.deferredPrompt = null;
+      this.cdr.detectChanges();
+    });
 
     // Verificar se deve mostrar modal de boas-vindas
     this.checkWelcomeModal();
@@ -206,6 +218,30 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return counts[productId % counts.length];
   }
 
+  // Instalar PWA
+  async installPwa(): Promise<void> {
+    if (!this.deferredPrompt) {
+      console.log('[Dashboard] Nenhum prompt de instalação disponível');
+      return;
+    }
+
+    console.log('[Dashboard] Mostrando prompt de instalação do PWA');
+    this.deferredPrompt.prompt();
+
+    const { outcome } = await this.deferredPrompt.userChoice;
+    console.log('[Dashboard] Usuário escolheu:', outcome);
+
+    if (outcome === 'accepted') {
+      console.log('[Dashboard] Usuário aceitou a instalação');
+    } else {
+      console.log('[Dashboard] Usuário recusou a instalação');
+    }
+
+    this.deferredPrompt = null;
+    this.canInstallPwa = false;
+    this.cdr.detectChanges();
+  }
+
   checkWelcomeModal(): void {
     // Verifica se o usuário já viu o modal de boas-vindas
     const hasSeenWelcome = localStorage.getItem('welcomeModalShown');
@@ -230,8 +266,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   markNotificationsAsRead(): void {
     // Marcar todas as notificações como lidas
     this.productTracker.markAllAsRead();
-    this.hasNewProducts = false;
-    this.newProductsCount = 0;
   }
 
   // Admin login (ativado por double-click na logo)
@@ -280,22 +314,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   closeWelcomeModal(): void {
     this.showWelcomeModal = false
-  }
-
-  // Modal de notificações
-  openNotificationModal(): void {
-    this.showNotificationModal = true;
-    // Marcar notificações como lidas quando usuário abrir o modal
-    this.markNotificationsAsRead();
-  }
-
-  closeNotificationModal(): void {
-    this.showNotificationModal = false;
-  }
-
-  onNotificationSettingsSaved(): void {
-    this.alertService.success('Notificações Configuradas', 'Você será avisado sobre novos produtos e atualizações de preços!');
-    this.checkForNewProducts();
   }
 
   toggleAdminMode(): void {

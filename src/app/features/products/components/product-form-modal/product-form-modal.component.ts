@@ -13,23 +13,21 @@ import { Product, ProductFormData } from '../../models/product.model';
       <form (ngSubmit)="onSubmit()" class="space-y-4">
         <!-- Nome -->
         <div>
-          <label class="block text-sm font-semibold mb-2" style="color: #23292A;">Nome do Produto *</label>
+          <label class="block text-sm font-semibold mb-2" style="color: #23292A;">Nome do Produto</label>
           <input 
             type="text" 
             [(ngModel)]="formData.name" 
             name="name"
-            required
             placeholder="Ex: Sofá 3 Lugares Retrátil"
             class="w-full px-4 py-2 rounded-lg focus:ring-2 focus:outline-none" style="border: 1px solid #D7DDE3; background-color: #EDF1F4;" onfocus="this.style.boxShadow='0 0 0 2px #7588A8'" onblur="this.style.boxShadow='none'">
         </div>
 
         <!-- Descrição -->
         <div>
-          <label class="block text-sm font-semibold mb-2" style="color: #23292A;">Descrição *</label>
+          <label class="block text-sm font-semibold mb-2" style="color: #23292A;">Descrição</label>
           <textarea 
             [(ngModel)]="formData.description" 
             name="description"
-            required
             rows="3"
             placeholder="Descreva o produto..."
             class="w-full px-4 py-2 rounded-lg focus:ring-2 focus:outline-none" style="border: 1px solid #D7DDE3; background-color: #EDF1F4;"></textarea>
@@ -38,12 +36,11 @@ import { Product, ProductFormData } from '../../models/product.model';
         <!-- Preço e Custo -->
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-sm font-semibold mb-2" style="color: #23292A;">Preço de Venda (R$) *</label>
+            <label class="block text-sm font-semibold mb-2" style="color: #23292A;">Preço de Venda (R$)</label>
             <input 
               type="number" 
               [(ngModel)]="formData.price" 
               name="price"
-              required
               step="0.01"
               placeholder="0.00"
               class="w-full px-4 py-2 rounded-lg focus:ring-2 focus:outline-none" style="border: 1px solid #D7DDE3; background-color: #EDF1F4;">
@@ -63,23 +60,21 @@ import { Product, ProductFormData } from '../../models/product.model';
         <!-- Condição e Categoria -->
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-sm font-semibold mb-2" style="color: #23292A;">Condição *</label>
+            <label class="block text-sm font-semibold mb-2" style="color: #23292A;">Condição</label>
             <select 
               [(ngModel)]="formData.condition" 
               name="condition"
-              required
               class="w-full px-4 py-2 rounded-lg focus:ring-2 focus:outline-none" style="border: 1px solid #D7DDE3; background-color: #EDF1F4;">
               <option value="novo">Novo</option>
               <option value="seminovo">Seminovo</option>
             </select>
           </div>
           <div>
-            <label class="block text-sm font-semibold mb-2" style="color: #23292A;">Categoria *</label>
+            <label class="block text-sm font-semibold mb-2" style="color: #23292A;">Categoria</label>
             <input 
               type="text" 
               [(ngModel)]="formData.category" 
               name="category"
-              required
               placeholder="Ex: Sofá, Mesa, Cadeira"
               class="w-full px-4 py-2 rounded-lg focus:ring-2 focus:outline-none" style="border: 1px solid #D7DDE3; background-color: #EDF1F4;">
           </div>
@@ -119,12 +114,11 @@ import { Product, ProductFormData } from '../../models/product.model';
         <!-- Estoque e Garantia -->
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-sm font-semibold mb-2" style="color: #23292A;">Estoque *</label>
+            <label class="block text-sm font-semibold mb-2" style="color: #23292A;">Estoque</label>
             <input 
               type="number" 
               [(ngModel)]="formData.stock" 
               name="stock"
-              required
               min="0"
               class="w-full px-4 py-2 rounded-lg focus:ring-2 focus:outline-none" style="border: 1px solid #D7DDE3; background-color: #EDF1F4;">
           </div>
