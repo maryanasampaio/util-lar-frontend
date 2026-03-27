@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { Observable, of, catchError, tap, timeout, map, firstValueFrom } from 'rxjs';
-import { SwPush } from '@angular/service-worker';
 import { NotificationRepository } from '../repositories/notification.repository';
 import {
   NotificationPreferences,
@@ -22,10 +21,7 @@ import { environment } from '../../../environments/environment';
 export class NotificationService {
   private readonly STORAGE_KEY = 'notificationSettings';
 
-  constructor(
-    private readonly repository: NotificationRepository,
-    private readonly swPush: SwPush
-  ) {}
+  constructor(private readonly repository: NotificationRepository) {}
 
   /**
    * Salvar preferências de notificação
@@ -157,17 +153,21 @@ export class NotificationService {
       return false;
     }
 
-    if (!this.swPush.isEnabled) {
-      console.error('❌ Push notifications indisponíveis: Service Worker não está ativo');
+    if (!this.hasPushSupport()) {
+      console.error('❌ Push notifications indisponíveis neste navegador/contexto');
       this.updateStoredPushState(false);
       return false;
     }
 
     try {
+      const permission = await this.ensureNotificationPermission();
+      if (permission !== 'granted') {
+        this.updateStoredPushState(false);
+        return false;
+      }
+
       const existingSubscription = await this.getCurrentSubscription();
-      const subscription = existingSubscription ?? await this.swPush.requestSubscription({
-        serverPublicKey: environment.vapidPublicKey
-      });
+      const subscription = existingSubscription ?? await this.createPushSubscription();
 
       const synced = await this.sendSubscriptionToBackend(subscription);
       this.updateStoredPushState(synced, subscription);
@@ -192,7 +192,7 @@ export class NotificationService {
    * Garante que o backend sempre tem a subscription atualizada.
    */
   async syncPushSubscription(): Promise<boolean> {
-    if (!this.swPush.isEnabled) {
+    if (!this.hasPushSupport()) {
       this.updateStoredPushState(false);
       return false;
     }
@@ -219,7 +219,7 @@ export class NotificationService {
    * Chamado ao desativar push nas configurações ou no logout.
    */
   async removePushSubscription(): Promise<void> {
-    if (!this.swPush.isEnabled) {
+    if (!this.hasPushSupport()) {
       this.updateStoredPushState(false);
       return;
     }
@@ -234,7 +234,7 @@ export class NotificationService {
     const endpoint = subscription.endpoint;
 
     try {
-      await this.swPush.unsubscribe();
+      await subscription.unsubscribe();
       console.log('✅ Subscription removida do navegador');
     } catch (err) {
       console.warn('⚠️ Erro ao remover subscription do SW:', err);
@@ -337,7 +337,7 @@ export class NotificationService {
   }
 
   private async getCurrentSubscription(): Promise<PushSubscription | null> {
-    if (!('serviceWorker' in navigator)) {
+    if (!this.hasPushSupport()) {
       return null;
     }
 
@@ -366,6 +366,44 @@ export class NotificationService {
       subscription: subscription ?? preferences.push.subscription
     };
     this.saveToLocalStorage(preferences);
+  }
+
+  private hasPushSupport(): boolean {
+    return 'serviceWorker' in navigator && 'PushManager' in globalThis;
+  }
+
+  private async ensureNotificationPermission(): Promise<NotificationPermission> {
+    if (Notification.permission === 'granted') {
+      return 'granted';
+    }
+
+    if (Notification.permission === 'denied') {
+      return 'denied';
+    }
+
+    return Notification.requestPermission();
+  }
+
+  private async createPushSubscription(): Promise<PushSubscription> {
+    const registration = await navigator.serviceWorker.ready;
+    const applicationServerKey = this.urlBase64ToArrayBuffer(environment.vapidPublicKey);
+    return registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey
+    });
+  }
+
+  private urlBase64ToArrayBuffer(base64String: string): ArrayBuffer {
+    const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding).replaceAll('-', '+').replaceAll('_', '/');
+    const rawData = atob(base64);
+    const outputArray = new Uint8Array(new ArrayBuffer(rawData.length));
+
+    for (let index = 0; index < rawData.length; index += 1) {
+      outputArray[index] = rawData.codePointAt(index) ?? 0;
+    }
+
+    return outputArray.buffer;
   }
 
   private isIosBrowserWithoutStandalone(): boolean {
