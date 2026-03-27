@@ -55,6 +55,10 @@ export class NotificationService {
     );
   }
 
+  savePreferencesLocally(preferences: NotificationPreferences): void {
+    this.saveToLocalStorage(preferences);
+  }
+
   /**
    * Buscar preferências salvas
    * Tenta buscar do backend, fallback para localStorage

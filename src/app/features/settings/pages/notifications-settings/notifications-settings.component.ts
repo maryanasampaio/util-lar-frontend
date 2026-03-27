@@ -335,7 +335,7 @@ export class NotificationsSettingsComponent implements OnInit {
     } else {
       // Remover subscription do navegador e avisar o backend
       await this.notificationService.removePushSubscription();
-      this.saveSettings();
+      this.persistPushSettingsLocally();
     }
   }
 
@@ -344,7 +344,7 @@ export class NotificationsSettingsComponent implements OnInit {
 
     if (granted) {
       this.settings.push.enabled = true;
-      this.saveSettings();
+      this.persistPushSettingsLocally();
       this.notificationService.sendTestPushNotification();
     } else {
       this.settings.push.enabled = false;
@@ -360,5 +360,17 @@ export class NotificationsSettingsComponent implements OnInit {
         enabled: pushEnabled
       }
     };
+  }
+
+  private persistPushSettingsLocally(): void {
+    this.notificationService.savePreferencesLocally({
+      whatsapp: this.settings.whatsapp,
+      email: this.settings.email,
+      push: this.settings.push
+    });
+    this.showSaveConfirmation = true;
+    setTimeout(() => {
+      this.showSaveConfirmation = false;
+    }, 3000);
   }
 }

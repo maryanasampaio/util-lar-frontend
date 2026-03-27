@@ -175,6 +175,7 @@ export class NotificationModalComponent implements OnInit {
     }
 
     await this.notificationService.removePushSubscription();
+    this.persistSettingsLocally();
   }
 
   async requestPushPermission(): Promise<void> {
@@ -187,6 +188,7 @@ export class NotificationModalComponent implements OnInit {
     }
 
     this.settings.push.enabled = true;
+    this.persistSettingsLocally();
   }
 
   saveSettings(): void {
@@ -217,6 +219,18 @@ export class NotificationModalComponent implements OnInit {
         enabled: this.settings.push.enabled
       }
     };
+
+    if (!this.settings.whatsapp.enabled) {
+      this.notificationService.savePreferencesLocally(preferences);
+      this.showSuccess = true;
+      this.settingsSaved.emit(preferences);
+      setTimeout(() => {
+        this.showSuccess = false;
+        this.close();
+      }, 2000);
+      this.isSaving = false;
+      return;
+    }
 
     this.notificationService.savePreferences(preferences).subscribe({
       next: (response) => {
@@ -251,5 +265,21 @@ export class NotificationModalComponent implements OnInit {
     this.settings.whatsapp.enabled = prefs.whatsapp?.enabled || false;
     this.settings.whatsapp.phoneNumber = prefs.whatsapp?.phoneNumber || '';
     this.settings.push.enabled = pushEnabled;
+  }
+
+  private persistSettingsLocally(): void {
+    this.notificationService.savePreferencesLocally({
+      whatsapp: {
+        enabled: this.settings.whatsapp.enabled,
+        phoneNumber: this.settings.whatsapp.phoneNumber
+      },
+      email: {
+        enabled: false,
+        emailAddress: ''
+      },
+      push: {
+        enabled: this.settings.push.enabled
+      }
+    });
   }
 }
