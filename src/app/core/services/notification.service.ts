@@ -141,12 +141,25 @@ export class NotificationService {
    * Enviar notificação de teste (browser)
    */
   sendTestPushNotification(): void {
-    if (Notification.permission === 'granted') {
-      new Notification('🎉 Notificações Ativas!', {
-        body: 'Você receberá alertas quando novos produtos forem publicados.',
-        icon: '/assets/logo.png',
-        badge: '/assets/badge.png'
+    if (Notification.permission !== 'granted') return;
+    this.showNotification('🎉 Notificações Ativas!', {
+      body: 'Você receberá alertas quando novos produtos forem publicados.',
+      icon: '/logo-utilar.png',
+      badge: '/logo-utilar.png'
+    });
+  }
+
+  /**
+   * Exibe notificação via Service Worker (aparece na central do celular)
+   * Fallback para new Notification() caso SW não esteja disponível
+   */
+  showNotification(title: string, options: NotificationOptions): void {
+    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+      navigator.serviceWorker.ready.then(reg => {
+        reg.showNotification(title, options);
       });
+    } else {
+      new Notification(title, options);
     }
   }
 

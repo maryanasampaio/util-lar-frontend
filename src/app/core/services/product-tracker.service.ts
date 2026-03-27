@@ -155,14 +155,21 @@ export class ProductTrackerService {
       body = `${update.product.name}: R$ ${this.formatPrice(update.oldPrice || 0)} → R$ ${this.formatPrice(update.newPrice || 0)}`;
     }
 
+    const options: NotificationOptions = {
+      body,
+      icon: update.product.images?.[0] || '/logo-utilar.png',
+      badge: '/logo-utilar.png',
+      tag: `product-${update.product.id}`,
+      requireInteraction: false
+    };
+
     try {
-      new Notification(title, {
-        body,
-        icon: update.product.images?.[0] || '/logo-utilar.png',
-        badge: '/logo-utilar.png',
-        tag: `product-${update.product.id}`,
-        requireInteraction: false
-      });
+      // Usa Service Worker para exibir na central de notificações do celular
+      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.ready.then(reg => reg.showNotification(title, options));
+      } else {
+        new Notification(title, options);
+      }
     } catch (error) {
       console.error('Erro ao enviar notificação push:', error);
     }
