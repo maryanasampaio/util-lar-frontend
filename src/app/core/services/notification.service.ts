@@ -142,6 +142,12 @@ export class NotificationService {
       return false;
     }
 
+    if (this.isIosBrowserWithoutStandalone()) {
+      console.error('❌ No iPhone, Web Push só funciona com o app instalado na Tela de Início');
+      this.updateStoredPushState(false);
+      return false;
+    }
+
     if (Notification.permission === 'denied') {
       console.warn('⚠️ Permissão de notificação negada pelo usuário');
       return false;
@@ -356,6 +362,14 @@ export class NotificationService {
       subscription: subscription ?? preferences.push.subscription
     };
     this.saveToLocalStorage(preferences);
+  }
+
+  private isIosBrowserWithoutStandalone(): boolean {
+    const userAgent = navigator.userAgent || '';
+    const isIos = /iPad|iPhone|iPod/.test(userAgent);
+    const isStandalone = globalThis.matchMedia?.('(display-mode: standalone)').matches || (navigator as Navigator & { standalone?: boolean }).standalone === true;
+
+    return isIos && !isStandalone;
   }
 
   /**
