@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, Output, OnInit, OnChanges, SimpleChange
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
-import { Product, ProductFormData } from '../../models/product.model';
+import { Product, ProductFormData, ProductFormSubmission } from '../../models/product.model';
 
 @Component({
   selector: 'app-product-form-modal',
@@ -195,6 +195,26 @@ import { Product, ProductFormData } from '../../models/product.model';
           <label for="featured" class="ml-2 text-sm font-medium text-gray-700">Produto em destaque</label>
         </div>
 
+        <div *ngIf="!editMode" class="rounded-xl p-4 space-y-2" style="background-color: #F5F7FA; border: 1px solid #D7DDE3;">
+          <div class="flex items-start gap-3">
+            <input
+              type="checkbox"
+              [(ngModel)]="publishToFacebookMarketplace"
+              name="publishToFacebookMarketplace"
+              id="publishToFacebookMarketplace"
+              class="mt-1 w-4 h-4 border-gray-300 rounded"
+              style="accent-color: #7588A8;">
+            <div>
+              <label for="publishToFacebookMarketplace" class="text-sm font-semibold cursor-pointer" style="color: #23292A;">
+                Preparar publicação no Facebook Marketplace
+              </label>
+              <p class="text-xs leading-relaxed mt-1" style="color: #6B7785;">
+                Depois de salvar, o app copia um texto de anúncio e abre o Marketplace em outra guia para você finalizar a publicação manualmente.
+              </p>
+            </div>
+          </div>
+        </div>
+
         <!-- Botões -->
         <div class="flex gap-3 pt-4 border-t">
           <button 
@@ -217,10 +237,11 @@ export class ProductFormModalComponent implements OnInit, OnChanges {
   @Input() isOpen = false;
   @Input() product?: Product;
   @Output() closeModal = new EventEmitter<void>();
-  @Output() submitForm = new EventEmitter<ProductFormData>();
+  @Output() submitForm = new EventEmitter<ProductFormSubmission>();
 
   editMode = false;
   imageUrls: string[] = [];
+  publishToFacebookMarketplace = false;
   formData: ProductFormData = {
     name: '',
     description: '',
@@ -257,6 +278,7 @@ export class ProductFormModalComponent implements OnInit, OnChanges {
     
     if (this.product) {
       this.editMode = true;
+      this.publishToFacebookMarketplace = false;
       this.imageUrls = this.product.images || [];
       this.formData = {
         name: this.product.name,
@@ -280,6 +302,7 @@ export class ProductFormModalComponent implements OnInit, OnChanges {
       console.log('[ProductFormModal] Modo criação - formulário resetado');
       this.editMode = false;
       this.imageUrls = [];
+      this.publishToFacebookMarketplace = false;
       this.formData = {
         name: '',
         description: '',
@@ -311,7 +334,7 @@ export class ProductFormModalComponent implements OnInit, OnChanges {
         const reader = new FileReader();
         
         reader.onload = (e: ProgressEvent<FileReader>) => {
-          if (e.target && e.target.result) {
+          if (e.target?.result) {
             const imageUrl = e.target.result as string;
             console.log(`[ProductFormModal] Imagem carregada, tamanho: ${imageUrl.length} chars`);
             
@@ -349,7 +372,10 @@ export class ProductFormModalComponent implements OnInit, OnChanges {
       costPrice: this.formData.costPrice ? Math.round(this.formData.costPrice * 100) : undefined,
       images: this.imageUrls.length > 0 ? this.imageUrls : null
     };
-    this.submitForm.emit(data);
+    this.submitForm.emit({
+      product: data,
+      publishToFacebookMarketplace: !this.editMode && this.publishToFacebookMarketplace
+    });
   }
 
   close(): void {

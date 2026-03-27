@@ -53,3 +53,8 @@ export interface ProductFormData {
 	warranty?: string;
 	featured: boolean;
 }
+
+export interface ProductFormSubmission {
+	product: ProductFormData;
+	publishToFacebookMarketplace: boolean;
+}

@@ -57,6 +57,14 @@ export class NotificationService {
   }
 
   /**
+   * Retorna preferências salvas no localStorage de forma síncrona.
+   * Útil para exibir dados imediatamente, sem aguardar a API.
+   */
+  getLocalPreferences(): NotificationPreferences {
+    return this.getFromLocalStorage();
+  }
+
+  /**
    * Buscar preferências salvas
    * Tenta buscar do backend, fallback para localStorage
    */

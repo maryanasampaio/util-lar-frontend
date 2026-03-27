@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -229,12 +229,21 @@ export class NotificationsSettingsComponent implements OnInit {
 
   showSaveConfirmation = false;
   errorMessage = '';
-  isLoading = true;
+  isLoading = false;
 
   constructor(
     private readonly route: ActivatedRoute,
-    private readonly notificationService: NotificationService
-  ) {}
+    private readonly notificationService: NotificationService,
+    private readonly cdr: ChangeDetectorRef
+  ) {
+    // Exibe dados do localStorage imediatamente, sem esperar a API
+    const localPrefs = notificationService.getLocalPreferences();
+    this.settings = {
+      whatsapp: localPrefs.whatsapp,
+      email: localPrefs.email,
+      push: localPrefs.push
+    };
+  }
 
   ngOnInit(): void {
     // Carregar configurações salvas (do service)
@@ -266,7 +275,7 @@ export class NotificationsSettingsComponent implements OnInit {
   }
 
   loadSettings(): void {
-    this.isLoading = true;
+    // Busca na API em segundo plano — a tela já exibe os dados do localStorage
     this.notificationService.getPreferences().subscribe({
       next: (prefs) => {
         this.settings = {
@@ -275,12 +284,13 @@ export class NotificationsSettingsComponent implements OnInit {
           push: prefs.push
         };
         this.isLoading = false;
+        this.cdr.detectChanges();
         void this.refreshPushState();
       },
       error: (error) => {
         console.error('Erro ao carregar preferências:', error);
         this.isLoading = false;
-        // Continuar com valores padrão
+        this.cdr.detectChanges();
       }
     });
   }
@@ -365,6 +375,7 @@ export class NotificationsSettingsComponent implements OnInit {
         enabled: pushEnabled
       }
     };
+    this.cdr.detectChanges();
   }
 
   private persistPushSettingsLocally(): void {

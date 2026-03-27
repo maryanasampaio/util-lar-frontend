@@ -282,6 +282,13 @@
   (submitForm)="onUpdateProduct($event)">
 </app-product-form-modal>
 
+<app-marketplace-publish-modal
+  [isOpen]="showMarketplacePublishModal"
+  [product]="marketplaceDraftProduct"
+  [copiedFullText]="marketplaceTextCopied"
+  (closeModal)="closeMarketplacePublishModal()">
+</app-marketplace-publish-modal>
+
 <!-- Modal de Login Admin -->
 <app-admin-login-modal
   *ngIf="showAdminLoginModal"

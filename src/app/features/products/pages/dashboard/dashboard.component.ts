@@ -3,9 +3,10 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ProductService } from '../../services/product.service';
-import { Product, ProductResponse, ProductFormData } from '../../models/product.model';
+import { Product, ProductResponse, ProductFormSubmission } from '../../models/product.model';
 import { AdminModeService } from '../../../../core/services/admin-mode.service';
 import { ProductTrackerService } from '../../../../core/services/product-tracker.service';
+import { MarketplacePublishModalComponent } from '../../components/marketplace-publish-modal/marketplace-publish-modal.component';
 import { ProductFormModalComponent } from '../../components/product-form-modal/product-form-modal.component';
 import { AdminLoginModalComponent } from '../../../../shared/components/admin-login-modal/admin-login-modal.component';
 import { WelcomeModalComponent } from '../../../../shared/components/welcome-modal/welcome-modal.component';
@@ -19,7 +20,7 @@ import { finalize, Subject, takeUntil } from 'rxjs';
   selector: 'app-dashboard',
   standalone: true,
   templateUrl: './dashboard.component.html',
-  imports: [CommonModule, FormsModule, ProductFormModalComponent, AdminLoginModalComponent, WelcomeModalComponent, PwaInstallPromptComponent, CapitalizePipe]
+  imports: [CommonModule, FormsModule, ProductFormModalComponent, MarketplacePublishModalComponent, AdminLoginModalComponent, WelcomeModalComponent, PwaInstallPromptComponent, CapitalizePipe]
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   errorMessage = '';
@@ -61,7 +62,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
   showCreateModal = false;
   showEditModal = false;
   showAdminLoginModal = false;
+  showMarketplacePublishModal = false;
   showWelcomeModal = false;
+  marketplaceDraftProduct?: Product;
+  marketplaceTextCopied = false;
   selectedProduct?: Product;
 
   // PWA Installation
@@ -310,13 +314,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
           console.error('[Dashboard] Erro ao autenticar admin:', error);
           
           // Mensagem específica baseada no erro
-          let message = 'Erro ao fazer login.';
-          
+          let message: string;
+
           if (error?.status === 401) {
             message = 'Senha incorreta ou usuário sem permissão de administrador.';
           } else if (error?.message) {
             message = error.message;
-          } else if (!navigator.onLine) {
+          } else if (navigator.onLine === false) {
             message = 'Verifique sua conexão com a internet.';
           } else {
             message = 'Erro ao conectar com o servidor. Verifique se o backend está rodando.';
@@ -381,11 +385,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   // CRUD Actions
-  onCreateProduct(data: ProductFormData): void {
-    this.productService.criarProduto(data).subscribe({
-      next: () => {
+  onCreateProduct(submission: ProductFormSubmission): void {
+    this.productService.criarProduto(submission.product).subscribe({
+      next: (product) => {
         this.closeCreateModal();
         this.loadProdutos();
+
+        if (submission.publishToFacebookMarketplace) {
+          this.openMarketplacePublishModal(product);
+          return;
+        }
+
         this.alertService.success('Produto Criado', 'O produto foi adicionado com sucesso!');
       },
       error: (err) => {
@@ -394,10 +404,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
     });
   }
 
-  onUpdateProduct(data: ProductFormData): void {
+  onUpdateProduct(submission: ProductFormSubmission): void {
     if (!this.selectedProduct) return;
     
-    this.productService.atualizarProduto(this.selectedProduct.id, data).subscribe({
+    this.productService.atualizarProduto(this.selectedProduct.id, submission.product).subscribe({
       next: () => {
         this.closeEditModal();
         this.loadProdutos();
@@ -478,6 +488,63 @@ export class DashboardComponent implements OnInit, OnDestroy {
   calcularLucro(produto: ProductResponse): number {
     if (!produto.costPrice) return 0;
     return produto.price - produto.costPrice;
+  }
+
+  closeMarketplacePublishModal(): void {
+    this.showMarketplacePublishModal = false;
+    this.marketplaceDraftProduct = undefined;
+    this.marketplaceTextCopied = false;
+  }
+
+  private async openMarketplacePublishModal(product: Product): Promise<void> {
+    this.marketplaceDraftProduct = product;
+    this.marketplaceTextCopied = await this.copyFacebookMarketplaceText(product);
+    this.showMarketplacePublishModal = true;
+    this.cdr.detectChanges();
+  }
+
+  private buildFacebookMarketplaceText(product: Product): string {
+    const details = [
+      product.category && `Categoria: ${product.category}`,
+      product.condition && `Condição: ${product.condition === 'novo' ? 'Novo' : 'Seminovo'}`,
+      product.material && `Material: ${product.material}`,
+      product.color && `Cor: ${product.color}`,
+      product.brand && `Marca: ${product.brand}`,
+      product.warranty && `Garantia: ${product.warranty}`,
+      `Estoque: ${product.stock}`
+    ].filter(Boolean);
+
+    const productUrl = `${globalThis.location.origin}/dashboard/produto/${product.id}`;
+
+    return [
+      `${product.name} - ${this.formatCurrency(product.price)}`,
+      product.description,
+      details.join(' | '),
+      `Veja mais detalhes: ${productUrl}`
+    ]
+      .filter((section) => section && section.trim().length > 0)
+      .join('\n\n');
+  }
+
+  private async copyFacebookMarketplaceText(product: Product): Promise<boolean> {
+    if (!globalThis.navigator?.clipboard?.writeText) {
+      return false;
+    }
+
+    try {
+      await globalThis.navigator.clipboard.writeText(this.buildFacebookMarketplaceText(product));
+      return true;
+    } catch (error) {
+      console.error('[Dashboard] Não foi possível copiar o texto do Marketplace:', error);
+      return false;
+    }
+  }
+
+  private formatCurrency(valueInCents: number): string {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(valueInCents / 100);
   }
 }
 
