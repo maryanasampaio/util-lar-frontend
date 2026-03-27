@@ -332,7 +332,16 @@ export class NotificationService {
     }
 
     try {
-      const registration = await navigator.serviceWorker.ready;
+      const registration = await Promise.race([
+        navigator.serviceWorker.ready,
+        new Promise<null>(resolve => setTimeout(() => resolve(null), 3000))
+      ]);
+
+      if (!registration) {
+        console.warn('⚠️ Timeout ao aguardar Service Worker pronto para PushSubscription');
+        return null;
+      }
+
       return await registration.pushManager.getSubscription();
     } catch (error) {
       console.error('❌ Erro ao buscar PushSubscription atual:', error);

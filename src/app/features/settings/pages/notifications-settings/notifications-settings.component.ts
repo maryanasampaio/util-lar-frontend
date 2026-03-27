@@ -269,7 +269,13 @@ export class NotificationsSettingsComponent implements OnInit {
     this.isLoading = true;
     this.notificationService.getPreferences().subscribe({
       next: (prefs) => {
-        void this.applyLoadedSettings(prefs);
+        this.settings = {
+          whatsapp: prefs.whatsapp,
+          email: prefs.email,
+          push: prefs.push
+        };
+        this.isLoading = false;
+        void this.refreshPushState();
       },
       error: (error) => {
         console.error('Erro ao carregar preferências:', error);
@@ -346,15 +352,13 @@ export class NotificationsSettingsComponent implements OnInit {
     }
   }
 
-  private async applyLoadedSettings(prefs: NotificationPreferences): Promise<void> {
+  private async refreshPushState(): Promise<void> {
     const pushEnabled = await this.notificationService.syncPushSubscription();
     this.settings = {
-      whatsapp: prefs.whatsapp,
-      email: prefs.email,
+      ...this.settings,
       push: {
         enabled: pushEnabled
       }
     };
-    this.isLoading = false;
   }
 }
