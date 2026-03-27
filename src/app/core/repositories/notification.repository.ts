@@ -84,6 +84,10 @@ export class NotificationRepository {
    * Payload: { endpoint, expirationTime, keys: { p256dh, auth } }
    */
   savePushSubscription(subscription: PushSubscription): Observable<any> {
+    console.log('[PushRepository] POST push-subscription', {
+      url: `${environment.apiUrl}/api/notification-preferences/push-subscription`,
+      payload: subscription.toJSON()
+    });
     return this.http.post(
       `${environment.apiUrl}/api/notification-preferences/push-subscription`,
       subscription.toJSON()
@@ -95,6 +99,10 @@ export class NotificationRepository {
    * DELETE /api/notification-preferences/push-subscription?endpoint=...
    */
   deletePushSubscription(endpoint: string): Observable<any> {
+    console.log('[PushRepository] DELETE push-subscription', {
+      url: `${environment.apiUrl}/api/notification-preferences/push-subscription`,
+      endpoint
+    });
     return this.http.delete(
       `${environment.apiUrl}/api/notification-preferences/push-subscription`,
       { params: { endpoint } }

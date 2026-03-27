@@ -330,6 +330,8 @@ export class NotificationsSettingsComponent implements OnInit {
   }
 
   async onPushToggle(): Promise<void> {
+    console.log('[PushUI] Toggle alterado', { enabled: this.settings.push.enabled });
+
     if (this.settings.push.enabled) {
       await this.requestPushPermission();
     } else {
@@ -340,7 +342,10 @@ export class NotificationsSettingsComponent implements OnInit {
   }
 
   async requestPushPermission(): Promise<void> {
+    console.log('[PushUI] Solicitando ativação de push');
     const granted = await this.notificationService.requestPushPermission();
+
+    console.log('[PushUI] Resultado final da ativação', { granted });
 
     if (granted) {
       this.settings.push.enabled = true;

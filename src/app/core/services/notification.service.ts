@@ -20,6 +20,7 @@ import { environment } from '../../../environments/environment';
 @Injectable({ providedIn: 'root' })
 export class NotificationService {
   private readonly STORAGE_KEY = 'notificationSettings';
+  private readonly PUSH_ENDPOINT = `${environment.apiUrl}/api/notification-preferences/push-subscription`;
 
   constructor(private readonly repository: NotificationRepository) {}
 
@@ -137,6 +138,15 @@ export class NotificationService {
    * Chamado ao ativar push nas configurações.
    */
   async requestPushPermission(): Promise<boolean> {
+    console.log('[Push] Iniciando ativação', {
+      permission: Notification.permission,
+      apiUrl: environment.apiUrl,
+      pushEndpoint: this.PUSH_ENDPOINT,
+      standalone: this.isStandaloneMode(),
+      hasServiceWorker: 'serviceWorker' in navigator,
+      hasPushManager: 'PushManager' in globalThis
+    });
+
     if (!('Notification' in globalThis)) {
       console.error('❌ Navegador não suporta notificações');
       return false;
@@ -161,13 +171,21 @@ export class NotificationService {
 
     try {
       const permission = await this.ensureNotificationPermission();
+      console.log('[Push] Resultado da permissão', { permission });
+
       if (permission !== 'granted') {
         this.updateStoredPushState(false);
         return false;
       }
 
       const existingSubscription = await this.getCurrentSubscription();
+      console.log('[Push] Subscription existente encontrada?', {
+        exists: !!existingSubscription,
+        endpoint: existingSubscription?.endpoint ?? null
+      });
+
       const subscription = existingSubscription ?? await this.createPushSubscription();
+      console.log('[Push] Subscription pronta para envio', subscription.toJSON());
 
       const synced = await this.sendSubscriptionToBackend(subscription);
       this.updateStoredPushState(synced, subscription);
@@ -192,6 +210,8 @@ export class NotificationService {
    * Garante que o backend sempre tem a subscription atualizada.
    */
   async syncPushSubscription(): Promise<boolean> {
+    console.log('[Push] Sincronizando subscription no startup');
+
     if (!this.hasPushSupport()) {
       this.updateStoredPushState(false);
       return false;
@@ -219,6 +239,8 @@ export class NotificationService {
    * Chamado ao desativar push nas configurações ou no logout.
    */
   async removePushSubscription(): Promise<void> {
+    console.log('[Push] Iniciando remoção da subscription');
+
     if (!this.hasPushSupport()) {
       this.updateStoredPushState(false);
       return;
@@ -232,6 +254,7 @@ export class NotificationService {
     }
 
     const endpoint = subscription.endpoint;
+    console.log('[Push] Subscription encontrada para remoção', { endpoint });
 
     try {
       await subscription.unsubscribe();
@@ -255,8 +278,14 @@ export class NotificationService {
    * { endpoint, expirationTime, keys: { p256dh, auth } }
    */
   private async sendSubscriptionToBackend(subscription: PushSubscription): Promise<boolean> {
+    console.log('[Push] Enviando subscription para o backend', {
+      url: this.PUSH_ENDPOINT,
+      payload: subscription.toJSON()
+    });
+
     try {
       await firstValueFrom(this.repository.savePushSubscription(subscription));
+      console.log('[Push] POST de subscription concluído com sucesso');
       return true;
     } catch (err) {
       console.error('❌ Erro ao salvar subscription no backend:', err);
@@ -338,19 +367,39 @@ export class NotificationService {
 
   private async getCurrentSubscription(): Promise<PushSubscription | null> {
     if (!this.hasPushSupport()) {
+      console.warn('[Push] getCurrentSubscription abortado: sem suporte a Service Worker/PushManager');
       return null;
     }
 
     try {
+      console.log('[Push] Aguardando serviceWorker.ready');
       const registration = await Promise.race([
         navigator.serviceWorker.ready,
         new Promise<null>(resolve => setTimeout(() => resolve(null), 3000))
       ]);
 
       if (!registration) {
-        console.warn('⚠️ Timeout ao aguardar Service Worker pronto para PushSubscription');
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        console.warn('⚠️ Timeout ao aguardar Service Worker pronto para PushSubscription', {
+          registrations: registrations.map(item => ({
+            scope: item.scope,
+            active: !!item.active,
+            installing: !!item.installing,
+            waiting: !!item.waiting
+          })),
+          controller: !!navigator.serviceWorker.controller,
+          standalone: this.isStandaloneMode(),
+          url: globalThis.location.href
+        });
         return null;
       }
+
+      console.log('[Push] Service Worker pronto', {
+        scope: registration.scope,
+        hasActiveWorker: !!registration.active,
+        hasInstallingWorker: !!registration.installing,
+        hasWaitingWorker: !!registration.waiting
+      });
 
       return await registration.pushManager.getSubscription();
     } catch (error) {
@@ -385,6 +434,7 @@ export class NotificationService {
   }
 
   private async createPushSubscription(): Promise<PushSubscription> {
+    console.log('[Push] Criando nova PushSubscription com a VAPID key configurada');
     const registration = await navigator.serviceWorker.ready;
     const applicationServerKey = this.urlBase64ToArrayBuffer(environment.vapidPublicKey);
     return registration.pushManager.subscribe({
@@ -409,9 +459,13 @@ export class NotificationService {
   private isIosBrowserWithoutStandalone(): boolean {
     const userAgent = navigator.userAgent || '';
     const isIos = /iPad|iPhone|iPod/.test(userAgent);
-    const isStandalone = globalThis.matchMedia?.('(display-mode: standalone)').matches || (navigator as Navigator & { standalone?: boolean }).standalone === true;
+    const isStandalone = this.isStandaloneMode();
 
     return isIos && !isStandalone;
+  }
+
+  private isStandaloneMode(): boolean {
+    return globalThis.matchMedia?.('(display-mode: standalone)').matches || (navigator as Navigator & { standalone?: boolean }).standalone === true;
   }
 
   /**
