@@ -161,7 +161,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   onMobileClose(): void {
-    // Mantém comportamento para navegação
+    this.sidebarService.close();
   }
 
   onLogoutAdmin(): void {

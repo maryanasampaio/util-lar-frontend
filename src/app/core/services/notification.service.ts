@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, of, catchError, tap } from 'rxjs';
+import { Observable, of, catchError, tap, timeout, map } from 'rxjs';
 import { SwPush } from '@angular/service-worker';
 import { NotificationRepository } from '../repositories/notification.repository';
 import {
@@ -60,13 +60,26 @@ export class NotificationService {
    * Tenta buscar do backend, fallback para localStorage
    */
   getPreferences(): Observable<NotificationPreferences> {
-    // Tentar buscar do backend
+    const localPrefs = this.getFromLocalStorage();
+
     return this.repository.getPreferences().pipe(
+      timeout(5000),
+      map(prefs => ({
+        // Suporta resposta nested (prefs.whatsapp) e flat (whatsappEnabled) do backend
+        whatsapp: prefs.whatsapp ?? {
+          enabled: (prefs as any).whatsappEnabled === true,
+          phoneNumber: (prefs as any).whatsappPhone ?? ''
+        },
+        email: prefs.email ?? {
+          enabled: (prefs as any).emailEnabled === true,
+          emailAddress: (prefs as any).emailAddress ?? ''
+        },
+        // push vem sempre do localStorage — estado real do browser
+        push: localPrefs.push
+      })),
       catchError(() => {
-        // Fallback: buscar do localStorage
         console.log('📦 Carregando preferências do localStorage');
-        const local = this.getFromLocalStorage();
-        return of(local);
+        return of(localPrefs);
       })
     );
   }
