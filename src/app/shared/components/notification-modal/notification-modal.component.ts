@@ -160,11 +160,7 @@ export class NotificationModalComponent implements OnInit {
   loadSettings(): void {
     this.notificationService.getPreferences().subscribe({
       next: (prefs) => {
-        if (prefs) {
-          this.settings.whatsapp.enabled = prefs.whatsapp?.enabled || false;
-          this.settings.whatsapp.phoneNumber = prefs.whatsapp?.phoneNumber || '';
-          this.settings.push.enabled = prefs.push?.enabled || false;
-        }
+        void this.applyLoadedSettings(prefs);
       },
       error: (err) => {
         console.error('Erro ao carregar preferências:', err);
@@ -172,35 +168,25 @@ export class NotificationModalComponent implements OnInit {
     });
   }
 
-  onPushToggle(): void {
+  async onPushToggle(): Promise<void> {
     if (this.settings.push.enabled) {
-      this.requestPushPermission();
+      await this.requestPushPermission();
+      return;
     }
+
+    await this.notificationService.removePushSubscription();
   }
 
-  requestPushPermission(): void {
-    if (!('Notification' in globalThis)) {
-      alert('Seu navegador não suporta notificações');
+  async requestPushPermission(): Promise<void> {
+    const granted = await this.notificationService.requestPushPermission();
+
+    if (!granted) {
       this.settings.push.enabled = false;
+      alert('Não foi possível ativar as notificações push. Verifique a permissão do navegador e se a assinatura foi registrada no servidor.');
       return;
     }
 
-    if (Notification.permission === 'granted') {
-      return;
-    }
-
-    if (Notification.permission === 'denied') {
-      this.settings.push.enabled = false;
-      alert('Notificações bloqueadas. Permita nas configurações do navegador.');
-      return;
-    }
-
-    Notification.requestPermission().then((permission) => {
-      if (permission !== 'granted') {
-        this.settings.push.enabled = false;
-        alert('Você precisa permitir notificações nas configurações do navegador');
-      }
-    });
+    this.settings.push.enabled = true;
   }
 
   saveSettings(): void {
@@ -254,5 +240,16 @@ export class NotificationModalComponent implements OnInit {
 
   close(): void {
     this.closeModal.emit();
+  }
+
+  private async applyLoadedSettings(prefs: NotificationPreferences): Promise<void> {
+    if (!prefs) {
+      return;
+    }
+
+    const pushEnabled = await this.notificationService.syncPushSubscription();
+    this.settings.whatsapp.enabled = prefs.whatsapp?.enabled || false;
+    this.settings.whatsapp.phoneNumber = prefs.whatsapp?.phoneNumber || '';
+    this.settings.push.enabled = pushEnabled;
   }
 }

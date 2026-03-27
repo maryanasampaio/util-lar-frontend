@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, of, catchError, tap, timeout, map } from 'rxjs';
+import { Observable, of, catchError, tap, timeout, map, firstValueFrom } from 'rxjs';
 import { SwPush } from '@angular/service-worker';
 import { NotificationRepository } from '../repositories/notification.repository';
 import {
@@ -94,7 +94,7 @@ export class NotificationService {
     }
 
     // Remover caracteres especiais
-    const cleaned = phone.replace(/\D/g, '');
+    const cleaned = phone.replaceAll(/\D/g, '');
 
     // Validar formato brasileiro
     if (cleaned.length === 11) {
@@ -148,20 +148,30 @@ export class NotificationService {
     }
 
     if (!this.swPush.isEnabled) {
-      // Dev mode sem SW — permissão simples
-      const permission = await Notification.requestPermission();
-      return permission === 'granted';
+      console.error('❌ Push notifications indisponíveis: Service Worker não está ativo');
+      this.updateStoredPushState(false);
+      return false;
     }
 
     try {
-      const subscription = await this.swPush.requestSubscription({
+      const existingSubscription = await this.getCurrentSubscription();
+      const subscription = existingSubscription ?? await this.swPush.requestSubscription({
         serverPublicKey: environment.vapidPublicKey
       });
-      await this.sendSubscriptionToBackend(subscription);
+
+      const synced = await this.sendSubscriptionToBackend(subscription);
+      this.updateStoredPushState(synced, subscription);
+
+      if (!synced) {
+        console.error('❌ Subscription criada, mas não foi salva no backend');
+        return false;
+      }
+
       console.log('✅ Web Push subscription criada e enviada ao backend');
       return true;
     } catch (err) {
       console.error('❌ Erro ao criar Web Push subscription:', err);
+      this.updateStoredPushState(false);
       return false;
     }
   }
@@ -171,15 +181,27 @@ export class NotificationService {
    * Chamar no startup do app quando push já estiver ativado.
    * Garante que o backend sempre tem a subscription atualizada.
    */
-  syncPushSubscription(): void {
-    if (!this.swPush.isEnabled) return;
+  async syncPushSubscription(): Promise<boolean> {
+    if (!this.swPush.isEnabled) {
+      this.updateStoredPushState(false);
+      return false;
+    }
 
-    this.swPush.subscription.subscribe(subscription => {
-      if (subscription) {
-        this.sendSubscriptionToBackend(subscription);
-        console.log('🔄 Subscription push sincronizada com o backend');
-      }
-    });
+    const subscription = await this.getCurrentSubscription();
+
+    if (!subscription) {
+      this.updateStoredPushState(false);
+      return false;
+    }
+
+    const synced = await this.sendSubscriptionToBackend(subscription);
+    this.updateStoredPushState(synced, subscription);
+
+    if (synced) {
+      console.log('🔄 Subscription push sincronizada com o backend');
+    }
+
+    return synced;
   }
 
   /**
@@ -187,44 +209,49 @@ export class NotificationService {
    * Chamado ao desativar push nas configurações ou no logout.
    */
   async removePushSubscription(): Promise<void> {
-    if (!this.swPush.isEnabled) return;
+    if (!this.swPush.isEnabled) {
+      this.updateStoredPushState(false);
+      return;
+    }
 
-    // Pegar endpoint atual antes de cancelar
-    this.swPush.subscription.subscribe(async subscription => {
-      if (!subscription) return;
+    const subscription = await this.getCurrentSubscription();
 
-      const endpoint = subscription.endpoint;
+    if (!subscription) {
+      this.updateStoredPushState(false);
+      return;
+    }
 
-      try {
-        await this.swPush.unsubscribe();
-        console.log('✅ Subscription removida do navegador');
-      } catch (err) {
-        console.warn('⚠️ Erro ao remover subscription do SW:', err);
-      }
+    const endpoint = subscription.endpoint;
 
-      // Avisar backend para remover
-      this.repository.deletePushSubscription(endpoint).pipe(
-        catchError(err => {
-          console.warn('⚠️ Erro ao remover subscription do backend:', err);
-          return of(null);
-        })
-      ).subscribe();
-    }).unsubscribe(); // unsubscribe do Observable (não do push)
+    try {
+      await this.swPush.unsubscribe();
+      console.log('✅ Subscription removida do navegador');
+    } catch (err) {
+      console.warn('⚠️ Erro ao remover subscription do SW:', err);
+    }
+
+    this.repository.deletePushSubscription(endpoint).pipe(
+      catchError(err => {
+        console.warn('⚠️ Erro ao remover subscription do backend:', err);
+        return of(null);
+      })
+    ).subscribe();
+
+    this.updateStoredPushState(false);
   }
 
   /**
    * Envia subscription ao backend no formato exato esperado pelo controller:
    * { endpoint, expirationTime, keys: { p256dh, auth } }
    */
-  private sendSubscriptionToBackend(subscription: PushSubscription): Promise<void> {
-    return new Promise(resolve => {
-      this.repository.savePushSubscription(subscription).pipe(
-        catchError(err => {
-          console.warn('⚠️ Erro ao salvar subscription no backend:', err);
-          return of(null);
-        })
-      ).subscribe(() => resolve());
-    });
+  private async sendSubscriptionToBackend(subscription: PushSubscription): Promise<boolean> {
+    try {
+      await firstValueFrom(this.repository.savePushSubscription(subscription));
+      return true;
+    } catch (err) {
+      console.error('❌ Erro ao salvar subscription no backend:', err);
+      return false;
+    }
   }
 
   /**
@@ -297,6 +324,29 @@ export class NotificationService {
       email: { enabled: false, emailAddress: '' },
       push: { enabled: false }
     };
+  }
+
+  private async getCurrentSubscription(): Promise<PushSubscription | null> {
+    if (!('serviceWorker' in navigator)) {
+      return null;
+    }
+
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      return await registration.pushManager.getSubscription();
+    } catch (error) {
+      console.error('❌ Erro ao buscar PushSubscription atual:', error);
+      return null;
+    }
+  }
+
+  private updateStoredPushState(enabled: boolean, subscription?: PushSubscription | null): void {
+    const preferences = this.getFromLocalStorage();
+    preferences.push = {
+      enabled,
+      subscription: subscription ?? preferences.push.subscription
+    };
+    this.saveToLocalStorage(preferences);
   }
 
   /**

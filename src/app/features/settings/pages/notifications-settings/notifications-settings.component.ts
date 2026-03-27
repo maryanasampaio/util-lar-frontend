@@ -269,12 +269,7 @@ export class NotificationsSettingsComponent implements OnInit {
     this.isLoading = true;
     this.notificationService.getPreferences().subscribe({
       next: (prefs) => {
-        this.settings = {
-          whatsapp: prefs.whatsapp,
-          email: prefs.email,
-          push: prefs.push
-        };
-        this.isLoading = false;
+        void this.applyLoadedSettings(prefs);
       },
       error: (error) => {
         console.error('Erro ao carregar preferências:', error);
@@ -328,12 +323,12 @@ export class NotificationsSettingsComponent implements OnInit {
     });
   }
 
-  onPushToggle(): void {
+  async onPushToggle(): Promise<void> {
     if (this.settings.push.enabled) {
-      this.requestPushPermission();
+      await this.requestPushPermission();
     } else {
       // Remover subscription do navegador e avisar o backend
-      this.notificationService.removePushSubscription();
+      await this.notificationService.removePushSubscription();
       this.saveSettings();
     }
   }
@@ -347,7 +342,19 @@ export class NotificationsSettingsComponent implements OnInit {
       this.notificationService.sendTestPushNotification();
     } else {
       this.settings.push.enabled = false;
-      this.errorMessage = 'Você precisa permitir notificações nas configurações do navegador.';
+      this.errorMessage = 'Não foi possível ativar as notificações push. Verifique a permissão do navegador e se a assinatura foi registrada no servidor.';
     }
+  }
+
+  private async applyLoadedSettings(prefs: NotificationPreferences): Promise<void> {
+    const pushEnabled = await this.notificationService.syncPushSubscription();
+    this.settings = {
+      whatsapp: prefs.whatsapp,
+      email: prefs.email,
+      push: {
+        enabled: pushEnabled
+      }
+    };
+    this.isLoading = false;
   }
 }

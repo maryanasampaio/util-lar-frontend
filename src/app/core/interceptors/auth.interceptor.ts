@@ -44,9 +44,9 @@ import { AlertService } from '../../shared/services/alert.service';
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
   constructor(
-    private authService: AuthService,
-    private router: Router,
-    private alertService: AlertService
+    private readonly authService: AuthService,
+    private readonly router: Router,
+    private readonly alertService: AlertService
   ) {}
   /**
    * ========================================================================
@@ -126,6 +126,10 @@ export class AuthInterceptor implements HttpInterceptor {
   private isPublicEndpoint(req: HttpRequest<any>): boolean {
     const url = req.url.toLowerCase();
     const method = req.method.toUpperCase();
+
+    if (url.includes('/api/notification-preferences/push-subscription')) {
+      return true;
+    }
     
     // Login é sempre público (qualquer método)
     if (url.includes('/auth/login')) {
@@ -161,11 +165,11 @@ export class AuthInterceptor implements HttpInterceptor {
       this.authService.logout();
       
       // Redireciona para dashboard (sem modo admin)
-      if (typeof window !== 'undefined') {
+      if (globalThis.window !== undefined) {
         this.alertService.warning('Sessão Expirada', 'Sua sessão expirou ou você não tem permissão. Faça login novamente.');
         setTimeout(() => {
           // Força reload para resetar estado
-          window.location.href = '/dashboard';
+          globalThis.window.location.href = '/dashboard';
         }, 2000);
       }
     }
