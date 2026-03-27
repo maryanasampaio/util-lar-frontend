@@ -111,7 +111,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
       }
     }
 
-    // Capturar evento se ainda não tiver sido disparado
+    // iOS Safari não dispara beforeinstallprompt — mostrar botão manualmente
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (isIOS && !this.isRunningAsStandalone) {
+      this.canInstallPwa = true;
+    }
+
+    // Capturar evento se ainda não tiver sido disparado (Chrome/Edge/Android)
     globalThis.addEventListener('beforeinstallprompt', (e: any) => {
       console.log('[Dashboard] beforeinstallprompt event capturado');
       e.preventDefault();
@@ -235,19 +241,27 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   // Instalar PWA
   async installPwa(): Promise<void> {
-    if (!this.deferredPrompt) return;
+    if (this.deferredPrompt) {
+      // Chrome / Edge / Android — prompt nativo
+      console.log('[Dashboard] Mostrando prompt de instalação do PWA');
+      this.deferredPrompt.prompt();
 
-    console.log('[Dashboard] Mostrando prompt de instalação do PWA');
-    this.deferredPrompt.prompt();
+      const { outcome } = await this.deferredPrompt.userChoice;
+      console.log('[Dashboard] Usuário escolheu:', outcome);
 
-    const { outcome } = await this.deferredPrompt.userChoice;
-    console.log('[Dashboard] Usuário escolheu:', outcome);
-
-    this.deferredPrompt = null;
-    if (outcome === 'accepted') {
-      this.canInstallPwa = false;
-      this.cdr.detectChanges();
+      this.deferredPrompt = null;
+      if (outcome === 'accepted') {
+        this.canInstallPwa = false;
+        this.cdr.detectChanges();
+      }
+      return;
     }
+
+    // iOS Safari — não tem prompt automático, mostrar instrução
+    this.alertService.success(
+      'Adicionar à Tela de Início',
+      'Toque em Compartilhar (□↑) na barra do Safari e depois em "Adicionar à Tela de Início".'
+    );
   }
 
   checkWelcomeModal(): void {
