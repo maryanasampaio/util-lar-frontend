@@ -77,4 +77,16 @@ export class NotificationRepository {
   sendTestNotification(type: 'whatsapp' | 'email' | 'push'): Observable<any> {
     return this.http.post(`${environment.apiUrl}/api/notifications/test`, { type });
   }
+
+  /**
+   * Salvar subscription Web Push do usuário
+   * POST /api/notification-preferences/push-subscription
+   * Backend usa esta subscription + chave VAPID privada para enviar push quando app estiver fechado
+   */
+  savePushSubscription(subscription: PushSubscription): Observable<any> {
+    return this.http.post(
+      `${environment.apiUrl}/api/notification-preferences/push-subscription`,
+      subscription.toJSON()
+    );
+  }
 }

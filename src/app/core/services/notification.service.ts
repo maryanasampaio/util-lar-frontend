@@ -1,11 +1,13 @@
 import { Injectable } from '@angular/core';
-import { Observable, of, catchError, tap } from 'rxjs';
+import { Observable, of, catchError, tap, from } from 'rxjs';
+import { SwPush } from '@angular/service-worker';
 import { NotificationRepository } from '../repositories/notification.repository';
 import {
   NotificationPreferences,
   SaveNotificationPreferencesRequest,
   NotificationPreferencesResponse
 } from '../models/notification-preferences.model';
+import { environment } from '../../../environments/environment';
 
 /**
  * Service para gerenciar notificações
@@ -20,7 +22,10 @@ import {
 export class NotificationService {
   private readonly STORAGE_KEY = 'notificationSettings';
 
-  constructor(private readonly repository: NotificationRepository) {}
+  constructor(
+    private readonly repository: NotificationRepository,
+    private readonly swPush: SwPush
+  ) {}
 
   /**
    * Salvar preferências de notificação
@@ -115,16 +120,13 @@ export class NotificationService {
   }
 
   /**
-   * Solicitar permissão para Push Notifications
+   * Solicitar permissão para Push Notifications e registrar subscription Web Push
+   * Usa SwPush do Angular para suporte real a notificações com app fechado
    */
   async requestPushPermission(): Promise<boolean> {
-    if (!('Notification' in window)) {
+    if (!('Notification' in globalThis)) {
       console.error('❌ Navegador não suporta notificações');
       return false;
-    }
-
-    if (Notification.permission === 'granted') {
-      return true;
     }
 
     if (Notification.permission === 'denied') {
@@ -132,7 +134,30 @@ export class NotificationService {
       return false;
     }
 
-    // Solicitar permissão
+    // Usar SwPush para criar subscription Web Push real
+    if (this.swPush.isEnabled) {
+      try {
+        const subscription = await this.swPush.requestSubscription({
+          serverPublicKey: environment.vapidPublicKey
+        });
+        // Enviar subscription ao backend para poder receber push quando app estiver fechado
+        this.repository.savePushSubscription(subscription).pipe(
+          catchError(err => {
+            console.warn('⚠️ Erro ao salvar subscription push no backend:', err);
+            return of(null);
+          })
+        ).subscribe();
+        console.log('✅ Web Push subscription criada');
+        return true;
+      } catch (err) {
+        console.error('❌ Erro ao criar Web Push subscription:', err);
+        // Fallback: permissão simples sem SW (funciona só com app aberto)
+        const permission = await Notification.requestPermission();
+        return permission === 'granted';
+      }
+    }
+
+    // Fallback para ambiente sem SW (dev mode)
     const permission = await Notification.requestPermission();
     return permission === 'granted';
   }
