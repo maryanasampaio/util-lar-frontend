@@ -597,8 +597,23 @@ export class SimulationCardComponent implements OnInit {
       container.remove();
       
       // Download da imagem
+      const filename = `simulacao-pagamento-${Date.now()}.png`;
+      const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+      // Em mobile, usar Web Share API para salvar na galeria
+      if (isMobile && navigator.canShare) {
+        const blob = await (await fetch(dataUrl)).blob();
+        const file = new File([blob], filename, { type: 'image/png' });
+        if (navigator.canShare({ files: [file] })) {
+          await navigator.share({ files: [file], title: 'Simulação de Pagamento' });
+          this.alertService.success('Imagem Gerada', 'Imagem gerada com sucesso!');
+          return;
+        }
+      }
+
+      // Fallback: download tradicional (desktop ou mobile sem suporte)
       const link = document.createElement('a');
-      link.download = `simulacao-pagamento-${Date.now()}.png`;
+      link.download = filename;
       link.href = dataUrl;
       link.click();
       
