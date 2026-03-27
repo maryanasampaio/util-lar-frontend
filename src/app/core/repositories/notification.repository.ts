@@ -81,12 +81,23 @@ export class NotificationRepository {
   /**
    * Salvar subscription Web Push do usuário
    * POST /api/notification-preferences/push-subscription
-   * Backend usa esta subscription + chave VAPID privada para enviar push quando app estiver fechado
+   * Payload: { endpoint, expirationTime, keys: { p256dh, auth } }
    */
   savePushSubscription(subscription: PushSubscription): Observable<any> {
     return this.http.post(
       `${environment.apiUrl}/api/notification-preferences/push-subscription`,
       subscription.toJSON()
+    );
+  }
+
+  /**
+   * Remover subscription Web Push do usuário
+   * DELETE /api/notification-preferences/push-subscription?endpoint=...
+   */
+  deletePushSubscription(endpoint: string): Observable<any> {
+    return this.http.delete(
+      `${environment.apiUrl}/api/notification-preferences/push-subscription`,
+      { params: { endpoint } }
     );
   }
 }

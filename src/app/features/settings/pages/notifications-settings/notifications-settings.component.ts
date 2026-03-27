@@ -332,17 +332,18 @@ export class NotificationsSettingsComponent implements OnInit {
     if (this.settings.push.enabled) {
       this.requestPushPermission();
     } else {
+      // Remover subscription do navegador e avisar o backend
+      this.notificationService.removePushSubscription();
       this.saveSettings();
     }
   }
 
   async requestPushPermission(): Promise<void> {
     const granted = await this.notificationService.requestPushPermission();
-    
+
     if (granted) {
       this.settings.push.enabled = true;
       this.saveSettings();
-      // Enviar notificação de teste
       this.notificationService.sendTestPushNotification();
     } else {
       this.settings.push.enabled = false;

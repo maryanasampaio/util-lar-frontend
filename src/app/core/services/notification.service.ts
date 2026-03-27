@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, of, catchError, tap, from } from 'rxjs';
+import { Observable, of, catchError, tap } from 'rxjs';
 import { SwPush } from '@angular/service-worker';
 import { NotificationRepository } from '../repositories/notification.repository';
 import {
@@ -120,8 +120,8 @@ export class NotificationService {
   }
 
   /**
-   * Solicitar permissão para Push Notifications e registrar subscription Web Push
-   * Usa SwPush do Angular para suporte real a notificações com app fechado
+   * Solicitar permissão e criar subscription Web Push.
+   * Chamado ao ativar push nas configurações.
    */
   async requestPushPermission(): Promise<boolean> {
     if (!('Notification' in globalThis)) {
@@ -134,32 +134,84 @@ export class NotificationService {
       return false;
     }
 
-    // Usar SwPush para criar subscription Web Push real
-    if (this.swPush.isEnabled) {
-      try {
-        const subscription = await this.swPush.requestSubscription({
-          serverPublicKey: environment.vapidPublicKey
-        });
-        // Enviar subscription ao backend para poder receber push quando app estiver fechado
-        this.repository.savePushSubscription(subscription).pipe(
-          catchError(err => {
-            console.warn('⚠️ Erro ao salvar subscription push no backend:', err);
-            return of(null);
-          })
-        ).subscribe();
-        console.log('✅ Web Push subscription criada');
-        return true;
-      } catch (err) {
-        console.error('❌ Erro ao criar Web Push subscription:', err);
-        // Fallback: permissão simples sem SW (funciona só com app aberto)
-        const permission = await Notification.requestPermission();
-        return permission === 'granted';
-      }
+    if (!this.swPush.isEnabled) {
+      // Dev mode sem SW — permissão simples
+      const permission = await Notification.requestPermission();
+      return permission === 'granted';
     }
 
-    // Fallback para ambiente sem SW (dev mode)
-    const permission = await Notification.requestPermission();
-    return permission === 'granted';
+    try {
+      const subscription = await this.swPush.requestSubscription({
+        serverPublicKey: environment.vapidPublicKey
+      });
+      await this.sendSubscriptionToBackend(subscription);
+      console.log('✅ Web Push subscription criada e enviada ao backend');
+      return true;
+    } catch (err) {
+      console.error('❌ Erro ao criar Web Push subscription:', err);
+      return false;
+    }
+  }
+
+  /**
+   * Sincronizar subscription existente com o backend.
+   * Chamar no startup do app quando push já estiver ativado.
+   * Garante que o backend sempre tem a subscription atualizada.
+   */
+  syncPushSubscription(): void {
+    if (!this.swPush.isEnabled) return;
+
+    this.swPush.subscription.subscribe(subscription => {
+      if (subscription) {
+        this.sendSubscriptionToBackend(subscription);
+        console.log('🔄 Subscription push sincronizada com o backend');
+      }
+    });
+  }
+
+  /**
+   * Remover subscription Web Push.
+   * Chamado ao desativar push nas configurações ou no logout.
+   */
+  async removePushSubscription(): Promise<void> {
+    if (!this.swPush.isEnabled) return;
+
+    // Pegar endpoint atual antes de cancelar
+    this.swPush.subscription.subscribe(async subscription => {
+      if (!subscription) return;
+
+      const endpoint = subscription.endpoint;
+
+      try {
+        await this.swPush.unsubscribe();
+        console.log('✅ Subscription removida do navegador');
+      } catch (err) {
+        console.warn('⚠️ Erro ao remover subscription do SW:', err);
+      }
+
+      // Avisar backend para remover
+      this.repository.deletePushSubscription(endpoint).pipe(
+        catchError(err => {
+          console.warn('⚠️ Erro ao remover subscription do backend:', err);
+          return of(null);
+        })
+      ).subscribe();
+    }).unsubscribe(); // unsubscribe do Observable (não do push)
+  }
+
+  /**
+   * Envia subscription ao backend no formato exato esperado pelo controller:
+   * { endpoint, expirationTime, keys: { p256dh, auth } }
+   */
+  private sendSubscriptionToBackend(subscription: PushSubscription): Promise<void> {
+    return new Promise(resolve => {
+      this.repository.savePushSubscription(subscription).pipe(
+        catchError(err => {
+          console.warn('⚠️ Erro ao salvar subscription no backend:', err);
+          return of(null);
+        })
+      ).subscribe(() => resolve());
+    });
   }
 
   /**
