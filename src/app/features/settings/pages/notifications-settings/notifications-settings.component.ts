@@ -27,13 +27,13 @@ interface NotificationSettings {
     <div class="min-h-screen" style="background-color: #EEF2F5;">
       <!-- Header com gradiente -->
       <header style="background: linear-gradient(to right, #7588A8, #95A7C1, #9AB6C8);">
-        <div class="max-w-4xl mx-auto px-4 py-8">
-          <h1 class="text-3xl md:text-4xl font-bold text-white mb-2">Configurações de Notificações</h1>
-          <p class="text-white/90 text-base">Escolha como deseja receber atualizações sobre novos produtos</p>
+        <div class="max-w-4xl mx-auto px-4 py-5 sm:py-8">
+          <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1 sm:mb-2">Configurações de Notificações</h1>
+          <p class="text-white/90 text-sm sm:text-base">Escolha como deseja receber atualizações sobre novos produtos</p>
         </div>
       </header>
 
-      <div class="max-w-4xl mx-auto px-4 py-8">
+      <div class="max-w-4xl mx-auto px-4 py-5 sm:py-8">
         <!-- Loading -->
         <div *ngIf="isLoading" class="flex justify-center items-center py-20">
           <div class="text-center">

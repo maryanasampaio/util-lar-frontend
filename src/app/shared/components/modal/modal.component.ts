@@ -18,8 +18,8 @@ import { CommonModule } from '@angular/common';
           (click)="$event.stopPropagation()">
           
           <!-- Header -->
-          <div class="sticky top-0 text-white px-6 py-4 rounded-t-2xl flex items-center justify-between z-10" style="background-color: #7588A8;">
-            <h2 class="text-2xl font-bold">{{ title }}</h2>
+          <div class="sticky top-0 text-white px-4 sm:px-6 py-3 sm:py-4 rounded-t-2xl flex items-center justify-between z-10" style="background-color: #7588A8;">
+            <h2 class="text-lg sm:text-2xl font-bold">{{ title }}</h2>
             <button 
               (click)="close()"
               class="text-white hover:text-gray-200 transition-colors p-2 hover:bg-white/20 rounded-lg">
@@ -30,7 +30,7 @@ import { CommonModule } from '@angular/common';
           </div>
           
           <!-- Content -->
-          <div class="p-6">
+          <div class="p-4 sm:p-6">
             <ng-content></ng-content>
           </div>
         </div>

@@ -1,7 +1,7 @@
 <div class="min-h-screen" style="background-color: #EEF2F5;">
   <!-- Header + Hero unificado -->
   <header style="background: linear-gradient(to right, #7588A8, #7588A8, #95A7C1);">
-    <div class="max-w-7xl mx-auto px-3 pt-1 pb-20 sm:px-4">
+    <div class="max-w-7xl mx-auto px-3 pt-1 pb-10 sm:pb-20 sm:px-4">
       <!-- Topo: Instalação -->
       <div class="flex items-center justify-end gap-2 mb-6">
         <!-- Botão Instalar App -->
@@ -19,21 +19,21 @@
       </div>
 
       <!-- Hero Content -->
-      <div class="flex flex-col md:flex-row items-start gap-8 py-6">
-        <!-- Logo Grande -->
+      <div class="flex flex-col sm:flex-row items-start gap-4 sm:gap-8 py-4 sm:py-6">
+        <!-- Logo -->
         <div class="bg-white rounded-2xl p-3 shadow-2xl border-2 border-white/20 flex-shrink-0 cursor-pointer" (dblclick)="onLogoDoubleClick()" title="Duplo clique para modo admin">
-          <img src="logo-utilar.png" alt="Util Lar" class="w-24 h-24 object-contain">
+          <img src="logo-utilar.png" alt="Util Lar" class="w-16 h-16 sm:w-24 sm:h-24 object-contain">
         </div>
         
         <!-- Conteúdo Principal -->
-        <div class="flex-1 py-2">
-          <h1 class="text-3xl md:text-4xl font-bold text-white mb-4">Móveis e Eletrodomésticos</h1>
-          <p class="text-white/90 text-base mb-4 leading-relaxed">
+        <div class="flex-1 py-1 sm:py-2">
+          <h1 class="text-xl sm:text-3xl md:text-4xl font-bold text-white mb-2 sm:mb-4">Móveis e Eletrodomésticos</h1>
+          <p class="text-white/90 text-sm sm:text-base mb-2 sm:mb-4 leading-relaxed">
             Bem-vindo à Util Lar! Somos especializados em móveis e eletros novos e seminovos de alta qualidade. 
             Oferecemos desde sofás confortáveis até mesas elegantes e os melhores eletrodomésticos, tudo para transformar sua casa em um lar acolhedor.
           </p>
-          <p class="text-white/95 text-base leading-relaxed font-medium">
-            📱 Encontrou o produto perfeito? Clique no produto para ver todos os detalhes e entre em contato via WhatsApp para reservar!
+          <p class="text-white/95 text-sm sm:text-base leading-relaxed font-medium">
+            Encontrou o produto perfeito? Clique para ver detalhes e fale por WhatsApp!
           </p>
         </div>
       </div>
@@ -49,7 +49,7 @@
     </div>
   </header>
 
-  <div class="max-w-7xl mx-auto px-4 py-6">
+  <div class="max-w-7xl mx-auto px-2 sm:px-4 py-4 sm:py-6">
     <!-- Barra de Busca -->
     <div class="mb-5">
       <div class="relative">
@@ -65,37 +65,37 @@
       </div>
     </div>
 
-    <!-- Filtros em Linha -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    <!-- Filtros -->
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 mb-6">
       <!-- Categoria -->
       <div>
-        <label for="filter-category" class="block text-sm font-semibold mb-1.5" style="color: #23292A;">Categoria</label>
+        <label for="filter-category" class="block text-xs sm:text-sm font-semibold mb-1 sm:mb-1.5" style="color: #23292A;">Categoria</label>
         <select 
           id="filter-category"
           [(ngModel)]="selectedCategory"
-          class="w-full px-4 py-2.5 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:border-transparent appearance-none cursor-pointer" style="background-color: #FFFFFF; border: 1px solid #D7DDE3; color: #23292A;">
+          class="w-full px-2 sm:px-4 py-2 sm:py-2.5 text-sm rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:border-transparent appearance-none cursor-pointer" style="background-color: #FFFFFF; border: 1px solid #D7DDE3; color: #23292A;">
           <option *ngFor="let cat of categories" [value]="cat.value">{{ cat.label }}</option>
         </select>
       </div>
       
       <!-- Condição -->
       <div>
-        <label for="filter-condition" class="block text-sm font-semibold mb-1.5" style="color: #23292A;">Condição</label>
+        <label for="filter-condition" class="block text-xs sm:text-sm font-semibold mb-1 sm:mb-1.5" style="color: #23292A;">Condição</label>
         <select 
           id="filter-condition"
           [(ngModel)]="selectedCondition"
-          class="w-full px-4 py-2.5 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:border-transparent appearance-none cursor-pointer" style="background-color: #FFFFFF; border: 1px solid #D7DDE3; color: #23292A;">
+          class="w-full px-2 sm:px-4 py-2 sm:py-2.5 text-sm rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:border-transparent appearance-none cursor-pointer" style="background-color: #FFFFFF; border: 1px solid #D7DDE3; color: #23292A;">
           <option *ngFor="let cond of conditions" [value]="cond.value">{{ cond.label }}</option>
         </select>
       </div>
       
       <!-- Ordenar por -->
-      <div>
-        <label for="filter-sort" class="block text-sm font-semibold mb-1.5" style="color: #23292A;">Ordenar por</label>
+      <div class="col-span-2 md:col-span-1">
+        <label for="filter-sort" class="block text-xs sm:text-sm font-semibold mb-1 sm:mb-1.5" style="color: #23292A;">Ordenar por</label>
         <select 
           id="filter-sort"
           [(ngModel)]="selectedSort"
-          class="w-full px-4 py-2.5 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:border-transparent appearance-none cursor-pointer" style="background-color: #FFFFFF; border: 1px solid #D7DDE3; color: #23292A;">
+          class="w-full px-2 sm:px-4 py-2 sm:py-2.5 text-sm rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:border-transparent appearance-none cursor-pointer" style="background-color: #FFFFFF; border: 1px solid #D7DDE3; color: #23292A;">
           <option *ngFor="let sort of sortOptions" [value]="sort.value">{{ sort.label }}</option>
         </select>
       </div>
@@ -127,7 +127,7 @@
 
     <!-- Grid de Produtos -->
     <div *ngIf="!isLoading && filteredProducts.length > 0" 
-      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-5">
+      class="grid grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-5">
       
       <article 
         *ngFor="let produto of filteredProducts; trackBy: trackByProductId"
@@ -175,43 +175,31 @@
         </div>
         
         <!-- Conteúdo -->
-        <div class="p-4">
-          <!-- Título e Categoria na mesma linha -->
-          <div class="flex items-start justify-between gap-2 mb-2">
-            <h3 class="font-bold text-lg flex-1 line-clamp-2" style="color: #23292A;">
+        <div class="p-2.5 sm:p-4">
+          <!-- Título e Categoria -->
+          <div class="mb-1.5">
+            <h3 class="font-bold text-sm sm:text-base line-clamp-2 leading-tight" style="color: #23292A;">
               {{ produto.name | capitalize }}
             </h3>
-            <span class="px-2.5 py-1 rounded-md text-xs font-semibold whitespace-nowrap flex-shrink-0" style="background-color: #E6EBEF; color: #23292A;">
+            <span class="inline-block mt-1 px-1.5 py-0.5 rounded text-[10px] sm:text-xs font-semibold" style="background-color: #E6EBEF; color: #23292A;">
               {{ produto.category | capitalize }}
             </span>
           </div>
           
-          <!-- Avaliação (Estrelas) -->
-          <div class="flex items-center mb-3">
-            <div class="flex" style="color: #9AB6C8;">
-              <svg *ngFor="let star of [1,2,3,4,5]" class="w-3.5 h-3.5 fill-current" viewBox="0 0 20 20">
-                <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
-              </svg>
-            </div>
-          </div>
-          
           <!-- Preço e Lucro -->
-          <div class="mb-3 space-y-1">
-            <div class="text-xl font-bold" style="color: #23292A;">
+          <div class="mb-2 space-y-0.5">
+            <div class="text-base sm:text-xl font-bold" style="color: #23292A;">
               R$ {{ formatarPreco(produto.price) }}
             </div>
-            <div *ngIf="isAdmin && produto.costPrice" class="text-sm font-semibold" style="color: #5a8a6a;">
-              💰 Lucro: R$ {{ formatarPreco(produto.price - produto.costPrice) }}
+            <div *ngIf="isAdmin && produto.costPrice" class="text-xs font-semibold" style="color: #5a8a6a;">
+              Lucro: R$ {{ formatarPreco(produto.price - produto.costPrice) }}
             </div>
           </div>
           
           <!-- Botão Ver Detalhes -->
           <button 
             (click)="verDetalhes(produto.id)"
-            class="w-full font-semibold py-2 rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm" style="background-color: #7588A8; color: #FFFFFF;" onmouseover="this.style.backgroundColor='#95A7C1'" onmouseout="this.style.backgroundColor='#7588A8'">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
-            </svg>
+            class="w-full font-semibold py-1.5 sm:py-2 text-xs sm:text-sm rounded-lg transition-colors flex items-center justify-center gap-1 shadow-sm" style="background-color: #7588A8; color: #FFFFFF;" onmouseover="this.style.backgroundColor='#95A7C1'" onmouseout="this.style.backgroundColor='#7588A8'">
             Ver detalhes
           </button>
           

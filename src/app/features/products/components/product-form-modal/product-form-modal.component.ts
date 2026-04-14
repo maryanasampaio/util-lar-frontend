@@ -34,17 +34,7 @@ import { Product, ProductFormData, ProductFormSubmission } from '../../models/pr
         </div>
 
         <!-- Preço e Custo -->
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-semibold mb-2" style="color: #23292A;">Preço de Venda (R$)</label>
-            <input 
-              type="number" 
-              [(ngModel)]="formData.price" 
-              name="price"
-              step="0.01"
-              placeholder="0.00"
-              class="w-full px-4 py-2 rounded-lg focus:ring-2 focus:outline-none" style="border: 1px solid #D7DDE3; background-color: #EDF1F4;">
-          </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block text-sm font-semibold mb-2" style="color: #23292A;">Preço de Custo (R$)</label>
             <input 
@@ -55,10 +45,20 @@ import { Product, ProductFormData, ProductFormSubmission } from '../../models/pr
               placeholder="0.00"
               class="w-full px-4 py-2 rounded-lg focus:ring-2 focus:outline-none" style="border: 1px solid #D7DDE3; background-color: #EDF1F4;">
           </div>
+          <div>
+            <label class="block text-sm font-semibold mb-2" style="color: #23292A;">Preço de Venda (R$)</label>
+            <input 
+              type="number" 
+              [(ngModel)]="formData.price" 
+              name="price"
+              step="0.01"
+              placeholder="0.00"
+              class="w-full px-4 py-2 rounded-lg focus:ring-2 focus:outline-none" style="border: 1px solid #D7DDE3; background-color: #EDF1F4;">
+          </div>
         </div>
 
         <!-- Condição e Categoria -->
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block text-sm font-semibold mb-2" style="color: #23292A;">Condição</label>
             <select 
@@ -81,7 +81,7 @@ import { Product, ProductFormData, ProductFormSubmission } from '../../models/pr
         </div>
 
         <!-- Material, Cor, Marca -->
-        <div class="grid grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
             <label class="block text-sm font-semibold mb-2" style="color: #23292A;">Material</label>
             <input 
@@ -112,7 +112,7 @@ import { Product, ProductFormData, ProductFormSubmission } from '../../models/pr
         </div>
 
         <!-- Estoque e Garantia -->
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block text-sm font-semibold mb-2" style="color: #23292A;">Estoque</label>
             <input 
@@ -161,7 +161,7 @@ import { Product, ProductFormData, ProductFormSubmission } from '../../models/pr
             </div>
             
             <!-- Preview das imagens -->
-            <div class="grid grid-cols-4 gap-3">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div *ngFor="let url of imageUrls; let i = index; trackBy: trackByIndex" class="relative aspect-square rounded-lg overflow-hidden border-2 border-gray-200 group">
                 <img [src]="url" alt="Preview" class="w-full h-full object-cover">
                 <button 
@@ -245,8 +245,8 @@ export class ProductFormModalComponent implements OnInit, OnChanges {
   formData: ProductFormData = {
     name: '',
     description: '',
-    price: 0,
-    costPrice: 0,
+    price: null as unknown as number,
+    costPrice: null as unknown as number,
     condition: 'novo',
     category: '',
     images: null,
@@ -306,8 +306,8 @@ export class ProductFormModalComponent implements OnInit, OnChanges {
       this.formData = {
         name: '',
         description: '',
-        price: 0,
-        costPrice: 0,
+        price: null as unknown as number,
+        costPrice: null as unknown as number,
         condition: 'novo',
         category: '',
         images: null,
