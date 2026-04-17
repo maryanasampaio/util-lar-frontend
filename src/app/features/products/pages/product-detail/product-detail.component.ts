@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ProductService } from '../../services/product.service';
 import { Product } from '../../models/product.model';
 import { AdminModeService } from '../../../../core/services/admin-mode.service';
+import { FavoritesService } from '../../../../core/services/favorites.service';
 import { CapitalizePipe } from '../../../../shared/pipes/capitalize.pipe';
 import { AlertService } from '../../../../shared/services/alert.service';
 
@@ -13,166 +14,268 @@ import { AlertService } from '../../../../shared/services/alert.service';
   imports: [CommonModule, CapitalizePipe],
   template: `
     <div class="min-h-screen" style="background-color: #EEF2F5;">
-      <!-- Header com gradiente (igual ao dashboard) -->
-      <header style="background: linear-gradient(to right, #7588A8, #95A7C1, #9AB6C8);">
-        <div class="max-w-6xl mx-auto px-4 py-6">
-          <button 
-            (click)="voltar()"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all text-base" 
-            style="background-color: #FFFFFF; color: #23292A;" 
-            onmouseover="this.style.backgroundColor='#EDF1F4'" 
-            onmouseout="this.style.backgroundColor='#FFFFFF'">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-            </svg>
-            <span>Voltar para produtos</span>
-          </button>
-        </div>
-      </header>
-
       <!-- Loading -->
-      <div *ngIf="isLoading" class="flex justify-center items-center py-20">
-        <div class="animate-spin rounded-full h-16 w-16 border-b-4" style="border-color: #7588A8;"></div>
+      <div *ngIf="isLoading" class="flex justify-center items-center min-h-screen">
+        <div class="text-center">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-4 mx-auto mb-3" style="border-color: #7588A8;"></div>
+          <p class="text-sm" style="color: #6B7785;">Carregando produto...</p>
+        </div>
       </div>
 
       <!-- Produto não encontrado -->
-      <div *ngIf="!isLoading && !produto" class="max-w-6xl mx-auto px-3 sm:px-4 py-12 sm:py-20 text-center">
-        <h2 class="text-xl sm:text-2xl font-bold mb-4" style="color: #23292A;">Produto não encontrado</h2>
+      <div *ngIf="!isLoading && !produto" class="flex flex-col items-center justify-center min-h-screen px-4">
+        <svg class="w-20 h-20 mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <h2 class="text-xl font-bold mb-2" style="color: #23292A;">Produto não encontrado</h2>
+        <p class="text-sm mb-6" style="color: #6B7785;">O produto que você procura não existe ou foi removido.</p>
         <button 
           (click)="voltar()"
-          class="font-medium text-sm sm:text-base" style="color: #7588A8;">
-          Voltar para página inicial
+          class="px-6 py-2.5 rounded-lg font-semibold text-white transition-all text-sm"
+          style="background-color: #7588A8;">
+          Voltar para produtos
         </button>
       </div>
 
       <!-- Detalhes do Produto -->
-      <div *ngIf="!isLoading && produto" class="max-w-6xl mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8">
-        <div class="bg-white rounded-xl sm:rounded-2xl shadow-xl overflow-hidden" style="border: 1px solid #D7DDE3;">
-          <div class="grid md:grid-cols-2 gap-4 sm:gap-6 p-4 sm:p-6 md:p-8">
-            <!-- Galeria de Imagens -->
-            <div class="space-y-2 sm:space-y-3">
-              <!-- Imagem Principal -->
-              <div class="aspect-square rounded-lg sm:rounded-xl overflow-hidden bg-gray-100 shadow-lg">
-                <img 
-                  *ngIf="produto.images && produto.images.length > 0" 
-                  [src]="produto.images[imagemPrincipalIndex]" 
-                  [alt]="produto.name"
-                  class="w-full h-full object-cover">
-                <div *ngIf="!produto.images || produto.images.length === 0"
-                  class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
-                  <svg class="h-20 w-20 sm:h-32 sm:w-32 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                </div>
-              </div>
+      <div *ngIf="!isLoading && produto">
+        <!-- Breadcrumb / Navegação -->
+        <div class="max-w-6xl mx-auto px-3 sm:px-4 pt-4 sm:pt-6">
+          <nav class="flex items-center gap-2 text-xs sm:text-sm" style="color: #6B7785;">
+            <button (click)="voltar()" class="hover:underline transition-colors" style="color: #7588A8;">Produtos</button>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+            <span>{{ produto.category | capitalize }}</span>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+            <span class="font-medium truncate max-w-[200px]" style="color: #23292A;">{{ produto.name | capitalize }}</span>
+          </nav>
+        </div>
 
-              <!-- Miniaturas (todas as fotos até 4) -->
-              <div *ngIf="produto.images && produto.images.length > 0" class="grid grid-cols-4 gap-1.5 sm:gap-2">
-                <button 
-                  *ngFor="let img of produto.images.slice(0, 4); let i = index" 
-                  (click)="selecionarImagem(i)"
-                  [class.ring-4]="i === imagemPrincipalIndex"
-                  class="aspect-square rounded-lg overflow-hidden bg-gray-100 cursor-pointer hover:ring-2 transition-all shadow-md hover:shadow-lg transform hover:scale-105"
-                  [style.--tw-ring-color]="'#7588A8'"
-                  [style.border]="i === imagemPrincipalIndex ? '3px solid #7588A8' : '1px solid #D7DDE3'">
-                  <img [src]="img" [alt]="produto.name" class="w-full h-full object-cover">
-                </button>
+        <div class="max-w-6xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
+            
+            <!-- COLUNA ESQUERDA: Galeria com miniaturas na lateral -->
+            <div class="lg:col-span-7">
+              <div class="flex flex-col-reverse sm:flex-row gap-3">
+                <!-- Miniaturas verticais (lado esquerdo em desktop, abaixo em mobile) -->
+                <div *ngIf="produto.images && produto.images.length > 1" 
+                  class="flex sm:flex-col gap-2 overflow-x-auto sm:overflow-y-auto sm:overflow-x-hidden sm:max-h-[500px] pb-1 sm:pb-0 sm:pr-1">
+                  <button 
+                    *ngFor="let img of produto.images; let i = index" 
+                    (click)="selecionarImagem(i)"
+                    class="flex-shrink-0 w-16 h-16 sm:w-[72px] sm:h-[72px] rounded-lg overflow-hidden transition-all duration-200"
+                    [class.opacity-40]="i !== imagemPrincipalIndex"
+                    [class.opacity-100]="i === imagemPrincipalIndex"
+                    [style.border]="i === imagemPrincipalIndex ? '3px solid #7588A8' : '2px solid #D7DDE3'"
+                    [style.box-shadow]="i === imagemPrincipalIndex ? '0 0 0 1px #7588A8' : 'none'">
+                    <img [src]="img" [alt]="produto.name + ' - foto ' + (i+1)" class="w-full h-full object-cover">
+                  </button>
+                </div>
+
+                <!-- Imagem Principal -->
+                <div class="relative flex-1 aspect-square rounded-2xl overflow-hidden bg-white shadow-lg" style="border: 1px solid #D7DDE3;">
+                  <!-- Overlay Vendido -->
+                  <div *ngIf="produto.disponivel === 0" 
+                    class="absolute inset-0 bg-black/50 z-20 flex items-center justify-center">
+                    <span class="bg-white/90 px-8 py-3 rounded-xl text-lg font-bold shadow-xl" style="color: #23292A;">
+                      VENDIDO
+                    </span>
+                  </div>
+
+                  <!-- Botão Favorito -->
+                  <button
+                    (click)="toggleFavorite($event)"
+                    class="absolute top-3 right-3 z-10 w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition-all duration-200 hover:scale-110"
+                    [style.background-color]="isFavorite() ? '#DC2626' : 'rgba(255,255,255,0.9)'"
+                    [title]="isFavorite() ? 'Remover dos favoritos' : 'Adicionar aos favoritos'">
+                    <svg class="w-5 h-5" [attr.fill]="isFavorite() ? 'white' : 'none'" [attr.stroke]="isFavorite() ? 'white' : '#6B7785'" viewBox="0 0 24 24" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                    </svg>
+                  </button>
+
+                  <!-- Badge Desconto -->
+                  <div *ngIf="produto.originalPrice && produto.originalPrice > produto.price" 
+                    class="absolute top-3 left-3 z-10 px-3 py-1.5 rounded-full text-xs font-bold shadow-md"
+                    style="background-color: #FEE2E2; color: #DC2626;">
+                    -{{ getDiscountPercent() }}%
+                  </div>
+
+                  <img 
+                    *ngIf="produto.images && produto.images.length > 0" 
+                    [src]="produto.images[imagemPrincipalIndex]" 
+                    [alt]="produto.name"
+                    class="w-full h-full object-cover">
+                  <div *ngIf="!produto.images || produto.images.length === 0"
+                    class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+                    <svg class="h-24 w-24 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+
+                  <!-- Navegação -->
+                  <button *ngIf="produto.images && produto.images.length > 1"
+                    (click)="prevImage()" 
+                    class="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full flex items-center justify-center shadow-md transition-all hover:scale-110"
+                    style="background-color: rgba(255,255,255,0.9); color: #23292A;">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                  </button>
+                  <button *ngIf="produto.images && produto.images.length > 1"
+                    (click)="nextImage()" 
+                    class="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full flex items-center justify-center shadow-md transition-all hover:scale-110"
+                    style="background-color: rgba(255,255,255,0.9); color: #23292A;">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                  </button>
+
+                  <!-- Contador -->
+                  <div *ngIf="produto.images && produto.images.length > 1"
+                    class="absolute bottom-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-xs font-semibold shadow-md"
+                    style="background-color: rgba(0,0,0,0.6); color: white;">
+                    {{ imagemPrincipalIndex + 1 }} / {{ produto.images.length }}
+                  </div>
+                </div>
               </div>
             </div>
 
-            <!-- Informações -->
-            <div class="space-y-3 sm:space-y-4 md:space-y-5">
-              <!-- Badges -->
-              <div class="flex flex-wrap gap-1.5 sm:gap-2">
-                <span *ngIf="produto.condition === 'novo'"
-                  class="px-2 py-1 sm:px-3 sm:py-1.5 rounded-full text-xs sm:text-sm font-bold" style="background-color: #d4f4dd; color: #2d6a3f;">
-                  ✨ Novo
-                </span>
-                <span *ngIf="produto.condition !== 'novo'"
-                  class="px-2 py-1 sm:px-3 sm:py-1.5 rounded-full text-xs sm:text-sm font-bold" style="background-color: #f5ebd4; color: #8b6914;">
-                  ♻️ Seminovo
-                </span>
-                <span class="px-2 py-1 sm:px-3 sm:py-1.5 rounded-full text-xs sm:text-sm font-bold" style="background-color: #EEF2F5; color: #7588A8;">
-                  {{ produto.category | capitalize }}
-                </span>
-              </div>
-
-              <!-- Nome -->
-              <h1 class="text-2xl sm:text-3xl font-bold leading-tight" style="color: #23292A;">{{ produto.name | capitalize }}</h1>
-
-              <!-- Preço -->
-              <div class="p-4 sm:p-5 rounded-lg sm:rounded-xl" style="background: linear-gradient(to right, #EEF2F5, #E6EBEF); border: 2px solid #D7DDE3;">
-                <div class="text-xs sm:text-sm mb-1" style="color: #6B7785;">Preço</div>
-                <div class="text-3xl sm:text-4xl font-extrabold" style="color: #7588A8;">
-                  R$ {{ formatarPreco(produto.price) }}
+            <!-- COLUNA DIREITA: Informações -->
+            <div class="lg:col-span-5 flex flex-col">
+              <!-- Conteúdo scrollável -->
+              <div class="flex-1 space-y-4">
+                <!-- Badges -->
+                <div class="flex flex-wrap items-center gap-2">
+                  <span *ngIf="produto.condition === 'novo'"
+                    class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide"
+                    style="background-color: #d4f4dd; color: #2d6a3f;">
+                    Novo
+                  </span>
+                  <span *ngIf="produto.condition !== 'novo'"
+                    class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide"
+                    style="background-color: #f5ebd4; color: #8b6914;">
+                    Seminovo
+                  </span>
+                  <span class="px-3 py-1 rounded-full text-xs font-bold"
+                    style="background-color: #EEF2F5; color: #7588A8;">
+                    {{ produto.category | capitalize }}
+                  </span>
+                  <span *ngIf="produto.brand" class="px-3 py-1 rounded-full text-xs font-bold"
+                    style="background-color: #EEF2F5; color: #23292A;">
+                    {{ produto.brand | capitalize }}
+                  </span>
                 </div>
-              </div>
 
-              <!-- Descrição -->
-              <div>
-                <h2 class="text-base sm:text-lg font-bold mb-2" style="color: #23292A;">Descrição</h2>
-                <p class="text-sm sm:text-base leading-relaxed" style="color: #6B7785;">{{ produto.description | capitalize }}</p>
-              </div>
+                <!-- Nome -->
+                <h1 class="text-2xl sm:text-3xl font-bold leading-tight" style="color: #23292A;">
+                  {{ produto.name | capitalize }}
+                </h1>
 
-              <!-- Especificações (com altura mínima fixa) -->
-              <div style="min-height: 120px;">
-                <div *ngIf="produto.material || produto.color || produto.brand || produto.warranty">
-                  <h2 class="text-base sm:text-lg font-bold mb-2" style="color: #23292A;">Especificações</h2>
-                  <div class="grid grid-cols-2 gap-2 sm:gap-3">
-                    <div *ngIf="produto.material" class="p-2.5 sm:p-3 rounded-lg" style="background-color: #EEF2F5; border: 1px solid #D7DDE3;">
-                      <div class="text-xs mb-0.5 sm:mb-1" style="color: #6B7785;">Material</div>
-                      <div class="font-semibold text-xs sm:text-sm" style="color: #23292A;">{{ produto.material | capitalize }}</div>
+                <!-- Preço -->
+                <div class="p-4 rounded-xl" style="background-color: #FFFFFF; border: 1px solid #D7DDE3;">
+                  <div *ngIf="produto.originalPrice && produto.originalPrice > produto.price" class="flex items-center gap-2 mb-1">
+                    <span class="text-sm line-through" style="color: #A0AEC0;">
+                      R$ {{ formatarPreco(produto.originalPrice) }}
+                    </span>
+                    <span class="text-xs font-bold px-2 py-0.5 rounded" style="background-color: #FEE2E2; color: #DC2626;">
+                      -{{ getDiscountPercent() }}% OFF
+                    </span>
+                  </div>
+                  <div class="text-3xl sm:text-4xl font-extrabold" style="color: #7588A8;">
+                    R$ {{ formatarPreco(produto.price) }}
+                  </div>
+                  <p class="text-xs mt-1" style="color: #A0AEC0;">
+                    ou consulte condições de pagamento via WhatsApp
+                  </p>
+                </div>
+
+                <!-- Separador -->
+                <div class="h-px" style="background-color: #E6EBEF;"></div>
+
+                <!-- Descrição -->
+                <div>
+                  <h2 class="text-sm font-bold uppercase tracking-wide mb-2" style="color: #23292A;">Descrição</h2>
+                  <p class="text-sm leading-relaxed" style="color: #6B7785;">
+                    {{ produto.description | capitalize }}
+                  </p>
+                </div>
+
+                <!-- Especificações (inline list style) -->
+                <div *ngIf="produto.material || produto.color || produto.brand || produto.warranty || produto.dimensions">
+                  <div class="h-px mb-4" style="background-color: #E6EBEF;"></div>
+                  <h2 class="text-sm font-bold uppercase tracking-wide mb-3" style="color: #23292A;">Especificações</h2>
+                  <div class="space-y-2">
+                    <div *ngIf="produto.material" class="flex items-center justify-between py-1.5 text-sm" style="border-bottom: 1px solid #F0F3F6;">
+                      <span style="color: #6B7785;">Material</span>
+                      <span class="font-semibold" style="color: #23292A;">{{ produto.material | capitalize }}</span>
                     </div>
-                    <div *ngIf="produto.color" class="p-2.5 sm:p-3 rounded-lg" style="background-color: #EEF2F5; border: 1px solid #D7DDE3;">
-                      <div class="text-xs mb-0.5 sm:mb-1" style="color: #6B7785;">Cor</div>
-                      <div class="font-semibold text-xs sm:text-sm" style="color: #23292A;">{{ produto.color | capitalize }}</div>
+                    <div *ngIf="produto.color" class="flex items-center justify-between py-1.5 text-sm" style="border-bottom: 1px solid #F0F3F6;">
+                      <span style="color: #6B7785;">Cor</span>
+                      <span class="font-semibold" style="color: #23292A;">{{ produto.color | capitalize }}</span>
                     </div>
-                    <div *ngIf="produto.brand" class="p-2.5 sm:p-3 rounded-lg" style="background-color: #EEF2F5; border: 1px solid #D7DDE3;">
-                      <div class="text-xs mb-0.5 sm:mb-1" style="color: #6B7785;">Marca</div>
-                      <div class="font-semibold text-xs sm:text-sm" style="color: #23292A;">{{ produto.brand | capitalize }}</div>
+                    <div *ngIf="produto.brand" class="flex items-center justify-between py-1.5 text-sm" style="border-bottom: 1px solid #F0F3F6;">
+                      <span style="color: #6B7785;">Marca</span>
+                      <span class="font-semibold" style="color: #23292A;">{{ produto.brand | capitalize }}</span>
                     </div>
-                    <div *ngIf="produto.warranty" class="p-2.5 sm:p-3 rounded-lg" style="background-color: #EEF2F5; border: 1px solid #D7DDE3;">
-                      <div class="text-xs mb-0.5 sm:mb-1" style="color: #6B7785;">Garantia</div>
-                      <div class="font-semibold text-xs sm:text-sm" style="color: #23292A;">{{ produto.warranty | capitalize }}</div>
+                    <div *ngIf="produto.warranty" class="flex items-center justify-between py-1.5 text-sm" style="border-bottom: 1px solid #F0F3F6;">
+                      <span style="color: #6B7785;">Garantia</span>
+                      <span class="font-semibold" style="color: #23292A;">{{ produto.warranty | capitalize }}</span>
+                    </div>
+                    <div *ngIf="produto.dimensions" class="flex items-center justify-between py-1.5 text-sm">
+                      <span style="color: #6B7785;">Dimensões</span>
+                      <span class="font-semibold" style="color: #23292A;">
+                        {{ produto.dimensions.width }} × {{ produto.dimensions.height }} × {{ produto.dimensions.depth }} {{ produto.dimensions.unit }}
+                      </span>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <!-- Botão WhatsApp -->
-              <div *ngIf="produto.disponivel === 1">
-                <a 
-                  [href]="getWhatsAppLink()"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="flex items-center justify-center gap-2 sm:gap-3 w-full py-3 sm:py-4 bg-green-600 hover:bg-green-700 text-white rounded-lg sm:rounded-xl font-bold transition-all shadow-lg hover:shadow-xl text-sm sm:text-base">
-                  <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+              <!-- Área fixa do CTA (sempre no mesmo lugar) -->
+              <div class="mt-6 space-y-3">
+                <!-- Botão WhatsApp -->
+                <div *ngIf="produto.disponivel === 1">
+                  <a 
+                    [href]="getWhatsAppLink()"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="flex items-center justify-center gap-3 w-full py-3.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold transition-all shadow-lg hover:shadow-xl text-sm sm:text-base">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                    </svg>
+                    Entrar em Contato
+                  </a>
+                </div>
+
+                <!-- Produto Vendido -->
+                <div *ngIf="produto.disponivel === 0" class="text-center p-4 rounded-xl" style="background-color: #F8FAFC; border: 2px solid #D7DDE3;">
+                  <svg class="w-8 h-8 mx-auto mb-1.5" fill="none" stroke="#A0AEC0" viewBox="0 0 24 24" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                   </svg>
-                  <span class="hidden xs:inline">Entre em Contato e Reserve Agora</span>
-                  <span class="xs:hidden">Entrar em Contato</span>
-                </a>
-              </div>
+                  <span class="text-base font-bold block" style="color: #6B7785;">Produto Vendido</span>
+                  <p class="text-xs mt-0.5" style="color: #A0AEC0;">Este produto não está mais disponível</p>
+                </div>
 
-              <!-- Botões Admin -->
-              <div *ngIf="isAdmin" class="flex flex-col sm:flex-row gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg sm:rounded-xl" style="background-color: #EEF2F5; border: 2px solid #D7DDE3;">
-                <button 
-                  *ngIf="produto.disponivel === 1"
-                  (click)="marcarComoVendido()"
-                  class="flex-1 py-2.5 sm:py-3 text-white rounded-lg font-bold transition-all shadow-md hover:shadow-lg text-xs sm:text-sm" style="background-color: #d4a650;" onmouseover="this.style.backgroundColor='#c49640'" onmouseout="this.style.backgroundColor='#d4a650'">
-                  ✓ Marcar como Vendido
-                </button>
-                <button 
-                  *ngIf="produto.disponivel === 0"
-                  (click)="reativarProduto()"
-                  class="flex-1 py-2.5 sm:py-3 text-white rounded-lg font-bold transition-all shadow-md hover:shadow-lg text-xs sm:text-sm" style="background-color: #5a8a6a;" onmouseover="this.style.backgroundColor='#4a7a5a'" onmouseout="this.style.backgroundColor='#5a8a6a'">
-                  ↻ Reativar Produto
-                </button>
-              </div>
-
-              <!-- Produto Vendido -->
-              <div *ngIf="produto.disponivel === 0" class="text-center p-4 sm:p-6 rounded-lg sm:rounded-xl" style="background-color: #EEF2F5; border: 2px solid #D7DDE3;">
-                <span class="text-lg sm:text-2xl font-bold" style="color: #6B7785;">✓ PRODUTO VENDIDO</span>
+                <!-- Botões Admin -->
+                <div *ngIf="isAdmin" class="flex flex-col sm:flex-row gap-2 p-3 rounded-xl" style="background-color: #F8FAFC; border: 1px dashed #D7DDE3;">
+                  <button 
+                    *ngIf="produto.disponivel === 1"
+                    (click)="marcarComoVendido()"
+                    class="flex-1 py-2.5 text-white rounded-lg font-bold transition-all shadow-md text-xs sm:text-sm"
+                    style="background-color: #d4a650;">
+                    ✓ Marcar como Vendido
+                  </button>
+                  <button 
+                    *ngIf="produto.disponivel === 0"
+                    (click)="reativarProduto()"
+                    class="flex-1 py-2.5 text-white rounded-lg font-bold transition-all shadow-md text-xs sm:text-sm"
+                    style="background-color: #5a8a6a;">
+                    ↻ Reativar Produto
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -193,7 +296,8 @@ export class ProductDetailComponent implements OnInit {
     private readonly productService: ProductService,
     private readonly cdr: ChangeDetectorRef,
     public readonly adminModeService: AdminModeService,
-    private readonly alertService: AlertService
+    private readonly alertService: AlertService,
+    private readonly favoritesService: FavoritesService
   ) {}
 
   ngOnInit(): void {
@@ -287,6 +391,36 @@ export class ProductDetailComponent implements OnInit {
 
   selecionarImagem(index: number): void {
     this.imagemPrincipalIndex = index;
+  }
+
+  prevImage(): void {
+    if (!this.produto?.images) return;
+    this.imagemPrincipalIndex = this.imagemPrincipalIndex === 0 
+      ? this.produto.images.length - 1 
+      : this.imagemPrincipalIndex - 1;
+  }
+
+  nextImage(): void {
+    if (!this.produto?.images) return;
+    this.imagemPrincipalIndex = this.imagemPrincipalIndex === this.produto.images.length - 1 
+      ? 0 
+      : this.imagemPrincipalIndex + 1;
+  }
+
+  toggleFavorite(event: Event): void {
+    event.stopPropagation();
+    if (this.produto) {
+      this.favoritesService.toggle(this.produto.id);
+    }
+  }
+
+  isFavorite(): boolean {
+    return this.produto ? this.favoritesService.isFavorite(this.produto.id) : false;
+  }
+
+  getDiscountPercent(): number {
+    if (!this.produto?.originalPrice || this.produto.originalPrice <= this.produto.price) return 0;
+    return Math.round(((this.produto.originalPrice - this.produto.price) / this.produto.originalPrice) * 100);
   }
 
   getWhatsAppLink(): string {

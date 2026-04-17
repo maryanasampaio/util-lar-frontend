@@ -32,6 +32,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   isAdmin = false;
   private readonly destroy$ = new Subject<void>();
   currentFeaturedIndex = 0;
+  private featuredAutoplayId: any = null;
   
   // Filtros
   selectedCategory: string = 'Todas';
@@ -39,6 +40,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
   selectedSort: string = 'populares';
   searchQuery: string = '';
   selectedBrand: string = '';
+  priceMin: number | null = null;
+  priceMax: number | null = null;
+  priceMinApplied: number | null = null;
+  priceMaxApplied: number | null = null;
+  showMobileFilters = false;
+  filterSections = {
+    category: true,
+    brand: true,
+    price: true,
+    condition: true
+  } as { [key: string]: boolean; category: boolean; brand: boolean; price: boolean; condition: boolean };
   
   brands = [
     { name: 'Brastemp' },
@@ -165,6 +177,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     console.log('[Dashboard] ngOnDestroy - limpando subscrições');
+    this.stopFeaturedAutoplay();
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -188,7 +201,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
         next: (resp: ProductResponse[]) => {
           console.log('[Dashboard] loadProdutos - produtos recebidos:', resp.length);
           this.produtos = resp;
+          // Inicializar faixa de preço
+          const available = resp.filter(p => p.disponivel === 1);
+          if (available.length > 0 && this.priceMin == null && this.priceMax == null) {
+            this.priceMin = Math.min(...available.map(p => p.price)) / 100;
+            this.priceMax = Math.max(...available.map(p => p.price)) / 100;
+          }
           this.checkForNewProducts();
+          this.startFeaturedAutoplay();
           this.cdr.detectChanges();
         },
         error: (err) => {
@@ -248,7 +268,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
       const query = this.searchQuery.toLowerCase();
       filtered = filtered.filter(p => 
         p.name.toLowerCase().includes(query) || 
-        p.category.toLowerCase().includes(query)
+        p.category.toLowerCase().includes(query) ||
+        p.brand?.toLowerCase().includes(query)
       );
     }
     
@@ -269,6 +290,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (this.selectedCondition !== 'Todas') {
       filtered = filtered.filter(p => p.condition === this.selectedCondition);
     }
+
+    // Filtro de preço
+    if (this.priceMinApplied != null) {
+      const minCentavos = this.priceMinApplied * 100;
+      filtered = filtered.filter(p => p.price >= minCentavos);
+    }
+    if (this.priceMaxApplied != null) {
+      const maxCentavos = this.priceMaxApplied * 100;
+      filtered = filtered.filter(p => p.price <= maxCentavos);
+    }
     
     // Ordenação
     switch (this.selectedSort) {
@@ -283,7 +314,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
         break;
       case 'populares':
       default:
-        // Mantém ordem padrão (featured primeiro, depois por ID)
         filtered.sort((a, b) => {
           if (a.featured && !b.featured) return -1;
           if (!a.featured && b.featured) return 1;
@@ -292,6 +322,82 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
     
     return filtered;
+  }
+
+  get hasActiveFilters(): boolean {
+    return this.selectedCategory !== 'Todas' || 
+           this.selectedCondition !== 'Todas' || 
+           !!this.selectedBrand || 
+           this.priceMinApplied != null || 
+           this.priceMaxApplied != null;
+  }
+
+  get activeFilterCount(): number {
+    let count = 0;
+    if (this.selectedCategory !== 'Todas') count++;
+    if (this.selectedCondition !== 'Todas') count++;
+    if (this.selectedBrand) count++;
+    if (this.priceMinApplied != null || this.priceMaxApplied != null) count++;
+    return count;
+  }
+
+  toggleFilterSection(section: string): void {
+    this.filterSections[section] = !this.filterSections[section];
+  }
+
+  applyPriceFilter(): void {
+    this.priceMinApplied = this.priceMin;
+    this.priceMaxApplied = this.priceMax;
+  }
+
+  clearAllFilters(): void {
+    this.selectedCategory = 'Todas';
+    this.selectedCondition = 'Todas';
+    this.selectedBrand = '';
+    this.priceMin = this.globalMinPrice;
+    this.priceMax = this.globalMaxPrice;
+    this.priceMinApplied = null;
+    this.priceMaxApplied = null;
+    this.searchQuery = '';
+  }
+
+  get globalMinPrice(): number {
+    const available = this.produtos.filter(p => p.disponivel === 1);
+    if (available.length === 0) return 0;
+    return Math.min(...available.map(p => p.price)) / 100;
+  }
+
+  get globalMaxPrice(): number {
+    const available = this.produtos.filter(p => p.disponivel === 1);
+    if (available.length === 0) return 0;
+    return Math.max(...available.map(p => p.price)) / 100;
+  }
+
+  get sliderMinPercent(): number {
+    const min = this.globalMinPrice;
+    const max = this.globalMaxPrice;
+    if (max <= min) return 0;
+    return ((this.priceMin ?? min) - min) / (max - min) * 100;
+  }
+
+  get sliderMaxPercent(): number {
+    const min = this.globalMinPrice;
+    const max = this.globalMaxPrice;
+    if (max <= min) return 100;
+    return ((this.priceMax ?? max) - min) / (max - min) * 100;
+  }
+
+  formatPriceDisplay(value: number | null): string {
+    if (value == null) return '0,00';
+    return value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  onSliderMinInput(event: Event): void {
+    this.priceMin = +(event.target as HTMLInputElement).value;
+  }
+
+  onSliderMaxInput(event: Event): void {
+    this.priceMax = +(event.target as HTMLInputElement).value;
   }
   
   // Gerar avaliação fictícia baseada no ID do produto (para consistência)
@@ -454,6 +560,56 @@ export class DashboardComponent implements OnInit, OnDestroy {
       left: targetScroll,
       behavior: 'smooth'
     });
+
+    // Reiniciar autoplay após interação manual
+    this.restartFeaturedAutoplay();
+  }
+
+  private startFeaturedAutoplay(): void {
+    this.stopFeaturedAutoplay();
+    if (this.featuredProducts.length <= 1) return;
+
+    this.featuredAutoplayId = setInterval(() => {
+      // Volta ao início se chegou no fim, senão avança
+      if (this.currentFeaturedIndex >= this.featuredProducts.length - 1) {
+        this.currentFeaturedIndex = 0;
+        const carousel = this.featuredCarousel?.nativeElement;
+        if (carousel) {
+          carousel.scrollTo({ left: 0, behavior: 'smooth' });
+        }
+      } else {
+        this.scrollFeaturedToIndex(this.currentFeaturedIndex + 1);
+      }
+      this.cdr.detectChanges();
+    }, 5000);
+  }
+
+  private stopFeaturedAutoplay(): void {
+    if (this.featuredAutoplayId) {
+      clearInterval(this.featuredAutoplayId);
+      this.featuredAutoplayId = null;
+    }
+  }
+
+  private restartFeaturedAutoplay(): void {
+    this.startFeaturedAutoplay();
+  }
+
+  private scrollFeaturedToIndex(index: number): void {
+    const carousel = this.featuredCarousel?.nativeElement;
+    if (!carousel) return;
+
+    this.currentFeaturedIndex = index;
+    const scrollAmount = carousel.offsetWidth * 0.9;
+    carousel.scrollTo({
+      left: scrollAmount * index,
+      behavior: 'smooth'
+    });
+  }
+
+  goToFeatured(index: number): void {
+    this.scrollFeaturedToIndex(index);
+    this.restartFeaturedAutoplay();
   }
 
   // Modal de edição

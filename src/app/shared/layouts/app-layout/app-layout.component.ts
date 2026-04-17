@@ -21,6 +21,7 @@ import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 import { SidebarService } from '../../../core/services/sidebar.service';
+import { AdminModeService } from '../../../core/services/admin-mode.service';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({
@@ -29,12 +30,14 @@ import { Subject, takeUntil } from 'rxjs';
   imports: [CommonModule, RouterOutlet, SidebarComponent],
   template: `
     <div class="min-h-screen bg-gray-50 flex">
-      <!-- SIDEBAR (sempre presente, abre/fecha) -->
-      <app-sidebar />
+      <!-- SIDEBAR (apenas para admin) -->
+      <ng-container *ngIf="isAdmin">
+        <app-sidebar />
+      </ng-container>
 
-      <!-- OVERLAY MOBILE (apenas mobile) -->
+      <!-- OVERLAY MOBILE (apenas mobile + admin) -->
       <div 
-        *ngIf="isSidebarOpen"
+        *ngIf="isAdmin && isSidebarOpen"
         (click)="closeSidebar()"
         class="fixed inset-0 bg-black/50 z-20 transition-opacity lg:hidden">
       </div>
@@ -42,8 +45,8 @@ import { Subject, takeUntil } from 'rxjs';
       <!-- CONTEÚDO PRINCIPAL -->
       <main 
         class="flex-1 transition-all duration-300 ease-in-out"
-        [class.lg:ml-64]="isSidebarOpen"
-        [class.ml-0]="!isSidebarOpen">
+        [class.lg:ml-64]="isAdmin && isSidebarOpen"
+        [class.ml-0]="!isAdmin || !isSidebarOpen">
         <router-outlet />
       </main>
     </div>
@@ -51,15 +54,25 @@ import { Subject, takeUntil } from 'rxjs';
 })
 export class AppLayoutComponent implements OnInit, OnDestroy {
   isSidebarOpen = false;
+  isAdmin = false;
   private readonly destroy$ = new Subject<void>();
 
-  constructor(private readonly sidebarService: SidebarService) {}
+  constructor(
+    private readonly sidebarService: SidebarService,
+    private readonly adminModeService: AdminModeService
+  ) {}
 
   ngOnInit(): void {
     this.sidebarService.isOpen$
       .pipe(takeUntil(this.destroy$))
       .subscribe(isOpen => {
         this.isSidebarOpen = isOpen;
+      });
+
+    this.adminModeService.isAdmin$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(isAdmin => {
+        this.isAdmin = isAdmin;
       });
   }
 

@@ -1,11 +1,11 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FavoritesService } from '../../../../core/services/favorites.service';
 import { ProductService } from '../../../products/services/product.service';
 import { ProductResponse } from '../../../products/models/product.model';
 import { CapitalizePipe } from '../../../../shared/pipes/capitalize.pipe';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, skip } from 'rxjs';
 
 @Component({
   selector: 'app-favorites',
@@ -145,14 +145,16 @@ export class FavoritesComponent implements OnInit, OnDestroy {
   constructor(
     private readonly favoritesService: FavoritesService,
     private readonly productService: ProductService,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
     this.loadFavorites();
 
+    // skip(1) para não duplicar com o loadFavorites() acima
     this.favoritesService.favorites$
-      .pipe(takeUntil(this.destroy$))
+      .pipe(skip(1), takeUntil(this.destroy$))
       .subscribe(() => {
         this.loadFavorites();
       });
@@ -167,19 +169,24 @@ export class FavoritesComponent implements OnInit, OnDestroy {
     const ids = this.favoritesService.getFavoriteIds();
     if (ids.length === 0) {
       this.favoriteProducts = [];
+      this.isLoading = false;
+      this.cdr.detectChanges();
       return;
     }
 
     this.isLoading = true;
+    this.cdr.detectChanges();
     this.productService.buscarProdutos()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (products) => {
           this.favoriteProducts = products.filter(p => ids.includes(p.id));
           this.isLoading = false;
+          this.cdr.detectChanges();
         },
         error: () => {
           this.isLoading = false;
+          this.cdr.detectChanges();
         }
       });
   }
