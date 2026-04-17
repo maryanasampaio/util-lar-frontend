@@ -1,6 +1,6 @@
 <div class="min-h-screen" style="background-color: #EEF2F5;">
   <!-- Hero Banner -->
-  <header class="relative overflow-hidden" style="background: linear-gradient(135deg, #4A5E78 0%, #7588A8 50%, #95A7C1 100%); min-height: 380px;">
+  <header class="relative overflow-hidden" style="background: linear-gradient(135deg, #4A5E78 0%, #7588A8 50%, #95A7C1 100%); min-height: 280px;">
     <!-- Formas geométricas decorativas -->
     <div class="absolute inset-0 overflow-hidden opacity-20">
       <div class="absolute -bottom-20 -left-20 w-80 h-80" style="background: linear-gradient(135deg, #FFFFFF 0%, transparent 70%); clip-path: polygon(0 0, 100% 0, 0 100%);"></div>
@@ -27,32 +27,32 @@
 
       <!-- Conteúdo Hero - Logo à direita -->
       <div class="flex-1 flex items-center">
-        <div class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-          <div class="grid lg:grid-cols-12 gap-4 lg:gap-4 items-center">
-            <!-- Conteúdo Textual - 8 colunas (primeiro no grid) -->
-            <div class="lg:col-span-8 order-2 lg:order-1 text-white text-center lg:text-left lg:pl-24 space-y-3 lg:space-y-4">
+        <div class="max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+          <div class="grid grid-cols-12 gap-3 sm:gap-4 lg:gap-4 items-center">
+            <!-- Conteúdo Textual - 8 colunas -->
+            <div class="col-span-8 text-white text-left pl-2 sm:pl-6 lg:pl-24 space-y-1 sm:space-y-2 lg:space-y-4">
               <!-- Tag superior -->
-              <p class="text-xs sm:text-sm font-bold tracking-widest uppercase" style="color: rgba(255, 255, 255, 0.85);">
+              <p class="text-[10px] sm:text-xs lg:text-sm font-bold tracking-widest uppercase" style="color: rgba(255, 255, 255, 0.85);">
                 Bem-vindo ao
               </p>
 
               <!-- Título principal -->
-              <h1 class="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-extrabold leading-tight tracking-tight">
+              <h1 class="text-2xl sm:text-3xl lg:text-5xl xl:text-6xl font-extrabold leading-tight tracking-tight">
                 UTIL LAR
               </h1>
 
               <!-- Subtítulo -->
-              <h2 class="text-lg sm:text-xl lg:text-2xl font-semibold" style="color: rgba(255, 255, 255, 0.95);">
+              <h2 class="text-base sm:text-lg lg:text-2xl font-semibold" style="color: rgba(255, 255, 255, 0.95);">
                 Móveis e Eletrodomésticos
               </h2>
 
               <!-- Descrição -->
-              <p class="text-sm sm:text-base lg:text-lg leading-relaxed max-w-3xl lg:max-w-none" style="color: rgba(255, 255, 255, 0.9);">
+              <p class="text-xs sm:text-sm lg:text-lg leading-relaxed max-w-3xl lg:max-w-none" style="color: rgba(255, 255, 255, 0.9);">
                 Especializados em produtos novos e seminovos de alta qualidade. Transforme sua casa em um lar acolhedor!
               </p>
 
               <!-- Bullets de benefícios -->
-              <div class="flex flex-wrap justify-center lg:justify-start gap-3 sm:gap-4 lg:gap-6 text-xs sm:text-sm font-semibold pt-2">
+              <div class="flex flex-wrap justify-start gap-2 sm:gap-3 lg:gap-6 text-[10px] sm:text-xs lg:text-sm font-semibold pt-1 sm:pt-2">
                 <div class="flex items-center gap-2">
                   <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
@@ -74,7 +74,7 @@
               </div>
 
               <!-- Botão Admin (se logado) -->
-              <div *ngIf="isAdmin" class="pt-2 flex justify-center lg:justify-start">
+              <div *ngIf="isAdmin" class="pt-2 flex justify-start">
                 <button 
                   (click)="openCreateModal()"
                   class="px-5 sm:px-6 py-2.5 sm:py-3 rounded-lg font-bold shadow-xl transition-all text-sm sm:text-base whitespace-nowrap" 
@@ -89,13 +89,13 @@
               </div>
             </div>
 
-            <!-- Logo - 4 colunas (segundo no grid, mas aparece à direita) -->
-            <div class="lg:col-span-4 order-1 lg:order-2 flex justify-center lg:justify-end lg:pr-4">
+            <!-- Logo - 4 colunas -->
+            <div class="col-span-4 flex justify-end pr-2 sm:pr-4">
               <div 
                 class="cursor-pointer transform hover:scale-105 transition-all" 
                 (dblclick)="onLogoDoubleClick()" 
                 title="Duplo clique para modo admin">
-                <img src="logo-branca.png" alt="Util Lar" class="w-40 h-40 sm:w-52 sm:h-52 lg:w-64 lg:h-64 object-contain drop-shadow-2xl">
+                <img src="logo-branca.png" alt="Util Lar" class="w-20 h-20 sm:w-40 sm:h-40 lg:w-64 lg:h-64 object-contain drop-shadow-2xl">
               </div>
             </div>
           </div>
@@ -104,7 +104,7 @@
 
       <!-- Indicadores decorativos (estilo carrossel) -->
       <div class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-center gap-2 sm:gap-3 pb-6 sm:pb-8">
+        <div class="flex justify-center gap-1.5 sm:gap-2 pb-4 sm:pb-6 lg:pb-8">
           <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-white shadow-lg"></div>
           <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-white/30"></div>
           <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-white/30"></div>
@@ -130,29 +130,29 @@
     </div>
 
     <!-- Carrossel: Destaques -->
-    <div *ngIf="!isLoading && featuredProducts.length > 0" class="mb-8 relative overflow-hidden">
-      <h2 class="text-base sm:text-lg font-light tracking-wide mb-6 text-center px-4" style="color: #7588A8;">
+    <div *ngIf="!isLoading && featuredProducts.length > 0" class="mb-6 sm:mb-8 relative overflow-hidden">
+      <h2 class="text-sm sm:text-base lg:text-lg font-light tracking-wide mb-4 sm:mb-6 text-center px-4" style="color: #7588A8;">
        Veja os produtos em destaque
       </h2>
       
-      <div class="relative px-2 sm:px-4">
+      <div class="relative px-1 sm:px-4">
         <!-- Botão anterior -->
         <button 
           *ngIf="featuredProducts.length > 1"
           (click)="scrollFeatured('left')"
-          class="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 sm:w-12 sm:h-12 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110"
+          class="absolute left-1 sm:left-4 top-1/2 -translate-y-1/2 z-10 w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110"
           style="background-color: rgba(255, 255, 255, 0.95); color: #7588A8;">
-          <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
           </svg>
         </button>
 
         <!-- Scroll container -->
-        <div #featuredCarousel class="flex gap-4 sm:gap-6 overflow-x-auto pb-4 snap-x snap-mandatory scroll-smooth" style="-ms-overflow-style: none; scrollbar-width: none;">
+        <div #featuredCarousel class="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto pb-4 snap-x snap-mandatory scroll-smooth" style="-ms-overflow-style: none; scrollbar-width: none;">
           <div 
             *ngFor="let produto of featuredProducts; trackBy: trackByProductId"
             (click)="verDetalhes(produto.id)"
-            class="flex-shrink-0 w-[calc(100%-2rem)] sm:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1rem)] h-72 sm:h-80 lg:h-96 rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer group relative snap-center"
+            class="flex-shrink-0 w-[calc(100%-1rem)] sm:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1rem)] h-52 sm:h-72 lg:h-96 rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer group relative snap-center"
             [style.background]="'linear-gradient(135deg, rgba(117, 136, 168, 0.15), rgba(149, 167, 193, 0.15))'">
             
             <!-- Imagem com overlay -->
@@ -173,8 +173,8 @@
               <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
               
               <!-- Nome do produto sobreposto -->
-              <div class="absolute bottom-0 left-0 right-0 p-4 sm:p-6 lg:p-8">
-                <h3 class="text-xl sm:text-2xl lg:text-3xl font-bold text-white uppercase tracking-wider drop-shadow-lg line-clamp-2">
+              <div class="absolute bottom-0 left-0 right-0 p-3 sm:p-5 lg:p-8">
+                <h3 class="text-base sm:text-xl lg:text-3xl font-bold text-white uppercase tracking-wider drop-shadow-lg line-clamp-2">
                   {{ produto.name | capitalize }}
                 </h3>
               </div>
@@ -186,9 +186,9 @@
         <button 
           *ngIf="featuredProducts.length > 1"
           (click)="scrollFeatured('right')"
-          class="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 sm:w-12 sm:h-12 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110"
+          class="absolute right-1 sm:right-4 top-1/2 -translate-y-1/2 z-10 w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110"
           style="background-color: rgba(255, 255, 255, 0.95); color: #7588A8;">
-          <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
           </svg>
         </button>
