@@ -67,6 +67,22 @@ export const routes: Routes = [
   },
 
   // ============================================================================
+  // ROTA DE FAVORITOS (CLIENTE)
+  // ============================================================================
+  {
+    path: 'favoritos',
+    loadComponent: () =>
+      import('./shared/layouts/app-layout/app-layout.component').then((m) => m.AppLayoutComponent),
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./features/products/pages/favorites/favorites.component').then((m) => m.FavoritesComponent),
+      }
+    ]
+  },
+
+  // ============================================================================
   // ROTA DE SIMULAÇÃO DE VENDAS NO CARTÃO
   // ============================================================================
   {

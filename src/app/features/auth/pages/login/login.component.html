@@ -1,55 +1,104 @@
-<div class="w-full max-w-md bg-white rounded-lg shadow-md p-6 sm:p-8 mx-4" style="border: 1px solid #D7DDE3;">
-  <div class="flex justify-center mb-4">
-    <img src="logo-utilar.png" alt="Util Lar" class="w-16 h-16 object-contain">
+<div class="w-full max-w-md mx-auto">
+  <!-- Logo mobile -->
+  <div class="flex justify-center mb-6 lg:hidden">
+    <div class="rounded-2xl p-4 shadow-lg" style="background: linear-gradient(135deg, #4A5E78, #7588A8);">
+      <img src="logo-utilar.png" alt="Util Lar" class="w-16 h-16 object-contain">
+    </div>
   </div>
-  <h2 class="text-2xl font-bold text-center mb-6" style="color: #23292A;">Login</h2>
+
+  <!-- Heading -->
+  <div class="mb-8">
+    <h2 class="text-2xl sm:text-3xl font-bold mb-2" style="color: #23292A;">Bem-vindo de volta</h2>
+    <p class="text-sm" style="color: #6B7A8D;">Faça login para acessar o painel da Util Lar</p>
+  </div>
 
   @if (errorMessage) {
-    <div class="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-md">
-      {{ errorMessage }}
+    <div class="mb-5 p-3.5 rounded-lg flex items-center gap-3 text-sm" style="background-color: #FEF2F2; border: 1px solid #FECACA; color: #DC2626;">
+      <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      <span>{{ errorMessage }}</span>
     </div>
   }
 
-  <form (ngSubmit)="onSubmit()" onsubmit="return false;" class="space-y-4">
+  <form (ngSubmit)="onSubmit()" onsubmit="return false;" class="space-y-5">
+    <!-- Usuário -->
     <div>
-      <label for="username" class="block text-sm font-medium mb-1" style="color: #23292A;">
+      <label for="username" class="block text-sm font-semibold mb-2" style="color: #23292A;">
         Usuário
       </label>
-      <input
-        type="text"
-        id="username"
-        [(ngModel)]="username"
-        name="username"
-        [disabled]="isLoading"
-        class="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 disabled:bg-gray-100" style="border: 1px solid #D7DDE3; background-color: #EDF1F4;"
-        placeholder="Usuário"
-      />
+      <div class="relative">
+        <div class="absolute left-3.5 top-1/2 transform -translate-y-1/2 pointer-events-none" style="color: #9BA8B7;">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+          </svg>
+        </div>
+        <input
+          type="text"
+          id="username"
+          [(ngModel)]="username"
+          name="username"
+          [disabled]="isLoading"
+          class="w-full pl-11 pr-4 py-3 rounded-xl text-sm transition-all duration-200 focus:outline-none disabled:opacity-50"
+          style="border: 1.5px solid #D7DDE3; background-color: #FFFFFF; color: #23292A;"
+          onfocus="this.style.borderColor='#7588A8'; this.style.boxShadow='0 0 0 3px rgba(117,136,168,0.15)';"
+          onblur="this.style.borderColor='#D7DDE3'; this.style.boxShadow='none';"
+          placeholder="Digite seu usuário"
+        />
+      </div>
     </div>
 
+    <!-- Senha -->
     <div>
-      <label for="password" class="block text-sm font-medium mb-1" style="color: #23292A;">
+      <label for="password" class="block text-sm font-semibold mb-2" style="color: #23292A;">
         Senha
       </label>
-      <input
-        type="password"
-        id="password"
-        [(ngModel)]="password"
-        name="password"
-        [disabled]="isLoading"
-        class="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 disabled:bg-gray-100" style="border: 1px solid #D7DDE3; background-color: #EDF1F4;"
-        placeholder="••••••••"
-      />
+      <div class="relative">
+        <div class="absolute left-3.5 top-1/2 transform -translate-y-1/2 pointer-events-none" style="color: #9BA8B7;">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+          </svg>
+        </div>
+        <input
+          type="password"
+          id="password"
+          [(ngModel)]="password"
+          name="password"
+          [disabled]="isLoading"
+          class="w-full pl-11 pr-4 py-3 rounded-xl text-sm transition-all duration-200 focus:outline-none disabled:opacity-50"
+          style="border: 1.5px solid #D7DDE3; background-color: #FFFFFF; color: #23292A;"
+          onfocus="this.style.borderColor='#7588A8'; this.style.boxShadow='0 0 0 3px rgba(117,136,168,0.15)';"
+          onblur="this.style.borderColor='#D7DDE3'; this.style.boxShadow='none';"
+          placeholder="••••••••"
+        />
+      </div>
     </div>
+
+    <!-- Botão -->
     <button
       type="submit"
       [disabled]="isLoading"
-      class="w-full text-white py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" style="background-color: #7588A8;"
+      class="w-full text-white py-3 px-4 rounded-xl font-semibold text-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl active:scale-[0.98]"
+      style="background: linear-gradient(135deg, #5A6F8E, #7588A8);"
+      onmouseover="this.style.background='linear-gradient(135deg, #4A5E78, #6A7D9E)'"
+      onmouseout="this.style.background='linear-gradient(135deg, #5A6F8E, #7588A8)'"
     >
       @if (isLoading) {
-        <span>Entrando...</span>
+        <span class="flex items-center justify-center gap-2">
+          <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          Entrando...
+        </span>
       } @else {
         <span>Entrar</span>
       }
     </button>
   </form>
+
+  <!-- Rodapé -->
+  <p class="text-center mt-8 text-xs" style="color: #9BA8B7;">
+    Util Lar &copy; {{ currentYear }} — Todos os direitos reservados
+  </p>
 </div>

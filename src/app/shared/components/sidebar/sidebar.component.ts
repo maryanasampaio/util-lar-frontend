@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AdminModeService } from '../../../core/services/admin-mode.service';
 import { SidebarService } from '../../../core/services/sidebar.service';
+import { FavoritesService } from '../../../core/services/favorites.service';
 import { AlertService } from '../../services/alert.service';
 import { Subject, takeUntil } from 'rxjs';
 
@@ -47,6 +48,25 @@ import { Subject, takeUntil } from 'rxjs';
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
           </svg>
           Produtos
+        </a>
+
+        <!-- Meus Favoritos (só para clientes) -->
+        <a 
+          *ngIf="!(adminModeService.isAdmin$ | async)"
+          routerLink="/favoritos" 
+          routerLinkActive="font-bold"
+          [ngClass]="{'active-link': isActiveRoute('/favoritos')}"
+          (click)="onMobileClose()"
+          class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors" style="color: #23292A;" onmouseover="this.style.backgroundColor='#E6EBEF'" onmouseout="if(!this.classList.contains('active-link')) this.style.backgroundColor='transparent'">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+          </svg>
+          Meus Favoritos
+          <span 
+            *ngIf="favoritesCount > 0"
+            class="ml-auto text-xs font-bold px-2 py-0.5 rounded-full text-white" style="background-color: #7588A8;">
+            {{ favoritesCount }}
+          </span>
         </a>
 
         <!-- Simulação de Vendas -->
@@ -130,13 +150,15 @@ import { Subject, takeUntil } from 'rxjs';
 })
 export class SidebarComponent implements OnInit, OnDestroy {
   isOpen = false;
+  favoritesCount = 0;
   private readonly destroy$ = new Subject<void>();
 
   constructor(
     public readonly adminModeService: AdminModeService,
     private readonly sidebarService: SidebarService,
     private readonly router: Router,
-    private readonly alertService: AlertService
+    private readonly alertService: AlertService,
+    private readonly favoritesService: FavoritesService
   ) {}
 
   ngOnInit(): void {
@@ -144,6 +166,13 @@ export class SidebarComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(isOpen => {
         this.isOpen = isOpen;
+      });
+
+    // Inscrever-se no contador de favoritos
+    this.favoritesService.count$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(count => {
+        this.favoritesCount = count;
       });
   }
 

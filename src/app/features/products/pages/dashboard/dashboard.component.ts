@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, OnDestroy } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -13,6 +13,7 @@ import { WelcomeModalComponent } from '../../../../shared/components/welcome-mod
 import { PwaInstallPromptComponent } from '../../../../shared/components/pwa-install-prompt/pwa-install-prompt.component';
 import { CapitalizePipe } from '../../../../shared/pipes/capitalize.pipe';
 import { AlertService } from '../../../../shared/services/alert.service';
+import { FavoritesService } from '../../../../core/services/favorites.service';
 import { finalize, Subject, takeUntil } from 'rxjs';
 
 
@@ -23,17 +24,33 @@ import { finalize, Subject, takeUntil } from 'rxjs';
   imports: [CommonModule, FormsModule, ProductFormModalComponent, MarketplacePublishModalComponent, AdminLoginModalComponent, WelcomeModalComponent, PwaInstallPromptComponent, CapitalizePipe]
 })
 export class DashboardComponent implements OnInit, OnDestroy {
+  @ViewChild('featuredCarousel') featuredCarousel?: ElementRef<HTMLDivElement>;
+  
   errorMessage = '';
   isLoading = false;
   produtos: ProductResponse[] = [];
   isAdmin = false;
   private readonly destroy$ = new Subject<void>();
+  currentFeaturedIndex = 0;
   
   // Filtros
   selectedCategory: string = 'Todas';
   selectedCondition: string = 'Todas';
   selectedSort: string = 'populares';
   searchQuery: string = '';
+  selectedBrand: string = '';
+  
+  brands = [
+    { name: 'Brastemp' },
+    { name: 'Electrolux' },
+    { name: 'Consul' },
+    { name: 'Samsung' },
+    { name: 'LG' },
+    { name: 'Colormaq' },
+    { name: 'Mueller' },
+    { name: 'Madesa' },
+    { name: 'Bertolini' }
+  ];
   
   categories = [
     { label: 'Todas', value: 'Todas' },
@@ -85,7 +102,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private readonly router: Router,
     public readonly adminModeService: AdminModeService,
     private readonly alertService: AlertService,
-    private readonly productTracker: ProductTrackerService
+    private readonly productTracker: ProductTrackerService,
+    private readonly favoritesService: FavoritesService
   ) {}
 
   ngOnInit(): void {
@@ -185,6 +203,42 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return produto.id;
   }
 
+  getDiscountPercent(produto: ProductResponse): number {
+    if (!produto.originalPrice || produto.originalPrice <= produto.price) return 0;
+    return Math.round(((produto.originalPrice - produto.price) / produto.originalPrice) * 100);
+  }
+
+  toggleFavorite(productId: number, event: Event): void {
+    event.stopPropagation();
+    this.favoritesService.toggle(productId);
+  }
+
+  isFavorite(productId: number): boolean {
+    return this.favoritesService.isFavorite(productId);
+  }
+
+  filterByBrand(brand: string): void {
+    this.selectedBrand = this.selectedBrand === brand ? '' : brand;
+  }
+
+  // Índice onde inserir a seção de marcas (após a 1ª fileira: 2 colunas mobile = 4 itens, 3 colunas xl = 6 itens)
+  readonly brandsInsertIndex = 8;
+
+  get productsBeforeBrands(): ProductResponse[] {
+    return this.filteredProducts.slice(0, this.brandsInsertIndex);
+  }
+
+  get productsAfterBrands(): ProductResponse[] {
+    return this.filteredProducts.slice(this.brandsInsertIndex);
+  }
+
+  get featuredProducts(): ProductResponse[] {
+    // Retorna os 4 produtos mais vendidos (featured)
+    return this.produtos
+      .filter(p => p.featured === true && p.disponivel === 1)
+      .slice(0, 4);
+  }
+
   // Filtros combinados
   get filteredProducts(): ProductResponse[] {
     let filtered = [...this.produtos];
@@ -195,6 +249,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
       filtered = filtered.filter(p => 
         p.name.toLowerCase().includes(query) || 
         p.category.toLowerCase().includes(query)
+      );
+    }
+    
+    // Filtro de marca
+    if (this.selectedBrand) {
+      const brand = this.selectedBrand.toLowerCase();
+      filtered = filtered.filter(p => 
+        p.brand?.toLowerCase().includes(brand)
       );
     }
     
@@ -372,6 +434,28 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.router.navigate(['/dashboard/produto', id]);
   }
 
+  scrollFeatured(direction: 'left' | 'right'): void {
+    const carousel = this.featuredCarousel?.nativeElement;
+    if (!carousel) return;
+
+    // Atualizar índice
+    if (direction === 'left') {
+      this.currentFeaturedIndex = Math.max(0, this.currentFeaturedIndex - 1);
+    } else {
+      this.currentFeaturedIndex = Math.min(this.featuredProducts.length - 1, this.currentFeaturedIndex + 1);
+    }
+
+    const scrollAmount = carousel.offsetWidth * 0.9; // Scroll quase uma tela completa
+    const targetScroll = direction === 'left' 
+      ? carousel.scrollLeft - scrollAmount 
+      : carousel.scrollLeft + scrollAmount;
+
+    carousel.scrollTo({
+      left: targetScroll,
+      behavior: 'smooth'
+    });
+  }
+
   // Modal de edição
   openEditModal(produto: Product): void {
     console.log('[Dashboard] Abrindo modal de edição para produto:', produto);
@@ -407,7 +491,20 @@ export class DashboardComponent implements OnInit, OnDestroy {
   onUpdateProduct(submission: ProductFormSubmission): void {
     if (!this.selectedProduct) return;
     
-    this.productService.atualizarProduto(this.selectedProduct.id, submission.product).subscribe({
+    const productData = { ...submission.product };
+    
+    // Se o preço novo é menor que o atual, guardar o preço original para mostrar desconto
+    const currentPrice = this.selectedProduct.price;
+    const newPrice = productData.price;
+    if (newPrice < currentPrice) {
+      // Manter o originalPrice mais alto (caso já tenha tido redução anterior)
+      (productData as any).originalPrice = this.selectedProduct.originalPrice || currentPrice;
+    } else if (newPrice >= (this.selectedProduct.originalPrice || currentPrice)) {
+      // Se o preço subiu ou voltou ao original, remover o originalPrice
+      (productData as any).originalPrice = null;
+    }
+    
+    this.productService.atualizarProduto(this.selectedProduct.id, productData).subscribe({
       next: () => {
         this.closeEditModal();
         this.loadProdutos();

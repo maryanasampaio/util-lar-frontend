@@ -1,50 +1,114 @@
 <div class="min-h-screen" style="background-color: #EEF2F5;">
-  <!-- Header + Hero unificado -->
-  <header style="background: linear-gradient(to right, #7588A8, #7588A8, #95A7C1);">
-    <div class="max-w-7xl mx-auto px-3 pt-1 pb-10 sm:pb-20 sm:px-4">
-      <!-- Topo: Instalação -->
-      <div class="flex items-center justify-end gap-2 mb-6">
-        <!-- Botão Instalar App -->
-        <button 
-          *ngIf="canInstallPwa"
-          (click)="installPwa()"
-          class="flex items-center gap-2 px-4 py-2 rounded-lg transition-all font-semibold shadow-lg hover:shadow-xl"
-          style="background-color: white; color: #7588A8;"
-          title="Instalar aplicativo">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-          </svg>
-          <span class="hidden sm:inline">Instalar App</span>
-        </button>
+  <!-- Hero Banner -->
+  <header class="relative overflow-hidden" style="background: linear-gradient(135deg, #4A5E78 0%, #7588A8 50%, #95A7C1 100%); min-height: 380px;">
+    <!-- Formas geométricas decorativas -->
+    <div class="absolute inset-0 overflow-hidden opacity-20">
+      <div class="absolute -bottom-20 -left-20 w-80 h-80" style="background: linear-gradient(135deg, #FFFFFF 0%, transparent 70%); clip-path: polygon(0 0, 100% 0, 0 100%);"></div>
+      <div class="absolute -bottom-20 -right-20 w-80 h-80" style="background: linear-gradient(135deg, transparent 30%, #FFFFFF 100%); clip-path: polygon(100% 0, 100% 100%, 0 100%);"></div>
+    </div>
+
+    <div class="relative z-10 h-full flex flex-col">
+      <!-- Barra superior: Botão Menu + PWA Install -->
+      <div class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-end py-2 sm:py-3">
+          <!-- Botão Instalar App -->
+          <button 
+            *ngIf="canInstallPwa"
+            (click)="installPwa()"
+            class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all font-semibold shadow-lg hover:shadow-xl hover:scale-105"
+            style="background-color: rgba(255, 255, 255, 0.95); color: #4A5E78;">
+            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+            </svg>
+            <span class="text-xs font-bold">Instalar</span>
+          </button>
+        </div>
       </div>
 
-      <!-- Hero Content -->
-      <div class="flex flex-col sm:flex-row items-start gap-4 sm:gap-8 py-4 sm:py-6">
-        <!-- Logo -->
-        <div class="bg-white rounded-2xl p-3 shadow-2xl border-2 border-white/20 flex-shrink-0 cursor-pointer" (dblclick)="onLogoDoubleClick()" title="Duplo clique para modo admin">
-          <img src="logo-utilar.png" alt="Util Lar" class="w-16 h-16 sm:w-24 sm:h-24 object-contain">
-        </div>
-        
-        <!-- Conteúdo Principal -->
-        <div class="flex-1 py-1 sm:py-2">
-          <h1 class="text-xl sm:text-3xl md:text-4xl font-bold text-white mb-2 sm:mb-4">Móveis e Eletrodomésticos</h1>
-          <p class="text-white/90 text-sm sm:text-base mb-2 sm:mb-4 leading-relaxed">
-            Bem-vindo à Util Lar! Somos especializados em móveis e eletros novos e seminovos de alta qualidade. 
-            Oferecemos desde sofás confortáveis até mesas elegantes e os melhores eletrodomésticos, tudo para transformar sua casa em um lar acolhedor.
-          </p>
-          <p class="text-white/95 text-sm sm:text-base leading-relaxed font-medium">
-            Encontrou o produto perfeito? Clique para ver detalhes e fale por WhatsApp!
-          </p>
+      <!-- Conteúdo Hero - Logo à direita -->
+      <div class="flex-1 flex items-center">
+        <div class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+          <div class="grid lg:grid-cols-12 gap-4 lg:gap-4 items-center">
+            <!-- Conteúdo Textual - 8 colunas (primeiro no grid) -->
+            <div class="lg:col-span-8 order-2 lg:order-1 text-white text-center lg:text-left lg:pl-24 space-y-3 lg:space-y-4">
+              <!-- Tag superior -->
+              <p class="text-xs sm:text-sm font-bold tracking-widest uppercase" style="color: rgba(255, 255, 255, 0.85);">
+                Bem-vindo ao
+              </p>
+
+              <!-- Título principal -->
+              <h1 class="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-extrabold leading-tight tracking-tight">
+                UTIL LAR
+              </h1>
+
+              <!-- Subtítulo -->
+              <h2 class="text-lg sm:text-xl lg:text-2xl font-semibold" style="color: rgba(255, 255, 255, 0.95);">
+                Móveis e Eletrodomésticos
+              </h2>
+
+              <!-- Descrição -->
+              <p class="text-sm sm:text-base lg:text-lg leading-relaxed max-w-3xl lg:max-w-none" style="color: rgba(255, 255, 255, 0.9);">
+                Especializados em produtos novos e seminovos de alta qualidade. Transforme sua casa em um lar acolhedor!
+              </p>
+
+              <!-- Bullets de benefícios -->
+              <div class="flex flex-wrap justify-center lg:justify-start gap-3 sm:gap-4 lg:gap-6 text-xs sm:text-sm font-semibold pt-2">
+                <div class="flex items-center gap-2">
+                  <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                  </svg>
+                  <span>Qualidade Garantida</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                  </svg>
+                  <span>Melhor Preço</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                  </svg>
+                  <span>Entrega Rápida</span>
+                </div>
+              </div>
+
+              <!-- Botão Admin (se logado) -->
+              <div *ngIf="isAdmin" class="pt-2 flex justify-center lg:justify-start">
+                <button 
+                  (click)="openCreateModal()"
+                  class="px-5 sm:px-6 py-2.5 sm:py-3 rounded-lg font-bold shadow-xl transition-all text-sm sm:text-base whitespace-nowrap" 
+                  style="background-color: #FFFFFF; color: #23292A;">
+                  <span class="flex items-center gap-2">
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                    </svg>
+                    Adicionar Produto
+                  </span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Logo - 4 colunas (segundo no grid, mas aparece à direita) -->
+            <div class="lg:col-span-4 order-1 lg:order-2 flex justify-center lg:justify-end lg:pr-4">
+              <div 
+                class="cursor-pointer transform hover:scale-105 transition-all" 
+                (dblclick)="onLogoDoubleClick()" 
+                title="Duplo clique para modo admin">
+                <img src="logo-branca.png" alt="Util Lar" class="w-40 h-40 sm:w-52 sm:h-52 lg:w-64 lg:h-64 object-contain drop-shadow-2xl">
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      
-      <!-- Botão Admin (se logado) -->
-      <div *ngIf="isAdmin" class="flex justify-end mt-4">
-        <button 
-          (click)="openCreateModal()"
-          class="px-5 py-2.5 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all text-sm" style="background-color: #FFFFFF; color: #23292A;" onmouseover="this.style.backgroundColor='#EDF1F4'" onmouseout="this.style.backgroundColor='#FFFFFF'">
-          + Adicionar Produto
-        </button>
+
+      <!-- Indicadores decorativos (estilo carrossel) -->
+      <div class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-center gap-2 sm:gap-3 pb-6 sm:pb-8">
+          <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-white shadow-lg"></div>
+          <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-white/30"></div>
+          <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-white/30"></div>
+        </div>
       </div>
     </div>
   </header>
@@ -63,6 +127,88 @@
           aria-label="Buscar produtos"
           class="w-full pl-12 pr-4 py-3 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:border-transparent" style="background-color: #FFFFFF; border: 1px solid #D7DDE3; color: #23292A;" onfocus="this.style.borderColor='#7588A8'; this.style.outline='2px solid #7588A8';" onblur="this.style.borderColor='#D7DDE3'; this.style.outline='none';">
       </div>
+    </div>
+
+    <!-- Carrossel: Destaques -->
+    <div *ngIf="!isLoading && featuredProducts.length > 0" class="mb-8 relative overflow-hidden">
+      <h2 class="text-base sm:text-lg font-light tracking-wide mb-6 text-center px-4" style="color: #7588A8;">
+       Veja os produtos em destaque
+      </h2>
+      
+      <div class="relative px-2 sm:px-4">
+        <!-- Botão anterior -->
+        <button 
+          *ngIf="featuredProducts.length > 1"
+          (click)="scrollFeatured('left')"
+          class="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 sm:w-12 sm:h-12 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110"
+          style="background-color: rgba(255, 255, 255, 0.95); color: #7588A8;">
+          <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+        </button>
+
+        <!-- Scroll container -->
+        <div #featuredCarousel class="flex gap-4 sm:gap-6 overflow-x-auto pb-4 snap-x snap-mandatory scroll-smooth" style="-ms-overflow-style: none; scrollbar-width: none;">
+          <div 
+            *ngFor="let produto of featuredProducts; trackBy: trackByProductId"
+            (click)="verDetalhes(produto.id)"
+            class="flex-shrink-0 w-[calc(100%-2rem)] sm:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1rem)] h-72 sm:h-80 lg:h-96 rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer group relative snap-center"
+            [style.background]="'linear-gradient(135deg, rgba(117, 136, 168, 0.15), rgba(149, 167, 193, 0.15))'">
+            
+            <!-- Imagem com overlay -->
+            <div class="w-full h-full relative">
+              <img 
+                *ngIf="produto.images && produto.images.length > 0" 
+                [src]="produto.images[0]" 
+                [alt]="produto.name"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+              <div *ngIf="!produto.images || produto.images.length === 0" 
+                class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+                <svg class="h-24 w-24 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+              </div>
+              
+              <!-- Overlay gradient -->
+              <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+              
+              <!-- Nome do produto sobreposto -->
+              <div class="absolute bottom-0 left-0 right-0 p-4 sm:p-6 lg:p-8">
+                <h3 class="text-xl sm:text-2xl lg:text-3xl font-bold text-white uppercase tracking-wider drop-shadow-lg line-clamp-2">
+                  {{ produto.name | capitalize }}
+                </h3>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botão próximo -->
+        <button 
+          *ngIf="featuredProducts.length > 1"
+          (click)="scrollFeatured('right')"
+          class="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 sm:w-12 sm:h-12 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110"
+          style="background-color: rgba(255, 255, 255, 0.95); color: #7588A8;">
+          <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Indicadores de pontos -->
+      <div *ngIf="featuredProducts.length > 1" class="flex justify-center gap-2 mt-4">
+        <div 
+          *ngFor="let produto of featuredProducts; let i = index" 
+          class="w-2 h-2 rounded-full transition-all duration-300"
+          [style.background-color]="i === currentFeaturedIndex ? '#7588A8' : 'rgba(117, 136, 168, 0.3)'">
+        </div>
+      </div>
+      
+      <!-- Estilo para esconder scrollbar -->
+      <style>
+        div::-webkit-scrollbar {
+          display: none;
+        }
+      </style>
     </div>
 
     <!-- Filtros -->
@@ -126,118 +272,48 @@
     </div>
 
     <!-- Grid de Produtos -->
-    <div *ngIf="!isLoading && filteredProducts.length > 0" 
-      class="grid grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-5">
-      
-      <article 
-        *ngFor="let produto of filteredProducts; trackBy: trackByProductId"
-        (click)="verDetalhes(produto.id)"
-        class="rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer" style="background-color: #FFFFFF; border: 1px solid #D7DDE3;">
-        
-        <!-- Imagem -->
-        <div class="aspect-[4/3] bg-gray-100 relative overflow-hidden">
-          <!-- Badge Condição (Novo/Seminovo) -->
-          <div class="absolute top-2 left-2 z-10">
-            <span 
-              *ngIf="produto.condition === 'novo'"
-              class="px-3 py-1 rounded-full text-xs font-bold uppercase shadow-md"
-              style="background-color: #d4f4dd; color: #2d6a3f;">
-              Novo
-            </span>
-            <span 
-              *ngIf="produto.condition === 'seminovo'"
-              class="px-3 py-1 rounded-full text-xs font-bold uppercase shadow-md"
-              style="background-color: #f5ebd4; color: #8b6914;">
-              Seminovo
-            </span>
-          </div>
+    <ng-container *ngIf="!isLoading && filteredProducts.length > 0">
+      <!-- Primeira fileira de produtos -->
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
+        <ng-container *ngFor="let produto of productsBeforeBrands; trackBy: trackByProductId">
+          <ng-container *ngTemplateOutlet="productCard; context: { $implicit: produto }"></ng-container>
+        </ng-container>
+      </div>
 
-          <!-- Badge Vendido -->
-          <div *ngIf="produto.disponivel === 0" 
-            class="absolute inset-0 bg-black/60 z-20 flex items-center justify-center">
-            <span class="bg-gray-700 text-white px-6 py-3 rounded-lg text-xl font-bold shadow-xl">
-              ✓ VENDIDO
-            </span>
-          </div>
-          
-          <img 
-            *ngIf="produto.images && produto.images.length > 0" 
-            [src]="produto.images[0]" 
-            [alt]="produto.name"
-            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-          
-          <div *ngIf="!produto.images || produto.images.length === 0" 
-            class="w-full h-full flex items-center justify-center">
-            <svg class="h-24 w-24 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-            </svg>
-          </div>
-        </div>
-        
-        <!-- Conteúdo -->
-        <div class="p-2.5 sm:p-4">
-          <!-- Título e Categoria -->
-          <div class="mb-1.5">
-            <h3 class="font-bold text-sm sm:text-base line-clamp-2 leading-tight" style="color: #23292A;">
-              {{ produto.name | capitalize }}
-            </h3>
-            <span class="inline-block mt-1 px-1.5 py-0.5 rounded text-[10px] sm:text-xs font-semibold" style="background-color: #E6EBEF; color: #23292A;">
-              {{ produto.category | capitalize }}
-            </span>
-          </div>
-          
-          <!-- Preço e Lucro -->
-          <div class="mb-2 space-y-0.5">
-            <div class="text-base sm:text-xl font-bold" style="color: #23292A;">
-              R$ {{ formatarPreco(produto.price) }}
-            </div>
-            <div *ngIf="isAdmin && produto.costPrice" class="text-xs font-semibold" style="color: #5a8a6a;">
-              Lucro: R$ {{ formatarPreco(produto.price - produto.costPrice) }}
+      <!-- Navegue pelas Marcas (entre os produtos) -->
+      <div class="my-6 sm:my-8" *ngIf="filteredProducts.length > brandsInsertIndex">
+        <h2 class="text-sm sm:text-base font-bold uppercase tracking-wider mb-4" style="color: #23292A;">Navegue pelas Marcas</h2>
+        <div class="flex gap-4 sm:gap-6 overflow-x-auto pb-3" style="-ms-overflow-style: none; scrollbar-width: none;">
+          <div 
+            *ngFor="let brand of brands"
+            (click)="filterByBrand(brand.name)"
+            class="flex-shrink-0 cursor-pointer"
+            [title]="brand.name">
+            <div 
+              class="w-24 h-24 sm:w-28 sm:h-28 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-105 hover:shadow-xl shadow-md"
+              [style.background]="selectedBrand === brand.name ? 'linear-gradient(135deg, #4A5E78, #7588A8)' : 'linear-gradient(135deg, #7588A8, #95A7C1)'">
+              <span class="text-white text-xs sm:text-sm font-bold text-center leading-tight px-2">{{ brand.name }}</span>
             </div>
           </div>
-          
-          <!-- Botão Ver Detalhes -->
-          <button 
-            (click)="verDetalhes(produto.id)"
-            class="w-full font-semibold py-1.5 sm:py-2 text-xs sm:text-sm rounded-lg transition-colors flex items-center justify-center gap-1 shadow-sm" style="background-color: #7588A8; color: #FFFFFF;" onmouseover="this.style.backgroundColor='#95A7C1'" onmouseout="this.style.backgroundColor='#7588A8'">
-            Ver detalhes
-          </button>
-          
-          <!-- Botões Admin -->
-          <div *ngIf="isAdmin" class="grid grid-cols-3 gap-2 mt-2 pt-2" style="border-top: 1px solid #E6EBEF;">
-            <button 
-              (click)="openEditModal(produto); $event.stopPropagation()"
-              class="py-1.5 rounded-lg text-sm font-medium transition-colors border" style="color: #23292A; background-color: transparent; border-color: #D7DDE3;" onmouseover="this.style.backgroundColor='#F5F7FA'; this.style.borderColor='#7588A8';" onmouseout="this.style.backgroundColor='transparent'; this.style.borderColor='#D7DDE3';"
-              title="Editar">
-              ✏️
-            </button>
-            
-            <button 
-              *ngIf="produto.disponivel === 1"
-              (click)="marcarComoVendido(produto.id, $event)"
-              class="py-1.5 rounded-lg text-sm font-medium transition-colors border" style="color: #23292A; background-color: transparent; border-color: #D7DDE3;" onmouseover="this.style.backgroundColor='#F5F7FA'; this.style.borderColor='#7588A8';" onmouseout="this.style.backgroundColor='transparent'; this.style.borderColor='#D7DDE3';"
-              title="Vender">
-              ✓
-            </button>
-            
-            <button 
-              *ngIf="produto.disponivel === 0"
-              (click)="reativarProduto(produto.id, $event)"
-              class="py-1.5 rounded-lg text-sm font-medium transition-colors border" style="color: #23292A; background-color: transparent; border-color: #D7DDE3;" onmouseover="this.style.backgroundColor='#F5F7FA'; this.style.borderColor='#7588A8';" onmouseout="this.style.backgroundColor='transparent'; this.style.borderColor='#D7DDE3';"
-              title="Reativar">
-              ↻
-            </button>
-            
-            <button 
-              (click)="removerProduto(produto.id, $event)"
-              class="py-1.5 rounded-lg text-sm font-medium transition-colors border" style="color: #23292A; background-color: transparent; border-color: #D7DDE3;" onmouseover="this.style.backgroundColor='#F5F7FA'; this.style.borderColor='#7588A8';" onmouseout="this.style.backgroundColor='transparent'; this.style.borderColor='#D7DDE3';"
-              title="Deletar">
-              🗑️
-            </button>
+          <div 
+            *ngIf="selectedBrand"
+            (click)="filterByBrand('')"
+            class="flex-shrink-0 cursor-pointer"
+            title="Ver todas as marcas">
+            <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-105 hover:shadow-xl border-2 border-dashed" style="border-color: #D7DDE3;">
+              <span class="text-sm font-bold" style="color: #6B7A8D;">Todas</span>
+            </div>
           </div>
         </div>
-      </article>
-    </div>
+      </div>
+
+      <!-- Restante dos produtos -->
+      <div *ngIf="productsAfterBrands.length > 0" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
+        <ng-container *ngFor="let produto of productsAfterBrands; trackBy: trackByProductId">
+          <ng-container *ngTemplateOutlet="productCard; context: { $implicit: produto }"></ng-container>
+        </ng-container>
+      </div>
+    </ng-container>
   </div>
 
   <!-- Botão Flutuante WhatsApp -->
@@ -255,6 +331,136 @@
     </span>
   </a>
 </div>
+
+<!-- Template reutilizável do card de produto -->
+<ng-template #productCard let-produto>
+  <article 
+    (click)="verDetalhes(produto.id)"
+    class="rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer" style="background-color: #FFFFFF; border: 1px solid #D7DDE3;">
+    
+    <!-- Imagem -->
+    <div class="aspect-[4/3] bg-gray-100 relative overflow-hidden">
+      <div class="absolute top-2 left-2 z-10 flex flex-col gap-1">
+        <span 
+          *ngIf="produto.condition === 'novo'"
+          class="px-3 py-1 rounded-full text-xs font-bold uppercase shadow-md"
+          style="background-color: #d4f4dd; color: #2d6a3f;">
+          Novo
+        </span>
+        <span 
+          *ngIf="produto.condition === 'seminovo'"
+          class="px-3 py-1 rounded-full text-xs font-bold uppercase shadow-md"
+          style="background-color: #f5ebd4; color: #8b6914;">
+          Seminovo
+        </span>
+      </div>
+
+      <!-- Badge Desconto -->
+      <div *ngIf="getDiscountPercent(produto) > 0" class="absolute top-12 right-2 z-10">
+        <span class="px-2.5 py-1 rounded-full text-xs font-bold shadow-md" style="background-color: #DC2626; color: #FFFFFF;">
+          -{{ getDiscountPercent(produto) }}%
+        </span>
+      </div>
+
+      <!-- Botão Favoritar -->
+      <button 
+        (click)="toggleFavorite(produto.id, $event)"
+        class="absolute top-2 right-2 z-10 w-9 h-9 rounded-full flex items-center justify-center shadow-md transition-all duration-200 hover:scale-110"
+        [style.backgroundColor]="isFavorite(produto.id) ? '#DC2626' : 'rgba(255,255,255,0.9)'"
+        [title]="isFavorite(produto.id) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'">
+        <svg class="w-5 h-5" 
+          [attr.fill]="isFavorite(produto.id) ? 'white' : 'none'" 
+          [attr.stroke]="isFavorite(produto.id) ? 'white' : '#6B7A8D'" 
+          viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+        </svg>
+      </button>
+
+      <div *ngIf="produto.disponivel === 0" 
+        class="absolute inset-0 bg-black/60 z-20 flex items-center justify-center">
+        <span class="bg-gray-700 text-white px-6 py-3 rounded-lg text-xl font-bold shadow-xl">
+          ✓ VENDIDO
+        </span>
+      </div>
+      
+      <img 
+        *ngIf="produto.images && produto.images.length > 0" 
+        [src]="produto.images[0]" 
+        [alt]="produto.name"
+        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+      
+      <div *ngIf="!produto.images || produto.images.length === 0" 
+        class="w-full h-full flex items-center justify-center">
+        <svg class="h-24 w-24 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+        </svg>
+      </div>
+    </div>
+    
+    <!-- Conteúdo -->
+    <div class="p-2.5 sm:p-4">
+      <div class="mb-1.5">
+        <h3 class="font-bold text-sm sm:text-base line-clamp-2 leading-tight" style="color: #23292A;">
+          {{ produto.name | capitalize }}
+        </h3>
+        <span class="inline-block mt-1 px-1.5 py-0.5 rounded text-[10px] sm:text-xs font-semibold" style="background-color: #E6EBEF; color: #23292A;">
+          {{ produto.category | capitalize }}
+        </span>
+      </div>
+      
+      <div class="mb-2 space-y-0.5">
+        <div *ngIf="getDiscountPercent(produto) > 0" class="flex items-center gap-2">
+          <span class="text-xs sm:text-sm line-through" style="color: #9BA8B7;">R$ {{ formatarPreco(produto.originalPrice) }}</span>
+          <span class="text-[10px] sm:text-xs font-bold px-1.5 py-0.5 rounded" style="background-color: #FEE2E2; color: #DC2626;">-{{ getDiscountPercent(produto) }}%</span>
+        </div>
+        <div class="text-base sm:text-xl font-bold" [style.color]="getDiscountPercent(produto) > 0 ? '#16A34A' : '#23292A'">
+          R$ {{ formatarPreco(produto.price) }}
+        </div>
+        <div *ngIf="isAdmin && produto.costPrice" class="text-xs font-semibold" style="color: #5a8a6a;">
+          Lucro: R$ {{ formatarPreco(produto.price - produto.costPrice) }}
+        </div>
+      </div>
+      
+      <button 
+        (click)="verDetalhes(produto.id)"
+        class="w-full font-semibold py-1.5 sm:py-2 text-xs sm:text-sm rounded-lg transition-colors flex items-center justify-center gap-1 shadow-sm" style="background-color: #7588A8; color: #FFFFFF;" onmouseover="this.style.backgroundColor='#95A7C1'" onmouseout="this.style.backgroundColor='#7588A8'">
+        Ver detalhes
+      </button>
+      
+      <div *ngIf="isAdmin" class="grid grid-cols-3 gap-2 mt-2 pt-2" style="border-top: 1px solid #E6EBEF;">
+        <button 
+          (click)="openEditModal(produto); $event.stopPropagation()"
+          class="py-1.5 rounded-lg text-sm font-medium transition-colors border" style="color: #23292A; background-color: transparent; border-color: #D7DDE3;" onmouseover="this.style.backgroundColor='#F5F7FA'; this.style.borderColor='#7588A8';" onmouseout="this.style.backgroundColor='transparent'; this.style.borderColor='#D7DDE3';"
+          title="Editar">
+          ✏️
+        </button>
+        
+        <button 
+          *ngIf="produto.disponivel === 1"
+          (click)="marcarComoVendido(produto.id, $event)"
+          class="py-1.5 rounded-lg text-sm font-medium transition-colors border" style="color: #23292A; background-color: transparent; border-color: #D7DDE3;" onmouseover="this.style.backgroundColor='#F5F7FA'; this.style.borderColor='#7588A8';" onmouseout="this.style.backgroundColor='transparent'; this.style.borderColor='#D7DDE3';"
+          title="Vender">
+          ✓
+        </button>
+        
+        <button 
+          *ngIf="produto.disponivel === 0"
+          (click)="reativarProduto(produto.id, $event)"
+          class="py-1.5 rounded-lg text-sm font-medium transition-colors border" style="color: #23292A; background-color: transparent; border-color: #D7DDE3;" onmouseover="this.style.backgroundColor='#F5F7FA'; this.style.borderColor='#7588A8';" onmouseout="this.style.backgroundColor='transparent'; this.style.borderColor='#D7DDE3';"
+          title="Reativar">
+          ↻
+        </button>
+        
+        <button 
+          (click)="removerProduto(produto.id, $event)"
+          class="py-1.5 rounded-lg text-sm font-medium transition-colors border" style="color: #23292A; background-color: transparent; border-color: #D7DDE3;" onmouseover="this.style.backgroundColor='#F5F7FA'; this.style.borderColor='#7588A8';" onmouseout="this.style.backgroundColor='transparent'; this.style.borderColor='#D7DDE3';"
+          title="Deletar">
+          🗑️
+        </button>
+      </div>
+    </div>
+  </article>
+</ng-template>
 
 <!-- Modais -->
 <app-product-form-modal
