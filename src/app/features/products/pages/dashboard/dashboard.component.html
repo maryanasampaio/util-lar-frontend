@@ -635,7 +635,7 @@
 <ng-template #productCard let-produto>
   <article 
     (click)="verDetalhes(produto.id)"
-    class="rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer" style="background-color: #FFFFFF; border: 1px solid #D7DDE3;">
+    class="flex flex-col rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer h-full" style="background-color: #FFFFFF; border: 1px solid #D7DDE3;">
     
     <!-- Imagem -->
     <div class="aspect-[4/3] bg-gray-100 relative overflow-hidden">
@@ -711,7 +711,7 @@
     </div>
     
     <!-- Conteúdo -->
-    <div class="p-2.5 sm:p-4">
+    <div class="flex flex-col flex-1 p-2.5 sm:p-4">
       <div class="mb-1.5">
         <h3 class="font-bold text-sm sm:text-base line-clamp-2 leading-tight" style="color: #23292A;">
           {{ produto.name | capitalize }}
@@ -725,24 +725,27 @@
         {{ produto.description }}
       </p>
       
-      <div class="mb-2 space-y-0.5">
-        <div *ngIf="getDiscountPercent(produto) > 0" class="flex items-center gap-2">
-          <span class="text-xs sm:text-sm line-through" style="color: #9BA8B7;">R$ {{ formatarPreco(produto.originalPrice) }}</span>
-          <span class="text-[10px] sm:text-xs font-bold px-1.5 py-0.5 rounded" style="background-color: #FEE2E2; color: #DC2626;">-{{ getDiscountPercent(produto) }}%</span>
+      <!-- Footer fixo embaixo -->
+      <div class="mt-auto">
+        <div class="mb-2 space-y-0.5">
+          <div *ngIf="getDiscountPercent(produto) > 0" class="flex items-center gap-2">
+            <span class="text-xs sm:text-sm line-through" style="color: #9BA8B7;">R$ {{ formatarPreco(produto.originalPrice) }}</span>
+            <span class="text-[10px] sm:text-xs font-bold px-1.5 py-0.5 rounded" style="background-color: #FEE2E2; color: #DC2626;">-{{ getDiscountPercent(produto) }}%</span>
+          </div>
+          <div class="text-base sm:text-xl font-bold" [style.color]="getDiscountPercent(produto) > 0 ? '#16A34A' : '#23292A'">
+            R$ {{ formatarPreco(produto.price) }}
+          </div>
+          <div *ngIf="isAdmin && produto.costPrice" class="text-xs font-semibold" style="color: #5a8a6a;">
+            Lucro: R$ {{ formatarPreco(produto.price - produto.costPrice) }}
+          </div>
         </div>
-        <div class="text-base sm:text-xl font-bold" [style.color]="getDiscountPercent(produto) > 0 ? '#16A34A' : '#23292A'">
-          R$ {{ formatarPreco(produto.price) }}
-        </div>
-        <div *ngIf="isAdmin && produto.costPrice" class="text-xs font-semibold" style="color: #5a8a6a;">
-          Lucro: R$ {{ formatarPreco(produto.price - produto.costPrice) }}
-        </div>
+        
+        <button 
+          (click)="verDetalhes(produto.id)"
+          class="w-full font-semibold py-1.5 sm:py-2 text-xs sm:text-sm rounded-lg transition-colors flex items-center justify-center gap-1 shadow-sm" style="background-color: #7588A8; color: #FFFFFF;" onmouseover="this.style.backgroundColor='#95A7C1'" onmouseout="this.style.backgroundColor='#7588A8'">
+          Ver detalhes
+        </button>
       </div>
-      
-      <button 
-        (click)="verDetalhes(produto.id)"
-        class="w-full font-semibold py-1.5 sm:py-2 text-xs sm:text-sm rounded-lg transition-colors flex items-center justify-center gap-1 shadow-sm" style="background-color: #7588A8; color: #FFFFFF;" onmouseover="this.style.backgroundColor='#95A7C1'" onmouseout="this.style.backgroundColor='#7588A8'">
-        Ver detalhes
-      </button>
       
       <div *ngIf="isAdmin" class="grid grid-cols-3 gap-2 mt-2 pt-2" style="border-top: 1px solid #E6EBEF;">
         <button 
