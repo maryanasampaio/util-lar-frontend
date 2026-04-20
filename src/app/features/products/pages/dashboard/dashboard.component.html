@@ -10,7 +10,34 @@
     <div class="relative z-10 h-full flex flex-col">
       <!-- Barra superior: Botão Menu + PWA Install -->
       <div class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-end py-2 sm:py-3">
+        <div class="flex items-center justify-end gap-3 sm:gap-4 py-2 sm:py-3">
+          <!-- Ícones do cliente (não-admin) -->
+          <ng-container *ngIf="!isAdmin">
+            <!-- Favoritos -->
+            <button 
+              (click)="goToFavorites()"
+              class="relative p-1 transition-opacity hover:opacity-70"
+              title="Meus Favoritos">
+              <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="white" viewBox="0 0 24 24">
+                <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+              </svg>
+              <span 
+                *ngIf="favoritesCount > 0"
+                class="absolute -top-0.5 -right-0.5 w-4.5 h-4.5 rounded-full text-white text-[9px] font-bold flex items-center justify-center shadow-md"
+                style="background-color: #DC2626;">
+                {{ favoritesCount }}
+              </span>
+            </button>
+            <!-- Notificações -->
+            <button 
+              (click)="goToNotifications()"
+              class="p-1 transition-opacity hover:opacity-70"
+              title="Notificações">
+              <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+              </svg>
+            </button>
+          </ng-container>
           <!-- Botão Instalar App -->
           <button 
             *ngIf="canInstallPwa"
@@ -121,7 +148,7 @@
     
     <div class="relative px-1 sm:px-4">
       <button 
-        *ngIf="featuredProducts.length > 1"
+        *ngIf="featuredProducts.length > 3"
         (click)="scrollFeatured('left')"
         class="absolute left-0 sm:left-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 sm:w-10 sm:h-10 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110"
         style="background-color: rgba(255, 255, 255, 0.95); color: #7588A8;">
@@ -130,11 +157,11 @@
         </svg>
       </button>
 
-      <div #featuredCarousel class="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-auto pb-4 snap-x snap-mandatory scroll-smooth" style="-ms-overflow-style: none; scrollbar-width: none;">
+      <div #featuredCarousel class="flex gap-2 sm:gap-3 lg:gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scroll-smooth" style="-ms-overflow-style: none; scrollbar-width: none;">
         <div 
           *ngFor="let produto of featuredProducts; trackBy: trackByProductId"
           (click)="verDetalhes(produto.id)"
-          class="flex-shrink-0 w-[calc(100%-1rem)] sm:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1rem)] h-44 sm:h-56 lg:h-72 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer group relative snap-center"
+          class="flex-shrink-0 w-[calc(33.333%-0.5rem)] sm:w-[calc(33.333%-0.75rem)] lg:w-[calc(33.333%-1rem)] h-32 sm:h-48 lg:h-64 rounded-xl lg:rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer group relative snap-start"
           [style.background]="'linear-gradient(135deg, rgba(117, 136, 168, 0.15), rgba(149, 167, 193, 0.15))'">
           <div class="w-full h-full relative">
             <img 
@@ -144,13 +171,13 @@
               class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
             <div *ngIf="!produto.images || produto.images.length === 0" 
               class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
-              <svg class="h-16 w-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="h-8 w-8 sm:h-12 sm:w-12 lg:h-16 lg:w-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
               </svg>
             </div>
             <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
-            <div class="absolute bottom-0 left-0 right-0 p-3 sm:p-5">
-              <h3 class="text-sm sm:text-lg lg:text-xl font-bold text-white uppercase tracking-wider drop-shadow-lg line-clamp-2">
+            <div class="absolute bottom-0 left-0 right-0 p-2 sm:p-4">
+              <h3 class="text-[10px] sm:text-base lg:text-lg font-bold text-white uppercase tracking-wider drop-shadow-lg line-clamp-2">
                 {{ produto.name | capitalize }}
               </h3>
             </div>
@@ -159,7 +186,7 @@
       </div>
 
       <button 
-        *ngIf="featuredProducts.length > 1"
+        *ngIf="featuredProducts.length > 3"
         (click)="scrollFeatured('right')"
         class="absolute right-0 sm:right-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 sm:w-10 sm:h-10 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110"
         style="background-color: rgba(255, 255, 255, 0.95); color: #7588A8;">
@@ -169,13 +196,13 @@
       </button>
     </div>
 
-    <div *ngIf="featuredProducts.length > 1" class="flex justify-center gap-2 mt-3">
+    <div *ngIf="featuredProducts.length > 3" class="flex justify-center gap-2 mt-3">
       <button 
-        *ngFor="let produto of featuredProducts; let i = index" 
-        (click)="goToFeatured(i)"
+        *ngFor="let page of carouselPages; let i = index" 
+        (click)="goToFeaturedPage(i)"
         class="w-2.5 h-2.5 rounded-full transition-all duration-300 cursor-pointer"
-        [style.background-color]="i === currentFeaturedIndex ? '#7588A8' : 'rgba(117, 136, 168, 0.3)'"
-        [style.transform]="i === currentFeaturedIndex ? 'scale(1.3)' : 'scale(1)'">
+        [style.background-color]="i === currentCarouselPage ? '#7588A8' : 'rgba(117, 136, 168, 0.3)'"
+        [style.transform]="i === currentCarouselPage ? 'scale(1.3)' : 'scale(1)'">
       </button>
     </div>
     
@@ -240,16 +267,28 @@
 
   <!-- Contagem de resultados + Ordenação -->
   <div class="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 pt-4">
-    <div class="flex items-center justify-between">
+    <div class="flex items-center justify-between gap-3">
+      <div class="flex items-center gap-2 lg:hidden">
+        <button 
+          (click)="showMobileFilters = !showMobileFilters"
+          class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition-all shadow-md hover:shadow-lg"
+          style="background-color: #7588A8;">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+          </svg>
+          Filtros
+          <span *ngIf="activeFilterCount > 0" class="bg-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold" style="color: #7588A8;">{{ activeFilterCount }}</span>
+        </button>
+      </div>
       <p class="text-xs sm:text-sm" style="color: #6B7785;">
         <span *ngIf="!isLoading">{{ filteredProducts.length }} produto{{ filteredProducts.length !== 1 ? 's' : '' }} encontrado{{ filteredProducts.length !== 1 ? 's' : '' }}</span>
       </p>
       <div class="flex items-center gap-2">
-        <label for="filter-sort" class="text-xs sm:text-sm whitespace-nowrap" style="color: #6B7785;">Ordenar por</label>
+        <label for="filter-sort" class="text-xs sm:text-sm whitespace-nowrap hidden sm:inline" style="color: #6B7785;">Ordenar por</label>
         <select 
           id="filter-sort"
           [(ngModel)]="selectedSort"
-          class="px-3 py-1.5 text-sm rounded-lg focus:outline-none focus:ring-1 appearance-none cursor-pointer"
+          class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm rounded-lg focus:outline-none focus:ring-1 appearance-none cursor-pointer"
           style="background-color: #FFFFFF; border: 1px solid #D7DDE3; color: #23292A; --tw-ring-color: #7588A8;">
           <option *ngFor="let sort of sortOptions" [value]="sort.value">{{ sort.label }}</option>
         </select>
@@ -413,20 +452,6 @@
           Limpar todos os filtros
         </button>
       </aside>
-
-      <!-- Botão de filtros mobile -->
-      <div class="lg:hidden fixed bottom-20 left-1/2 -translate-x-1/2 z-40">
-        <button 
-          (click)="showMobileFilters = !showMobileFilters"
-          class="flex items-center gap-2 px-5 py-2.5 rounded-full shadow-xl text-sm font-bold text-white transition-all"
-          style="background-color: #7588A8;">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
-          </svg>
-          Filtros
-          <span *ngIf="activeFilterCount > 0" class="bg-white rounded-full w-5 h-5 flex items-center justify-center text-xs" style="color: #7588A8;">{{ activeFilterCount }}</span>
-        </button>
-      </div>
 
       <!-- Modal de filtros mobile -->
       <div *ngIf="showMobileFilters" class="lg:hidden fixed inset-0 z-50 flex items-end">
@@ -638,6 +663,7 @@
 
       <!-- Botão Favoritar -->
       <button 
+        *ngIf="!isAdmin"
         (click)="toggleFavorite(produto.id, $event)"
         class="absolute top-2 right-2 z-10 w-9 h-9 rounded-full flex items-center justify-center shadow-md transition-all duration-200 hover:scale-110"
         [style.backgroundColor]="isFavorite(produto.id) ? '#DC2626' : 'rgba(255,255,255,0.9)'"
@@ -647,6 +673,19 @@
           [attr.stroke]="isFavorite(produto.id) ? 'white' : '#6B7A8D'" 
           viewBox="0 0 24 24" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+        </svg>
+      </button>
+
+      <!-- Botão Compartilhar -->
+      <button 
+        (click)="shareProduct(produto, $event)"
+        class="absolute top-2 z-10 w-9 h-9 rounded-full flex items-center justify-center shadow-md transition-all duration-200 hover:scale-110"
+        [class.right-2]="isAdmin"
+        [class.right-13]="!isAdmin"
+        style="background-color: rgba(255,255,255,0.9);"
+        title="Compartilhar">
+        <svg class="w-4.5 h-4.5" fill="none" stroke="#6B7A8D" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
         </svg>
       </button>
 
@@ -681,6 +720,10 @@
           {{ produto.category | capitalize }}
         </span>
       </div>
+      
+      <p *ngIf="produto.description" class="text-xs sm:text-sm line-clamp-2 mb-2 leading-relaxed" style="color: #6B7785;">
+        {{ produto.description }}
+      </p>
       
       <div class="mb-2 space-y-0.5">
         <div *ngIf="getDiscountPercent(produto) > 0" class="flex items-center gap-2">

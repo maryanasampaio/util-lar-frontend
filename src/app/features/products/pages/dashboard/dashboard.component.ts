@@ -30,8 +30,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
   isLoading = false;
   produtos: ProductResponse[] = [];
   isAdmin = false;
+  favoritesCount = 0;
   private readonly destroy$ = new Subject<void>();
   currentFeaturedIndex = 0;
+  currentCarouselPage = 0;
+  readonly itemsPerPage = 3;
   private featuredAutoplayId: any = null;
   
   // Filtros
@@ -127,6 +130,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
       .subscribe((isAdmin: boolean) => {
         console.log('[Dashboard] Admin mode alterado:', isAdmin);
         this.isAdmin = isAdmin;
+        this.cdr.detectChanges();
+      });
+
+    // Inscreve no contador de favoritos
+    this.favoritesService.count$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(count => {
+        this.favoritesCount = count;
         this.cdr.detectChanges();
       });
 
@@ -235,6 +246,34 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   isFavorite(productId: number): boolean {
     return this.favoritesService.isFavorite(productId);
+  }
+
+  goToFavorites(): void {
+    this.router.navigate(['/favoritos']);
+  }
+
+  goToNotifications(): void {
+    this.router.navigate(['/configuracoes']);
+  }
+
+  shareProduct(produto: any, event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
+    const url = `${globalThis.location.origin}/produto/${produto.id}`;
+    const text = `${produto.name} - R$ ${this.formatarPreco(produto.price)}`;
+
+    if (navigator.share) {
+      navigator.share({
+        title: produto.name,
+        text: text,
+        url: url
+      }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(`${text}\n${url}`).then(() => {
+        this.alertService.success('Link copiado!', 'O link do produto foi copiado para a área de transferência.');
+      }).catch(() => {});
+    }
   }
 
   filterByBrand(brand: string): void {
@@ -544,17 +583,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
     const carousel = this.featuredCarousel?.nativeElement;
     if (!carousel) return;
 
-    // Atualizar índice
+    const totalPages = Math.ceil(this.featuredProducts.length / this.itemsPerPage);
+    
+    // Atualizar página
     if (direction === 'left') {
-      this.currentFeaturedIndex = Math.max(0, this.currentFeaturedIndex - 1);
+      this.currentCarouselPage = Math.max(0, this.currentCarouselPage - 1);
     } else {
-      this.currentFeaturedIndex = Math.min(this.featuredProducts.length - 1, this.currentFeaturedIndex + 1);
+      this.currentCarouselPage = Math.min(totalPages - 1, this.currentCarouselPage + 1);
     }
 
-    const scrollAmount = carousel.offsetWidth * 0.9; // Scroll quase uma tela completa
-    const targetScroll = direction === 'left' 
-      ? carousel.scrollLeft - scrollAmount 
-      : carousel.scrollLeft + scrollAmount;
+    // Rolar para a página
+    const scrollAmount = carousel.offsetWidth;
+    const targetScroll = scrollAmount * this.currentCarouselPage;
 
     carousel.scrollTo({
       left: targetScroll,
@@ -567,21 +607,23 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   private startFeaturedAutoplay(): void {
     this.stopFeaturedAutoplay();
-    if (this.featuredProducts.length <= 1) return;
+    if (this.featuredProducts.length <= this.itemsPerPage) return;
 
     this.featuredAutoplayId = setInterval(() => {
+      const totalPages = Math.ceil(this.featuredProducts.length / this.itemsPerPage);
+      
       // Volta ao início se chegou no fim, senão avança
-      if (this.currentFeaturedIndex >= this.featuredProducts.length - 1) {
-        this.currentFeaturedIndex = 0;
+      if (this.currentCarouselPage >= totalPages - 1) {
+        this.currentCarouselPage = 0;
         const carousel = this.featuredCarousel?.nativeElement;
         if (carousel) {
           carousel.scrollTo({ left: 0, behavior: 'smooth' });
         }
       } else {
-        this.scrollFeaturedToIndex(this.currentFeaturedIndex + 1);
+        this.goToFeaturedPage(this.currentCarouselPage + 1);
       }
       this.cdr.detectChanges();
-    }, 5000);
+    }, 3000);
   }
 
   private stopFeaturedAutoplay(): void {
@@ -610,6 +652,24 @@ export class DashboardComponent implements OnInit, OnDestroy {
   goToFeatured(index: number): void {
     this.scrollFeaturedToIndex(index);
     this.restartFeaturedAutoplay();
+  }
+
+  goToFeaturedPage(pageIndex: number): void {
+    const carousel = this.featuredCarousel?.nativeElement;
+    if (!carousel) return;
+
+    this.currentCarouselPage = pageIndex;
+    const scrollAmount = carousel.offsetWidth;
+    carousel.scrollTo({
+      left: scrollAmount * pageIndex,
+      behavior: 'smooth'
+    });
+    this.restartFeaturedAutoplay();
+  }
+
+  get carouselPages(): number[] {
+    const totalPages = Math.ceil(this.featuredProducts.length / this.itemsPerPage);
+    return new Array(totalPages).fill(0).map((_, i) => i);
   }
 
   // Modal de edição

@@ -96,6 +96,17 @@ import { AlertService } from '../../../../shared/services/alert.service';
                     </svg>
                   </button>
 
+                  <!-- Botão Compartilhar -->
+                  <button
+                    (click)="shareProduct($event)"
+                    class="absolute top-3 right-16 z-10 w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition-all duration-200 hover:scale-110"
+                    style="background-color: rgba(255,255,255,0.9);"
+                    title="Compartilhar">
+                    <svg class="w-5 h-5" fill="none" stroke="#6B7785" viewBox="0 0 24 24" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+                    </svg>
+                  </button>
+
                   <!-- Badge Desconto -->
                   <div *ngIf="produto.originalPrice && produto.originalPrice > produto.price" 
                     class="absolute top-3 left-3 z-10 px-3 py-1.5 rounded-full text-xs font-bold shadow-md"
@@ -434,5 +445,25 @@ export class ProductDetailComponent implements OnInit {
 
   formatarPreco(preco: number): string {
     return (preco / 100).toFixed(2).replace('.', ',');
+  }
+
+  shareProduct(event: Event): void {
+    event.stopPropagation();
+    if (!this.produto) return;
+
+    const url = `${globalThis.location.origin}/produto/${this.produto.id}`;
+    const text = `${this.produto.name} - R$ ${this.formatarPreco(this.produto.price)}`;
+
+    if (navigator.share) {
+      navigator.share({
+        title: this.produto.name,
+        text: text,
+        url: url
+      }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(`${text}\n${url}`).then(() => {
+        this.alertService.success('Link copiado!', 'O link do produto foi copiado para a área de transferência.');
+      }).catch(() => {});
+    }
   }
 }

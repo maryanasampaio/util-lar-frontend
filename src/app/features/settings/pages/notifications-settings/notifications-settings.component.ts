@@ -1,7 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { NotificationPreferences } from '../../../../core/models/notification-preferences.model';
 
@@ -28,6 +28,12 @@ interface NotificationSettings {
       <!-- Header com gradiente -->
       <header style="background: linear-gradient(to right, #7588A8, #95A7C1, #9AB6C8);">
         <div class="max-w-4xl mx-auto px-4 py-5 sm:py-8">
+          <button (click)="goBack()" class="flex items-center gap-1.5 text-white/80 hover:text-white text-sm mb-3 transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+            Voltar
+          </button>
           <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1 sm:mb-2">Configurações de Notificações</h1>
           <p class="text-white/90 text-sm sm:text-base">Escolha como deseja receber atualizações sobre novos produtos</p>
         </div>
@@ -233,6 +239,7 @@ export class NotificationsSettingsComponent implements OnInit {
 
   constructor(
     private readonly route: ActivatedRoute,
+    private readonly router: Router,
     private readonly notificationService: NotificationService,
     private readonly cdr: ChangeDetectorRef
   ) {
@@ -243,6 +250,10 @@ export class NotificationsSettingsComponent implements OnInit {
       email: localPrefs.email,
       push: localPrefs.push
     };
+  }
+
+  goBack(): void {
+    this.router.navigate(['/dashboard']);
   }
 
   ngOnInit(): void {

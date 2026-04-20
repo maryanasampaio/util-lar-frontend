@@ -16,6 +16,12 @@ import { Subject, takeUntil, skip } from 'rxjs';
       <!-- Header -->
       <header style="background: linear-gradient(to right, #7588A8, #7588A8, #95A7C1);">
         <div class="max-w-7xl mx-auto px-3 py-6 sm:px-4 sm:py-10">
+          <button (click)="goToDashboard()" class="flex items-center gap-1.5 text-white/80 hover:text-white text-sm mb-3 transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+            Voltar
+          </button>
           <h1 class="text-xl sm:text-3xl font-bold text-white flex items-center gap-3">
             <svg class="w-7 h-7 sm:w-8 sm:h-8" fill="currentColor" viewBox="0 0 24 24">
               <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
