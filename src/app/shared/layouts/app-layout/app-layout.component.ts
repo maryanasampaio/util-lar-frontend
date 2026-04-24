@@ -16,7 +16,7 @@
  * - Todas rotas protegidas
  */
 
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
@@ -59,7 +59,8 @@ export class AppLayoutComponent implements OnInit, OnDestroy {
 
   constructor(
     private readonly sidebarService: SidebarService,
-    private readonly adminModeService: AdminModeService
+    private readonly adminModeService: AdminModeService,
+    private readonly cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -67,12 +68,16 @@ export class AppLayoutComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(isOpen => {
         this.isSidebarOpen = isOpen;
+        this.cdr.detectChanges();
       });
 
     this.adminModeService.isAdmin$
       .pipe(takeUntil(this.destroy$))
       .subscribe(isAdmin => {
+        console.log('[AppLayout] Admin mode mudou para:', isAdmin);
         this.isAdmin = isAdmin;
+        // Força detecção de mudanças para atualizar a view
+        this.cdr.detectChanges();
       });
   }
 

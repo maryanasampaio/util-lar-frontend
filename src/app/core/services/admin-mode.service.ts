@@ -22,10 +22,18 @@ export class AdminModeService {
 
   constructor() {
     if (isPlatformBrowser(this.platformId)) {
-      // Carrega estado inicial verificando se está autenticado
+      // Carrega estado inicial verificando se está autenticado E se tem flag de admin
       const isAuthenticated = this.authService.isAuthenticated();
-      if (isAuthenticated) {
+      const isAdminMode = localStorage.getItem('isAdminMode') === 'true';
+      
+      console.log('[AdminModeService] Inicializando - Auth:', isAuthenticated, 'AdminMode:', isAdminMode);
+      
+      if (isAuthenticated && isAdminMode) {
         this.isAdminSubject.next(true);
+      } else {
+        // Limpa flag inconsistente
+        localStorage.removeItem('isAdminMode');
+        this.isAdminSubject.next(false);
       }
     }
   }
@@ -52,8 +60,8 @@ export class AdminModeService {
 
           if (isPlatformBrowser(this.platformId)) {
             localStorage.setItem('isAdminMode', 'true');
-            this.isAdminSubject.next(true);
           }
+          this.isAdminSubject.next(true);
           console.log('[AdminModeService] ✅ Admin autenticado com sucesso! Permission:', response.permission);
           observer.next(response);
           observer.complete();
@@ -70,11 +78,12 @@ export class AdminModeService {
    * Desativa o modo admin e faz logout do backend
    */
   disableAdminMode(): void {
+    console.log('[AdminModeService] Desativando modo admin');
     if (isPlatformBrowser(this.platformId)) {
       localStorage.removeItem('isAdminMode');
       this.authService.logout();
-      this.isAdminSubject.next(false);
     }
+    this.isAdminSubject.next(false);
   }
 
   /**

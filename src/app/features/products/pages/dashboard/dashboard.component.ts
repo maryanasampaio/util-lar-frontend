@@ -30,6 +30,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   errorMessage = '';
   isLoading = false;
   produtos: ProductResponse[] = [];
+  cachedFeaturedProducts: ProductResponse[] = [];
   isAdmin = false;
   favoritesCount = 0;
   private readonly destroy$ = new Subject<void>();
@@ -216,6 +217,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
         next: (resp: ProductResponse[]) => {
           console.log('[Dashboard] loadProdutos - produtos recebidos:', resp.length);
           this.produtos = resp;
+          
+          // Atualiza cache de produtos featured
+          this.updateFeaturedProductsCache();
+          
+          // Log para debug de featured
+          console.log('[Dashboard] Produtos featured disponíveis:', this.cachedFeaturedProducts.length);
+          
           // Inicializar faixa de preço
           const available = resp.filter(p => p.disponivel === 1);
           if (available.length > 0 && this.priceMin == null && this.priceMax == null) {
@@ -223,7 +231,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
             this.priceMax = Math.max(...available.map(p => p.price)) / 100;
           }
           this.checkForNewProducts();
-          this.startFeaturedAutoplay();
+          
+          // Força detecção de mudanças antes de iniciar autoplay
+          this.cdr.detectChanges();
+          
+          // Inicia autoplay apenas se houver produtos featured
+          if (this.cachedFeaturedProducts.length > 0) {
+            this.startFeaturedAutoplay();
+          }
+          
           this.cdr.detectChanges();
         },
         error: (err) => {
@@ -313,11 +329,44 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return this.filteredProducts.slice(this.brandsInsertIndex);
   }
 
-  get featuredProducts(): ProductResponse[] {
-    // Retorna os 4 produtos mais vendidos (featured)
-    return this.produtos
-      .filter(p => p.featured === true && p.disponivel === 1)
+  /**
+   * Atualiza o cache de produtos featured
+   * Chamado sempre que os produtos mudam
+   * 
+   * IMPORTANTE: Em produção, o ChangeDetection do Angular pode não detectar 
+   * mudanças em getters. Por isso, usamos um cache explícito.
+   */
+  private updateFeaturedProductsCache(): void {
+    // Tenta buscar produtos marcados como featured
+    let featured = this.produtos
+      .filter(p => !!p.featured && p.disponivel === 1)
       .slice(0, 4);
+    
+    // FALLBACK: Se não houver produtos featured, usa os 4 mais recentes disponíveis
+    if (featured.length === 0 && this.produtos.length > 0) {
+      console.warn('[Dashboard] Nenhum produto featured encontrado. Usando fallback com produtos recentes.');
+      featured = this.produtos
+        .filter(p => p.disponivel === 1)
+        .sort((a, b) => b.id - a.id)
+        .slice(0, 4);
+    }
+    
+    this.cachedFeaturedProducts = featured;
+    
+    // Log para debug em produção
+    if (this.cachedFeaturedProducts.length === 0 && this.produtos.length > 0) {
+      console.warn('[Dashboard] Nenhum produto disponível para o carrossel.');
+      console.warn('[Dashboard] Total de produtos:', this.produtos.length);
+      console.warn('[Dashboard] Produtos com featured=true:', this.produtos.filter(p => !!p.featured).length);
+      console.warn('[Dashboard] Produtos disponíveis:', this.produtos.filter(p => p.disponivel === 1).length);
+    } else {
+      console.log('[Dashboard] Carrossel atualizado com', this.cachedFeaturedProducts.length, 'produtos');
+    }
+  }
+
+  get featuredProducts(): ProductResponse[] {
+    // Retorna o cache atualizado
+    return this.cachedFeaturedProducts;
   }
 
   // Filtros combinados

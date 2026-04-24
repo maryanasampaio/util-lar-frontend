@@ -605,7 +605,7 @@
 
         <!-- Grid de Produtos -->
         <ng-container *ngIf="!isLoading && filteredProducts.length > 0">
-          <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 lg:gap-5">
+          <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 gap-2 sm:gap-4 lg:gap-5">
             <ng-container *ngFor="let produto of filteredProducts; trackBy: trackByProductId">
               <ng-container *ngTemplateOutlet="productCard; context: { $implicit: produto }"></ng-container>
             </ng-container>
@@ -638,25 +638,25 @@
     class="flex flex-col rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer h-full" style="background-color: #FFFFFF; border: 1px solid #D7DDE3;">
     
     <!-- Imagem -->
-    <div class="aspect-[4/3] bg-gray-100 relative overflow-hidden">
-      <div class="absolute top-2 left-2 z-10 flex flex-col gap-1">
+    <div class="aspect-square sm:aspect-[4/3] bg-gray-100 relative overflow-hidden">
+      <div class="absolute top-1.5 sm:top-2 left-1.5 sm:left-2 z-10 flex flex-col gap-0.5 sm:gap-1">
         <span 
           *ngIf="produto.condition === 'novo'"
-          class="px-3 py-1 rounded-full text-xs font-bold uppercase shadow-md"
+          class="px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[8px] sm:text-xs font-bold uppercase shadow-md"
           style="background-color: #d4f4dd; color: #2d6a3f;">
           Novo
         </span>
         <span 
           *ngIf="produto.condition === 'seminovo'"
-          class="px-3 py-1 rounded-full text-xs font-bold uppercase shadow-md"
+          class="px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[8px] sm:text-xs font-bold uppercase shadow-md"
           style="background-color: #f5ebd4; color: #8b6914;">
           Seminovo
         </span>
       </div>
 
       <!-- Badge Desconto -->
-      <div *ngIf="getDiscountPercent(produto) > 0" class="absolute top-12 right-2 z-10">
-        <span class="px-2.5 py-1 rounded-full text-xs font-bold shadow-md" style="background-color: #DC2626; color: #FFFFFF;">
+      <div *ngIf="getDiscountPercent(produto) > 0" class="absolute top-9 sm:top-12 right-1.5 sm:right-2 z-10">
+        <span class="px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[8px] sm:text-xs font-bold shadow-md" style="background-color: #DC2626; color: #FFFFFF;">
           -{{ getDiscountPercent(produto) }}%
         </span>
       </div>
@@ -665,10 +665,10 @@
       <button 
         *ngIf="!isAdmin"
         (click)="toggleFavorite(produto.id, $event)"
-        class="absolute top-2 right-2 z-10 w-9 h-9 rounded-full flex items-center justify-center shadow-md transition-all duration-200 hover:scale-110"
+        class="absolute top-1.5 sm:top-2 right-1.5 sm:right-2 z-10 w-7 h-7 sm:w-9 sm:h-9 rounded-full flex items-center justify-center shadow-md transition-all duration-200 hover:scale-110"
         [style.backgroundColor]="isFavorite(produto.id) ? '#DC2626' : 'rgba(255,255,255,0.9)'"
         [title]="isFavorite(produto.id) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'">
-        <svg class="w-5 h-5" 
+        <svg class="w-4 h-4 sm:w-5 sm:h-5" 
           [attr.fill]="isFavorite(produto.id) ? 'white' : 'none'" 
           [attr.stroke]="isFavorite(produto.id) ? 'white' : '#6B7A8D'" 
           viewBox="0 0 24 24" stroke-width="2">
@@ -679,19 +679,21 @@
       <!-- Botão Compartilhar -->
       <button 
         (click)="shareProduct(produto, $event)"
-        class="absolute top-2 z-10 w-9 h-9 rounded-full flex items-center justify-center shadow-md transition-all duration-200 hover:scale-110"
-        [class.right-2]="isAdmin"
-        [class.right-13]="!isAdmin"
+        class="absolute top-1.5 sm:top-2 z-10 w-7 h-7 sm:w-9 sm:h-9 rounded-full flex items-center justify-center shadow-md transition-all duration-200 hover:scale-110"
+        [class.right-1.5]="isAdmin"
+        [class.right-9]="!isAdmin"
+        [class.sm:right-2]="isAdmin"
+        [class.sm:right-13]="!isAdmin"
         style="background-color: rgba(255,255,255,0.9);"
         title="Compartilhar">
-        <svg class="w-4.5 h-4.5" fill="none" stroke="#6B7A8D" viewBox="0 0 24 24" stroke-width="2">
+        <svg class="w-4 h-4 sm:w-4.5 sm:h-4.5" fill="none" stroke="#6B7A8D" viewBox="0 0 24 24" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
         </svg>
       </button>
 
       <div *ngIf="produto.disponivel === 0" 
         class="absolute inset-0 bg-black/60 z-20 flex items-center justify-center">
-        <span class="bg-gray-700 text-white px-6 py-3 rounded-lg text-xl font-bold shadow-xl">
+        <span class="bg-gray-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg text-sm sm:text-xl font-bold shadow-xl">
           ✓ VENDIDO
         </span>
       </div>
@@ -704,56 +706,56 @@
       
       <div *ngIf="!produto.images || produto.images.length === 0" 
         class="w-full h-full flex items-center justify-center">
-        <svg class="h-24 w-24 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="h-16 w-16 sm:h-24 sm:w-24 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
         </svg>
       </div>
     </div>
     
     <!-- Conteúdo -->
-    <div class="flex flex-col flex-1 p-2.5 sm:p-4">
-      <div class="mb-1.5">
-        <h3 class="font-bold text-sm sm:text-base line-clamp-2 leading-tight" style="color: #23292A;">
+    <div class="flex flex-col flex-1 p-2 sm:p-4">
+      <div class="mb-1.5 sm:mb-2">
+        <h3 class="font-bold text-[11px] sm:text-base line-clamp-2 leading-snug mb-1" style="color: #23292A;">
           {{ produto.name | capitalize }}
         </h3>
-        <span class="inline-block mt-1 px-1.5 py-0.5 rounded text-[10px] sm:text-xs font-semibold" style="background-color: #E6EBEF; color: #23292A;">
+        <span class="inline-block px-2 py-0.5 rounded text-[9px] sm:text-xs font-semibold" style="background-color: #E6EBEF; color: #23292A;">
           {{ produto.category | capitalize }}
         </span>
       </div>
       
-      <p *ngIf="produto.description" class="text-xs sm:text-sm line-clamp-2 mb-2 leading-relaxed" style="color: #6B7785;">
+      <p *ngIf="produto.description" class="hidden lg:block text-xs sm:text-sm line-clamp-2 mb-2 leading-relaxed" style="color: #6B7785;">
         {{ produto.description }}
       </p>
       
       <!-- Footer fixo embaixo -->
       <div class="mt-auto">
         <div class="mb-2 space-y-0.5">
-          <div *ngIf="getDiscountPercent(produto) > 0" class="flex items-center gap-2">
-            <span class="text-xs sm:text-sm line-through" style="color: #9BA8B7;">R$ {{ formatarPreco(produto.originalPrice) }}</span>
-            <span class="text-[10px] sm:text-xs font-bold px-1.5 py-0.5 rounded" style="background-color: #FEE2E2; color: #DC2626;">-{{ getDiscountPercent(produto) }}%</span>
+          <div *ngIf="getDiscountPercent(produto) > 0" class="flex items-center gap-1.5 sm:gap-2">
+            <span class="text-[10px] sm:text-sm line-through" style="color: #9BA8B7;">R$ {{ formatarPreco(produto.originalPrice) }}</span>
+            <span class="text-[9px] sm:text-xs font-bold px-1.5 py-0.5 rounded" style="background-color: #FEE2E2; color: #DC2626;">-{{ getDiscountPercent(produto) }}%</span>
           </div>
-          <div class="text-base sm:text-xl font-bold" [style.color]="getDiscountPercent(produto) > 0 ? '#16A34A' : '#23292A'">
+          <div class="text-base sm:text-xl font-bold leading-tight" [style.color]="getDiscountPercent(produto) > 0 ? '#16A34A' : '#23292A'">
             R$ {{ formatarPreco(produto.price) }}
           </div>
-          <div class="text-xs sm:text-sm" style="color: #7588A8;">
-            ou até <span class="font-semibold">12x</span> de <span class="font-semibold">R$ {{ calculateInstallment12x(produto.price) }}</span>
+          <div class="text-[10px] sm:text-sm leading-tight" style="color: #7588A8;">
+            <span class="font-semibold">12x</span> <span class="font-semibold">R$ {{ calculateInstallment12x(produto.price) }}</span>
           </div>
-          <div *ngIf="isAdmin && produto.costPrice" class="text-xs font-semibold" style="color: #5a8a6a;">
+          <div *ngIf="isAdmin && produto.costPrice" class="text-[10px] sm:text-xs font-semibold" style="color: #5a8a6a;">
             Lucro: R$ {{ formatarPreco(produto.price - produto.costPrice) }}
           </div>
         </div>
         
         <button 
           (click)="verDetalhes(produto.id)"
-          class="w-full font-semibold py-1.5 sm:py-2 text-xs sm:text-sm rounded-lg transition-colors flex items-center justify-center gap-1 shadow-sm" style="background-color: #7588A8; color: #FFFFFF;" onmouseover="this.style.backgroundColor='#95A7C1'" onmouseout="this.style.backgroundColor='#7588A8'">
+          class="w-full font-semibold py-1.5 sm:py-2 text-[10px] sm:text-sm rounded-lg transition-colors flex items-center justify-center gap-1 shadow-sm" style="background-color: #7588A8; color: #FFFFFF;" onmouseover="this.style.backgroundColor='#95A7C1'" onmouseout="this.style.backgroundColor='#7588A8'">
           Ver detalhes
         </button>
       </div>
       
-      <div *ngIf="isAdmin" class="grid grid-cols-3 gap-2 mt-2 pt-2" style="border-top: 1px solid #E6EBEF;">
+      <div *ngIf="isAdmin" class="grid grid-cols-3 gap-1.5 sm:gap-2 mt-2 pt-2" style="border-top: 1px solid #E6EBEF;">
         <button 
           (click)="openEditModal(produto); $event.stopPropagation()"
-          class="py-1.5 rounded-lg text-sm font-medium transition-colors border" style="color: #23292A; background-color: transparent; border-color: #D7DDE3;" onmouseover="this.style.backgroundColor='#F5F7FA'; this.style.borderColor='#7588A8';" onmouseout="this.style.backgroundColor='transparent'; this.style.borderColor='#D7DDE3';"
+          class="py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors border" style="color: #23292A; background-color: transparent; border-color: #D7DDE3;" onmouseover="this.style.backgroundColor='#F5F7FA'; this.style.borderColor='#7588A8';" onmouseout="this.style.backgroundColor='transparent'; this.style.borderColor='#D7DDE3';"
           title="Editar">
           ✏️
         </button>
@@ -761,7 +763,7 @@
         <button 
           *ngIf="produto.disponivel === 1"
           (click)="marcarComoVendido(produto.id, $event)"
-          class="py-1.5 rounded-lg text-sm font-medium transition-colors border" style="color: #23292A; background-color: transparent; border-color: #D7DDE3;" onmouseover="this.style.backgroundColor='#F5F7FA'; this.style.borderColor='#7588A8';" onmouseout="this.style.backgroundColor='transparent'; this.style.borderColor='#D7DDE3';"
+          class="py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors border" style="color: #23292A; background-color: transparent; border-color: #D7DDE3;" onmouseover="this.style.backgroundColor='#F5F7FA'; this.style.borderColor='#7588A8';" onmouseout="this.style.backgroundColor='transparent'; this.style.borderColor='#D7DDE3';"
           title="Vender">
           ✓
         </button>
@@ -769,14 +771,14 @@
         <button 
           *ngIf="produto.disponivel === 0"
           (click)="reativarProduto(produto.id, $event)"
-          class="py-1.5 rounded-lg text-sm font-medium transition-colors border" style="color: #23292A; background-color: transparent; border-color: #D7DDE3;" onmouseover="this.style.backgroundColor='#F5F7FA'; this.style.borderColor='#7588A8';" onmouseout="this.style.backgroundColor='transparent'; this.style.borderColor='#D7DDE3';"
+          class="py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors border" style="color: #23292A; background-color: transparent; border-color: #D7DDE3;" onmouseover="this.style.backgroundColor='#F5F7FA'; this.style.borderColor='#7588A8';" onmouseout="this.style.backgroundColor='transparent'; this.style.borderColor='#D7DDE3';"
           title="Reativar">
           ↻
         </button>
         
         <button 
           (click)="removerProduto(produto.id, $event)"
-          class="py-1.5 rounded-lg text-sm font-medium transition-colors border" style="color: #23292A; background-color: transparent; border-color: #D7DDE3;" onmouseover="this.style.backgroundColor='#F5F7FA'; this.style.borderColor='#7588A8';" onmouseout="this.style.backgroundColor='transparent'; this.style.borderColor='#D7DDE3';"
+          class="py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors border" style="color: #23292A; background-color: transparent; border-color: #D7DDE3;" onmouseover="this.style.backgroundColor='#F5F7FA'; this.style.borderColor='#7588A8';" onmouseout="this.style.backgroundColor='transparent'; this.style.borderColor='#D7DDE3';"
           title="Deletar">
           🗑️
         </button>
