@@ -129,17 +129,6 @@ import { Subject, takeUntil } from 'rxjs';
         </button>
       </nav>
     </aside>
-
-    <!-- Botão de Abrir (sempre visível quando fechado) -->
-    <button
-      *ngIf="!isOpen"
-      (click)="toggleSidebar()"
-      class="fixed left-6 top-6 z-20 shadow-md rounded-lg p-2.5 hover:shadow-lg transition-all" style="background-color: #FFFFFF; border: 1px solid #D7DDE3; color: #6B7785;" onmouseover="this.style.backgroundColor='#EDF1F4'; this.style.borderColor='#9AB6C8'" onmouseout="this.style.backgroundColor='#FFFFFF'; this.style.borderColor='#D7DDE3'"
-      title="Abrir Menu">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-      </svg>
-    </button>
   `,
   styles: [`
     .active-link {
