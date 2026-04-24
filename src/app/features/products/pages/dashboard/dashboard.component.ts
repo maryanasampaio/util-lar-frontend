@@ -335,6 +335,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
    * 
    * IMPORTANTE: Em produção, o ChangeDetection do Angular pode não detectar 
    * mudanças em getters. Por isso, usamos um cache explícito.
+   * Criamos um NOVO array para garantir que o Angular detecte a mudança.
    */
   private updateFeaturedProductsCache(): void {
     // Tenta buscar produtos marcados como featured
@@ -351,7 +352,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
         .slice(0, 4);
     }
     
-    this.cachedFeaturedProducts = featured;
+    // CRÍTICO: Criar um NOVO array para garantir que o Angular detecte a mudança
+    // Isso força o Change Detection a atualizar o template em produção
+    this.cachedFeaturedProducts = [...featured];
+    
+    // Força detecção de mudanças explicitamente
+    this.cdr.detectChanges();
     
     // Log para debug em produção
     if (this.cachedFeaturedProducts.length === 0 && this.produtos.length > 0) {
@@ -361,6 +367,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       console.warn('[Dashboard] Produtos disponíveis:', this.produtos.filter(p => p.disponivel === 1).length);
     } else {
       console.log('[Dashboard] Carrossel atualizado com', this.cachedFeaturedProducts.length, 'produtos');
+      console.log('[Dashboard] IDs dos produtos no carrossel:', this.cachedFeaturedProducts.map(p => p.id));
     }
   }
 
@@ -870,6 +877,57 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   formatarPreco(preco: number): string {
     return (preco / 100).toFixed(2).replace('.', ',');
+  }
+
+  clearAllFeatured(): void {
+    const featuredProducts = this.cachedFeaturedProducts;
+    
+    if (featuredProducts.length === 0) {
+      this.alertService.info('Carrossel Vazio', 'Não há produtos em destaque para remover.');
+      return;
+    }
+
+    this.alertService.confirm(
+      'Limpar Carrossel',
+      `Deseja remover todos os ${featuredProducts.length} produtos do carrossel de destaques?`,
+      () => {
+        console.log('[Dashboard] Limpando todos os destaques...');
+        let completed = 0;
+        let errors = 0;
+
+        featuredProducts.forEach(produto => {
+          this.productService.atualizarProduto(produto.id, { featured: false } as any).subscribe({
+            next: () => {
+              console.log(`[Dashboard] Produto ${produto.id} desmarcado como destaque`);
+              completed++;
+              
+              // Quando todos terminarem (com sucesso ou erro)
+              if (completed + errors === featuredProducts.length) {
+                this.loadProdutos();
+                if (errors === 0) {
+                  this.alertService.success('Carrossel Limpo', 'Todos os produtos foram removidos dos destaques!');
+                } else {
+                  this.alertService.warning('Parcialmente Completo', `${completed} produtos removidos, ${errors} falharam.`);
+                }
+              }
+            },
+            error: (err) => {
+              console.error(`[Dashboard] Erro ao desmarcar produto ${produto.id}:`, err);
+              errors++;
+              
+              if (completed + errors === featuredProducts.length) {
+                this.loadProdutos();
+                if (completed > 0) {
+                  this.alertService.warning('Parcialmente Completo', `${completed} produtos removidos, ${errors} falharam.`);
+                } else {
+                  this.alertService.error('Erro', 'Não foi possível remover os produtos dos destaques.');
+                }
+              }
+            }
+          });
+        });
+      }
+    );
   }
 
   calcularLucro(produto: ProductResponse): number {

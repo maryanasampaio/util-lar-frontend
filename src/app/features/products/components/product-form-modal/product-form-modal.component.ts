@@ -184,15 +184,37 @@ import { Product, ProductFormData, ProductFormSubmission } from '../../models/pr
           </div>
         </div>
 
-        <!-- Featured -->
-        <div class="flex items-center">
-          <input 
-            type="checkbox" 
-            [(ngModel)]="formData.featured" 
-            name="featured"
-            id="featured"
-            class="w-4 h-4 border-gray-300 rounded" style="accent-color: #7588A8;">
-          <label for="featured" class="ml-2 text-sm font-medium text-gray-700">Produto em destaque</label>
+        <!-- Produto em Destaque -->
+        <div class="rounded-xl p-4 border-2 transition-all" 
+          [style.background-color]="formData.featured ? '#FEF3C7' : '#F5F7FA'" 
+          [style.border-color]="formData.featured ? '#F59E0B' : '#D7DDE3'">
+          <div class="flex items-start gap-3">
+            <div class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center" 
+              [style.background-color]="formData.featured ? '#FCD34D' : '#E6EBEF'">
+              <svg class="w-5 h-5" [attr.fill]="formData.featured ? '#92400E' : 'none'" [attr.stroke]="formData.featured ? '#92400E' : '#6B7785'" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+              </svg>
+            </div>
+            <div class="flex-1">
+              <div class="flex items-center gap-2 mb-1">
+                <input 
+                  type="checkbox" 
+                  [(ngModel)]="formData.featured" 
+                  name="featured"
+                  id="featured"
+                  class="w-5 h-5 border-2 rounded cursor-pointer transition-all" 
+                  [style.accent-color]="formData.featured ? '#F59E0B' : '#7588A8'">
+                <label for="featured" class="text-base font-bold cursor-pointer" 
+                  [style.color]="formData.featured ? '#92400E' : '#23292A'">
+                  Produto em Destaque
+                </label>
+              </div>
+              <p class="text-xs leading-relaxed" 
+                [style.color]="formData.featured ? '#78350F' : '#6B7785'">
+                Este produto será exibido no carrossel principal da página inicial para maior visibilidade
+              </p>
+            </div>
+          </div>
         </div>
 
         <div *ngIf="!editMode" class="rounded-xl p-4 space-y-2" style="background-color: #F5F7FA; border: 1px solid #D7DDE3;">

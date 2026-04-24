@@ -85,8 +85,22 @@ import { AlertService } from '../../../../shared/services/alert.service';
                     </span>
                   </div>
 
+                  <!-- Botão Destaque (Admin) -->
+                  <button
+                    *ngIf="isAdmin"
+                    (click)="toggleFeatured($event)"
+                    class="absolute top-3 left-3 z-10 w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-all duration-200 hover:scale-110"
+                    [style.background-color]="produto.featured ? '#FEF3C7' : 'rgba(255,255,255,0.9)'"
+                    [style.border]="produto.featured ? '2px solid #F59E0B' : 'none'"
+                    [title]="produto.featured ? 'Remover dos destaques' : 'Adicionar aos destaques'">
+                    <svg class="w-6 h-6" [attr.fill]="produto.featured ? '#F59E0B' : 'none'" [attr.stroke]="produto.featured ? '#F59E0B' : '#6B7785'" viewBox="0 0 24 24" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                    </svg>
+                  </button>
+
                   <!-- Botão Favorito -->
                   <button
+                    *ngIf="!isAdmin"
                     (click)="toggleFavorite($event)"
                     class="absolute top-3 right-3 z-10 w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition-all duration-200 hover:scale-110"
                     [style.background-color]="isFavorite() ? '#DC2626' : 'rgba(255,255,255,0.9)'"
@@ -99,7 +113,8 @@ import { AlertService } from '../../../../shared/services/alert.service';
                   <!-- Botão Compartilhar -->
                   <button
                     (click)="shareProduct($event)"
-                    class="absolute top-3 right-16 z-10 w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition-all duration-200 hover:scale-110"
+                    [class]="isAdmin ? 'absolute top-3 right-3 z-10' : 'absolute top-3 right-16 z-10'"
+                    class="w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition-all duration-200 hover:scale-110"
                     style="background-color: rgba(255,255,255,0.9);"
                     title="Compartilhar">
                     <svg class="w-5 h-5" fill="none" stroke="#6B7785" viewBox="0 0 24 24" stroke-width="2">
@@ -397,6 +412,36 @@ export class ProductDetailComponent implements OnInit {
         });
       }
     );
+  }
+
+  toggleFeatured(event: Event): void {
+    event.stopPropagation();
+    if (!this.produto) return;
+    
+    const newFeaturedStatus = !this.produto.featured;
+    const action = newFeaturedStatus ? 'marcar como destaque' : 'remover destaque';
+    
+    this.productService.atualizarProduto(this.produto.id, { featured: newFeaturedStatus } as any).subscribe({
+      next: () => {
+        console.log('[ProductDetail] Status de destaque alterado:', newFeaturedStatus);
+        
+        // Atualiza o produto localmente
+        if (this.produto) {
+          this.produto.featured = newFeaturedStatus;
+          this.cdr.detectChanges();
+        }
+        
+        // Mostra feedback ao usuário
+        const message = newFeaturedStatus 
+          ? 'Produto adicionado aos destaques da página inicial!' 
+          : 'Produto removido dos destaques!';
+        this.alertService.success('Destaque Atualizado', message);
+      },
+      error: (err) => {
+        console.error('[ProductDetail] Erro ao alterar destaque:', err);
+        this.alertService.error('Erro', `Não foi possível ${action}. Verifique sua conexão e permissões.`);
+      }
+    });
   }
 
   voltar(): void {
