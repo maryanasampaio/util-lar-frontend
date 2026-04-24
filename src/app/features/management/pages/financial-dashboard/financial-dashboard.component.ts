@@ -8,6 +8,7 @@ import {
   ProductFinancial,
   SoldProduct
 } from '../../services/financial.service';
+import { SidebarService } from '../../../../core/services/sidebar.service';
 
 /**
  * ============================================================================
@@ -54,8 +55,23 @@ interface ProductWithMargin {
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="min-h-screen overflow-x-hidden pt-16 px-3 sm:p-4 md:p-8" style="background: linear-gradient(135deg, #EEF2F5, #E6EBEF);">
-      <div class="max-w-7xl mx-auto">
+    <div class="min-h-screen overflow-x-hidden" style="background: linear-gradient(135deg, #EEF2F5, #E6EBEF);">
+      <!-- Header com botão sidebar -->
+      <div class="sticky top-0 z-10 pt-16 sm:pt-0" style="background: linear-gradient(135deg, #EEF2F5, #E6EBEF);">
+        <div class="max-w-7xl mx-auto px-3 sm:px-4 md:px-8 py-3">
+          <button 
+            (click)="toggleSidebar()"
+            class="p-2 rounded-lg transition-all hover:scale-110 shadow-md" 
+            style="background-color: #FFFFFF; border: 1px solid #D7DDE3; color: #6B7785;"
+            title="Menu">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      
+      <div class="max-w-7xl mx-auto px-3 sm:px-4 md:px-8 pb-8">
         <!-- Header -->
         <div class="mb-5 sm:mb-8 flex flex-col gap-2 sm:gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -449,7 +465,8 @@ export class FinancialDashboardComponent implements OnInit, OnDestroy {
 
   constructor(
     public readonly financialService: FinancialService,
-    private readonly cdr: ChangeDetectorRef
+    private readonly cdr: ChangeDetectorRef,
+    private readonly sidebarService: SidebarService
   ) {}
 
   ngOnInit(): void {
@@ -615,5 +632,12 @@ export class FinancialDashboardComponent implements OnInit, OnDestroy {
    */
   formatarPreco(preco: number): string {
     return (preco / 100).toFixed(2).replace('.', ',');
+  }
+
+  /**
+   * Toggle sidebar
+   */
+  toggleSidebar(): void {
+    this.sidebarService.toggle();
   }
 }

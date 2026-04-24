@@ -9,6 +9,7 @@ import {
   SimulationState,
 } from '../../models/simulation.model';
 import { AlertService } from '../../../../shared/services/alert.service';
+import { SidebarService } from '../../../../core/services/sidebar.service';
 
 @Component({
   selector: 'app-simulation-card',
@@ -48,7 +49,8 @@ export class SimulationCardComponent implements OnInit {
   constructor(
     private readonly simulationService: SimulationService,
     private readonly cdr: ChangeDetectorRef,
-    private readonly alertService: AlertService
+    private readonly alertService: AlertService,
+    private readonly sidebarService: SidebarService
   ) {}
 
   ngOnInit(): void {
@@ -674,5 +676,12 @@ export class SimulationCardComponent implements OnInit {
       withRepasse: null,
       withoutRepasse: null,
     };
+  }
+
+  /**
+   * Toggle sidebar
+   */
+  toggleSidebar(): void {
+    this.sidebarService.toggle();
   }
 }
