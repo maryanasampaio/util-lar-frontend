@@ -735,6 +735,9 @@
           <div class="text-base sm:text-xl font-bold" [style.color]="getDiscountPercent(produto) > 0 ? '#16A34A' : '#23292A'">
             R$ {{ formatarPreco(produto.price) }}
           </div>
+          <div class="text-xs sm:text-sm" style="color: #7588A8;">
+            ou até <span class="font-semibold">12x</span> de <span class="font-semibold">R$ {{ calculateInstallment12x(produto.price) }}</span>
+          </div>
           <div *ngIf="isAdmin && produto.costPrice" class="text-xs font-semibold" style="color: #5a8a6a;">
             Lucro: R$ {{ formatarPreco(produto.price - produto.costPrice) }}
           </div>

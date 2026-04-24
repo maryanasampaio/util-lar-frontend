@@ -14,6 +14,7 @@ import { PwaInstallPromptComponent } from '../../../../shared/components/pwa-ins
 import { CapitalizePipe } from '../../../../shared/pipes/capitalize.pipe';
 import { AlertService } from '../../../../shared/services/alert.service';
 import { FavoritesService } from '../../../../core/services/favorites.service';
+import { SimulationService } from '../../../simulations/services/simulation.service';
 import { finalize, Subject, takeUntil } from 'rxjs';
 
 
@@ -94,6 +95,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   showCreateModal = false;
   showEditModal = false;
   showAdminLoginModal = false;
+  adminLoginLoading = false;
+  adminLoginError = '';
   showMarketplacePublishModal = false;
   showWelcomeModal = false;
   marketplaceDraftProduct?: Product;
@@ -118,7 +121,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     public readonly adminModeService: AdminModeService,
     private readonly alertService: AlertService,
     private readonly productTracker: ProductTrackerService,
-    private readonly favoritesService: FavoritesService
+    private readonly favoritesService: FavoritesService,
+    private readonly simulationService: SimulationService
   ) {}
 
   ngOnInit(): void {
@@ -246,6 +250,24 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   isFavorite(productId: number): boolean {
     return this.favoritesService.isFavorite(productId);
+  }
+
+  /**
+   * Calcula o valor da parcela em 12x usando a simulação Infinity (com repasse)
+   * Taxa de 16.66% para 12 parcelas, conforme configurado no SimulationService
+   */
+  calculateInstallment12x(priceInCents: number): string {
+    const priceInReais = priceInCents / 100;
+    const rate = 16.66 / 100; // Taxa para 12 parcelas
+    
+    // COM REPASSE (Infinity): valorCliente = valorBase ÷ (1 - taxa)
+    const finalAmount = priceInReais / (1 - rate);
+    const installmentValue = finalAmount / 12;
+    
+    return (Math.round(installmentValue * 100) / 100).toLocaleString('pt-BR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
   }
 
   goToFavorites(): void {
@@ -516,6 +538,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         next: () => {
           console.log('[Dashboard] Admin autenticado com sucesso');
           this.showAdminLoginModal = false;
+          this.cdr.detectChanges();
         },
         error: (error) => {
           console.error('[Dashboard] Erro ao autenticar admin:', error);
@@ -534,10 +557,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
           }
           
           this.alertService.error('Erro ao fazer login', message);
+          this.cdr.detectChanges();
         }
       });
     } else {
       this.showAdminLoginModal = false;
+      this.cdr.detectChanges();
     }
   }
 

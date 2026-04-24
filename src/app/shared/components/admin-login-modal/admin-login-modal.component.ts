@@ -74,6 +74,12 @@ export class AdminLoginModalComponent {
       this.errorMessage = '';
       // Envia senha para o componente pai validar no backend
       this.adminAuthenticated.emit(this.password);
+      
+      // Reset após um delay para permitir que o pai processe
+      setTimeout(() => {
+        this.isLoading = false;
+        this.password = '';
+      }, 100);
     } else {
       this.errorMessage = 'Por favor, digite a senha.';
     }
@@ -87,9 +93,15 @@ export class AdminLoginModalComponent {
 
   setSuccess(): void {
     this.isLoading = false;
+    this.password = '';
+    this.errorMessage = '';
   }
 
   onClose(): void {
+    // Reseta o estado ao fechar
+    this.password = '';
+    this.errorMessage = '';
+    this.isLoading = false;
     this.closeModal.emit();
   }
 }

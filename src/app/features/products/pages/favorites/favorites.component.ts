@@ -129,6 +129,9 @@ import { Subject, takeUntil, skip } from 'rxjs';
                 <div class="text-base sm:text-xl font-bold" style="color: #23292A;">
                   R$ {{ formatarPreco(produto.price) }}
                 </div>
+                <div class="text-xs sm:text-sm" style="color: #7588A8;">
+                  ou até <span class="font-semibold">12x</span> de <span class="font-semibold">R$ {{ calculateInstallment12x(produto.price) }}</span>
+                </div>
               </div>
               
               <button 
@@ -213,6 +216,22 @@ export class FavoritesComponent implements OnInit, OnDestroy {
 
   formatarPreco(centavos: number): string {
     return (centavos / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+  }
+
+  /**
+   * Calcula o valor da parcela em 12x usando a simulação Infinity (com repasse)
+   * Taxa de 16.66% para 12 parcelas
+   */
+  calculateInstallment12x(priceInCents: number): string {
+    const priceInReais = priceInCents / 100;
+    const rate = 16.66 / 100;
+    const finalAmount = priceInReais / (1 - rate);
+    const installmentValue = finalAmount / 12;
+    
+    return (Math.round(installmentValue * 100) / 100).toLocaleString('pt-BR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
   }
 
   trackByProductId(index: number, produto: ProductResponse): number {

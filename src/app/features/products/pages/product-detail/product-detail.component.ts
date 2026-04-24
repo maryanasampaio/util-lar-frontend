@@ -198,8 +198,11 @@ import { AlertService } from '../../../../shared/services/alert.service';
                   <div class="text-3xl sm:text-4xl font-extrabold" style="color: #7588A8;">
                     R$ {{ formatarPreco(produto.price) }}
                   </div>
-                  <p class="text-xs mt-1" style="color: #A0AEC0;">
-                    ou consulte condições de pagamento via WhatsApp
+                  <div class="text-sm mt-1" style="color: #6B7785;">
+                    ou até <span class="font-semibold">12x</span> de <span class="font-semibold text-base" style="color: #7588A8;">R$ {{ calculateInstallment12x(produto.price) }}</span>
+                  </div>
+                  <p class="text-xs mt-2" style="color: #A0AEC0;">
+                    Condições de pagamento via WhatsApp
                   </p>
                 </div>
 
@@ -445,6 +448,19 @@ export class ProductDetailComponent implements OnInit {
 
   formatarPreco(preco: number): string {
     return (preco / 100).toFixed(2).replace('.', ',');
+  }
+
+  /**
+   * Calcula o valor da parcela em 12x usando a simulação Infinity (com repasse)
+   * Taxa de 16.66% para 12 parcelas
+   */
+  calculateInstallment12x(priceInCents: number): string {
+    const priceInReais = priceInCents / 100;
+    const rate = 16.66 / 100;
+    const finalAmount = priceInReais / (1 - rate);
+    const installmentValue = finalAmount / 12;
+    
+    return (Math.round(installmentValue * 100) / 100).toFixed(2).replace('.', ',');
   }
 
   shareProduct(event: Event): void {
