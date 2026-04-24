@@ -57,8 +57,8 @@ interface ProductWithMargin {
   template: `
     <div class="min-h-screen overflow-x-hidden" style="background: linear-gradient(135deg, #EEF2F5, #E6EBEF);">
       <!-- Header com botão sidebar -->
-      <div class="sticky top-0 z-10 pt-16 sm:pt-0" style="background: linear-gradient(135deg, #EEF2F5, #E6EBEF);">
-        <div class="max-w-7xl mx-auto px-3 sm:px-4 md:px-8 py-3">
+      <div class="sticky top-0 z-10" style="background: linear-gradient(135deg, #EEF2F5, #E6EBEF);">
+        <div class="max-w-7xl mx-auto px-3 sm:px-4 md:px-8 py-2">
           <button 
             (click)="toggleSidebar()"
             class="p-2 rounded-lg transition-all hover:scale-110 shadow-md" 
