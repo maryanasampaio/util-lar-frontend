@@ -6,6 +6,7 @@ import { ProductService } from '../../services/product.service';
 import { Product, ProductResponse, ProductFormSubmission } from '../../models/product.model';
 import { AdminModeService } from '../../../../core/services/admin-mode.service';
 import { ProductTrackerService } from '../../../../core/services/product-tracker.service';
+import { SidebarService } from '../../../../core/services/sidebar.service';
 import { MarketplacePublishModalComponent } from '../../components/marketplace-publish-modal/marketplace-publish-modal.component';
 import { ProductFormModalComponent } from '../../components/product-form-modal/product-form-modal.component';
 import { AdminLoginModalComponent } from '../../../../shared/components/admin-login-modal/admin-login-modal.component';
@@ -15,7 +16,7 @@ import { CapitalizePipe } from '../../../../shared/pipes/capitalize.pipe';
 import { AlertService } from '../../../../shared/services/alert.service';
 import { FavoritesService } from '../../../../core/services/favorites.service';
 import { SimulationService } from '../../../simulations/services/simulation.service';
-import { finalize, Subject, takeUntil } from 'rxjs';
+import { finalize, Subject, takeUntil, forkJoin } from 'rxjs';
 
 
 @Component({
@@ -123,7 +124,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private readonly alertService: AlertService,
     private readonly productTracker: ProductTrackerService,
     private readonly favoritesService: FavoritesService,
-    private readonly simulationService: SimulationService
+    private readonly simulationService: SimulationService,
+    private readonly sidebarService: SidebarService
   ) {}
 
   ngOnInit(): void {
@@ -292,6 +294,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   goToNotifications(): void {
     this.router.navigate(['/configuracoes']);
+  }
+
+  toggleSidebar(): void {
+    this.sidebarService.toggle();
   }
 
   shareProduct(produto: any, event?: Event): void {
@@ -819,15 +825,20 @@ export class DashboardComponent implements OnInit, OnDestroy {
       'Remover Produto',
       'Tem certeza que deseja remover este produto? Esta ação não pode ser desfeita.',
       () => {
-        this.productService.removerProduto(id).subscribe({
-          next: () => {
-            this.loadProdutos();
-            this.alertService.success('Produto Removido', 'O produto foi removido com sucesso!');
-          },
-          error: (err) => {
-            this.alertService.error('Erro ao remover produto', err.message || 'Não foi possível remover o produto.');
-          }
-        });
+        this.productService.removerProduto(id)
+          .pipe(
+            takeUntil(this.destroy$),
+            finalize(() => this.cdr.detectChanges())
+          )
+          .subscribe({
+            next: () => {
+              this.loadProdutos();
+              this.alertService.success('Produto Removido', 'O produto foi removido com sucesso!');
+            },
+            error: (err) => {
+              this.alertService.error('Erro ao remover produto', err.message || 'Não foi possível remover o produto.');
+            }
+          });
       }
     );
   }
@@ -838,17 +849,22 @@ export class DashboardComponent implements OnInit, OnDestroy {
       'Marcar como Vendido',
       'Confirma que este produto foi vendido?',
       () => {
-        this.productService.marcarComoVendido(id).subscribe({
-          next: () => {
-            console.log('[Dashboard] Produto marcado como vendido');
-            this.loadProdutos();
-            this.alertService.success('Produto Vendido', 'O produto foi marcado como vendido!');
-          },
-          error: (err) => {
-            console.error('[Dashboard] Erro ao marcar como vendido:', err);
-            this.alertService.error('Erro', 'Não foi possível marcar como vendido. Verifique sua conexão e permissões.');
-          }
-        });
+        this.productService.marcarComoVendido(id)
+          .pipe(
+            takeUntil(this.destroy$),
+            finalize(() => this.cdr.detectChanges())
+          )
+          .subscribe({
+            next: () => {
+              console.log('[Dashboard] Produto marcado como vendido');
+              this.loadProdutos();
+              this.alertService.success('Produto Vendido', 'O produto foi marcado como vendido!');
+            },
+            error: (err) => {
+              console.error('[Dashboard] Erro ao marcar como vendido:', err);
+              this.alertService.error('Erro', 'Não foi possível marcar como vendido. Verifique sua conexão e permissões.');
+            }
+          });
       }
     );
   }
@@ -860,17 +876,22 @@ export class DashboardComponent implements OnInit, OnDestroy {
       'Reativar Produto',
       'Deseja reativar este produto para venda?',
       () => {
-        this.productService.reativarProduto(id).subscribe({
-          next: () => {
-            console.log('[Dashboard] Produto reativado');
-            this.loadProdutos();
-            this.alertService.success('Produto Reativado', 'O produto está disponível novamente para venda!');
-          },
-          error: (err) => {
-            console.error('[Dashboard] Erro ao reativar produto:', err);
-            this.alertService.error('Erro', 'Não foi possível reativar o produto. Verifique sua conexão e permissões.');
-          }
-        });
+        this.productService.reativarProduto(id)
+          .pipe(
+            takeUntil(this.destroy$),
+            finalize(() => this.cdr.detectChanges())
+          )
+          .subscribe({
+            next: () => {
+              console.log('[Dashboard] Produto reativado');
+              this.loadProdutos();
+              this.alertService.success('Produto Reativado', 'O produto está disponível novamente para venda!');
+            },
+            error: (err) => {
+              console.error('[Dashboard] Erro ao reativar produto:', err);
+              this.alertService.error('Erro', 'Não foi possível reativar o produto. Verifique sua conexão e permissões.');
+            }
+          });
       }
     );
   }
@@ -892,40 +913,31 @@ export class DashboardComponent implements OnInit, OnDestroy {
       `Deseja remover todos os ${featuredProducts.length} produtos do carrossel de destaques?`,
       () => {
         console.log('[Dashboard] Limpando todos os destaques...');
-        let completed = 0;
-        let errors = 0;
+        
+        // Cria um array de observables para todas as atualizações
+        const updates$ = featuredProducts.map(produto => 
+          this.productService.atualizarProduto(produto.id, { featured: false } as any)
+        );
 
-        featuredProducts.forEach(produto => {
-          this.productService.atualizarProduto(produto.id, { featured: false } as any).subscribe({
+        // Executa todas as atualizações em paralelo
+        forkJoin(updates$)
+          .pipe(
+            takeUntil(this.destroy$),
+            finalize(() => {
+              this.loadProdutos();
+              this.cdr.detectChanges();
+            })
+          )
+          .subscribe({
             next: () => {
-              console.log(`[Dashboard] Produto ${produto.id} desmarcado como destaque`);
-              completed++;
-              
-              // Quando todos terminarem (com sucesso ou erro)
-              if (completed + errors === featuredProducts.length) {
-                this.loadProdutos();
-                if (errors === 0) {
-                  this.alertService.success('Carrossel Limpo', 'Todos os produtos foram removidos dos destaques!');
-                } else {
-                  this.alertService.warning('Parcialmente Completo', `${completed} produtos removidos, ${errors} falharam.`);
-                }
-              }
+              console.log('[Dashboard] Todos os produtos desmarcados como destaque');
+              this.alertService.success('Carrossel Limpo', 'Todos os produtos foram removidos dos destaques!');
             },
             error: (err) => {
-              console.error(`[Dashboard] Erro ao desmarcar produto ${produto.id}:`, err);
-              errors++;
-              
-              if (completed + errors === featuredProducts.length) {
-                this.loadProdutos();
-                if (completed > 0) {
-                  this.alertService.warning('Parcialmente Completo', `${completed} produtos removidos, ${errors} falharam.`);
-                } else {
-                  this.alertService.error('Erro', 'Não foi possível remover os produtos dos destaques.');
-                }
-              }
+              console.error('[Dashboard] Erro ao limpar destaques:', err);
+              this.alertService.error('Erro', 'Não foi possível remover todos os produtos dos destaques. Alguns podem ter sido removidos.');
             }
           });
-        });
       }
     );
   }

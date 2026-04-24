@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProductService } from '../../services/product.service';
@@ -7,6 +7,7 @@ import { AdminModeService } from '../../../../core/services/admin-mode.service';
 import { FavoritesService } from '../../../../core/services/favorites.service';
 import { CapitalizePipe } from '../../../../shared/pipes/capitalize.pipe';
 import { AlertService } from '../../../../shared/services/alert.service';
+import { Subject, takeUntil, finalize } from 'rxjs';
 
 @Component({
   selector: 'app-product-detail',
@@ -313,11 +314,12 @@ import { AlertService } from '../../../../shared/services/alert.service';
     </div>
   `
 })
-export class ProductDetailComponent implements OnInit {
+export class ProductDetailComponent implements OnInit, OnDestroy {
   produto?: Product;
   isLoading = true;
   imagemPrincipalIndex = 0;
   isAdmin = false;
+  private readonly destroy$ = new Subject<void>();
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -334,9 +336,11 @@ export class ProductDetailComponent implements OnInit {
     console.log('ID da rota:', id);
     
     // Verifica modo admin
-    this.adminModeService.isAdmin$.subscribe(isAdmin => {
-      this.isAdmin = isAdmin;
-    });
+    this.adminModeService.isAdmin$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(isAdmin => {
+        this.isAdmin = isAdmin;
+      });
     
     if (id) {
       this.loadProduto(Number(id));
@@ -379,16 +383,21 @@ export class ProductDetailComponent implements OnInit {
       'Marcar como Vendido',
       'Confirma que este produto foi vendido?',
       () => {
-        this.productService.marcarComoVendido(this.produto!.id).subscribe({
-          next: () => {
-            this.alertService.success('Produto Vendido', 'O produto foi marcado como vendido!');
-            this.loadProduto(this.produto!.id);
-          },
-          error: (err) => {
-            console.error('Erro ao marcar como vendido:', err);
-            this.alertService.error('Erro', 'Não foi possível marcar como vendido. Verifique sua conexão e permissões.');
-          }
-        });
+        this.productService.marcarComoVendido(this.produto!.id)
+          .pipe(
+            takeUntil(this.destroy$),
+            finalize(() => this.cdr.detectChanges())
+          )
+          .subscribe({
+            next: () => {
+              this.alertService.success('Produto Vendido', 'O produto foi marcado como vendido!');
+              this.loadProduto(this.produto!.id);
+            },
+            error: (err) => {
+              console.error('Erro ao marcar como vendido:', err);
+              this.alertService.error('Erro', 'Não foi possível marcar como vendido. Verifique sua conexão e permissões.');
+            }
+          });
       }
     );
   }
@@ -400,16 +409,21 @@ export class ProductDetailComponent implements OnInit {
       'Reativar Produto',
       'Deseja reativar este produto para venda?',
       () => {
-        this.productService.reativarProduto(this.produto!.id).subscribe({
-          next: () => {
-            this.alertService.success('Produto Reativado', 'O produto está disponível novamente para venda!');
-            this.loadProduto(this.produto!.id);
-          },
-          error: (err) => {
-            console.error('Erro ao reativar produto:', err);
-            this.alertService.error('Erro', 'Não foi possível reativar o produto. Verifique sua conexão e permissões.');
-          }
-        });
+        this.productService.reativarProduto(this.produto!.id)
+          .pipe(
+            takeUntil(this.destroy$),
+            finalize(() => this.cdr.detectChanges())
+          )
+          .subscribe({
+            next: () => {
+              this.alertService.success('Produto Reativado', 'O produto está disponível novamente para venda!');
+              this.loadProduto(this.produto!.id);
+            },
+            error: (err) => {
+              console.error('Erro ao reativar produto:', err);
+              this.alertService.error('Erro', 'Não foi possível reativar o produto. Verifique sua conexão e permissões.');
+            }
+          });
       }
     );
   }
@@ -421,27 +435,32 @@ export class ProductDetailComponent implements OnInit {
     const newFeaturedStatus = !this.produto.featured;
     const action = newFeaturedStatus ? 'marcar como destaque' : 'remover destaque';
     
-    this.productService.atualizarProduto(this.produto.id, { featured: newFeaturedStatus } as any).subscribe({
-      next: () => {
-        console.log('[ProductDetail] Status de destaque alterado:', newFeaturedStatus);
-        
-        // Atualiza o produto localmente
-        if (this.produto) {
-          this.produto.featured = newFeaturedStatus;
-          this.cdr.detectChanges();
+    this.productService.atualizarProduto(this.produto.id, { featured: newFeaturedStatus } as any)
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => this.cdr.detectChanges())
+      )
+      .subscribe({
+        next: () => {
+          console.log('[ProductDetail] Status de destaque alterado:', newFeaturedStatus);
+          
+          // Atualiza o produto localmente
+          if (this.produto) {
+            this.produto.featured = newFeaturedStatus;
+            this.cdr.detectChanges();
+          }
+          
+          // Mostra feedback ao usuário
+          const message = newFeaturedStatus 
+            ? 'Produto adicionado aos destaques da página inicial!' 
+            : 'Produto removido dos destaques!';
+          this.alertService.success('Destaque Atualizado', message);
+        },
+        error: (err) => {
+          console.error('[ProductDetail] Erro ao alterar destaque:', err);
+          this.alertService.error('Erro', `Não foi possível ${action}. Verifique sua conexão e permissões.`);
         }
-        
-        // Mostra feedback ao usuário
-        const message = newFeaturedStatus 
-          ? 'Produto adicionado aos destaques da página inicial!' 
-          : 'Produto removido dos destaques!';
-        this.alertService.success('Destaque Atualizado', message);
-      },
-      error: (err) => {
-        console.error('[ProductDetail] Erro ao alterar destaque:', err);
-        this.alertService.error('Erro', `Não foi possível ${action}. Verifique sua conexão e permissões.`);
-      }
-    });
+      });
   }
 
   voltar(): void {
@@ -526,5 +545,10 @@ export class ProductDetailComponent implements OnInit {
         this.alertService.success('Link copiado!', 'O link do produto foi copiado para a área de transferência.');
       }).catch(() => {});
     }
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }
