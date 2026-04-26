@@ -246,6 +246,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           console.error('[Dashboard] loadProdutos - erro:', err);
+          console.error('[Dashboard] loadProdutos - status:', err?.status, '| body:', err?.error);
           this.errorMessage = err?.message || 'Erro ao carregar produtos';
           this.cdr.detectChanges();
         }
