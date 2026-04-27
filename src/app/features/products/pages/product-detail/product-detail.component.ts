@@ -531,7 +531,7 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     event.stopPropagation();
     if (!this.produto) return;
 
-    const url = `${globalThis.location.origin}/produto/${this.produto.id}`;
+    const url = `${globalThis.location.origin}/dashboard/produto/${this.produto.id}`;
     const text = `${this.produto.name} - R$ ${this.formatarPreco(this.produto.price)}`;
 
     if (navigator.share) {

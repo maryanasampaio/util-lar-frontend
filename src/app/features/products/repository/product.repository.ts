@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { environment } from "../../../../environments/environment";
 import { Product, ProductResponse, ProductFormData } from "../models/product.model";
 import { Observable } from "rxjs";
+import { map } from "rxjs/operators";
 
 /**
  * Repository para comunicação com API de produtos
@@ -22,7 +23,9 @@ export class ProductsRepository {
    * GET /produtos
    */
   buscarProdutos(): Observable<ProductResponse[]> {
-    return this.http.get<ProductResponse[]>(`${this.apiUrl}/produtos`);
+    return this.http.get<ProductResponse[]>(`${this.apiUrl}/produtos`).pipe(
+      map(produtos => produtos.map(produto => this.normalizeProductImages(produto)))
+    );
   }
 
   /**
@@ -30,7 +33,9 @@ export class ProductsRepository {
    * GET /produtos/:id
    */
   buscarProdutoPorId(id: number): Observable<ProductResponse> {
-    return this.http.get<ProductResponse>(`${this.apiUrl}/produtos/${id}`);
+    return this.http.get<ProductResponse>(`${this.apiUrl}/produtos/${id}`).pipe(
+      map(produto => this.normalizeProductImages(produto))
+    );
   }
 
   /**
@@ -76,5 +81,34 @@ export class ProductsRepository {
   reativarProduto(id: number, stock?: number): Observable<Product> {
     const body = stock !== undefined ? { stock } : {};
     return this.http.post<Product>(`${this.apiUrl}/produtos/${id}/available`, body);
+  }
+
+  /**
+   * Normaliza as imagens do produto
+   * Se images vier como string JSON, parseia para array
+   * Se vier null ou vazio, retorna null
+   */
+  private normalizeProductImages(produto: ProductResponse): ProductResponse {
+    if (!produto.images) {
+      return { ...produto, images: null };
+    }
+
+    // Se images for string (JSON), tentar parsear
+    if (typeof produto.images === 'string') {
+      try {
+        const parsed = JSON.parse(produto.images as any);
+        return { ...produto, images: Array.isArray(parsed) ? parsed : null };
+      } catch {
+        return { ...produto, images: null };
+      }
+    }
+
+    // Se já for array, retornar como está
+    if (Array.isArray(produto.images)) {
+      return produto;
+    }
+
+    // Caso não seja nem string nem array, retornar null
+    return { ...produto, images: null };
   }
 }

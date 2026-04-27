@@ -597,14 +597,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
   onAdminAuthenticated(password: string): void {
     const loginObservable = this.adminModeService.enableAdminMode(password);
     if (loginObservable) {
-      loginObservable.subscribe({
-        next: () => {
-          console.log('[Dashboard] Admin autenticado com sucesso');
-          this.showAdminLoginModal = false;
-          this.cdr.detectChanges();
-        },
-        error: (error) => {
-          console.error('[Dashboard] Erro ao autenticar admin:', error);
+      loginObservable
+        .pipe(
+          takeUntil(this.destroy$),
+          finalize(() => this.cdr.detectChanges())
+        )
+        .subscribe({
+          next: () => {
+            console.log('[Dashboard] Admin autenticado com sucesso');
+            this.showAdminLoginModal = false;
+          },
+          error: (error) => {
+            console.error('[Dashboard] Erro ao autenticar admin:', error);
           
           // Mensagem específica baseada no erro
           let message: string;
@@ -640,14 +644,19 @@ export class DashboardComponent implements OnInit, OnDestroy {
   toggleAdminMode(): void {
     const result = this.adminModeService.toggleAdminMode();
     if (result && typeof result.subscribe === 'function') {
-      result.subscribe({
-        next: () => {
-          console.log('[Dashboard] Admin mode alternado com sucesso');
-        },
-        error: (error) => {
-          console.error('[Dashboard] Erro ao alternar admin mode:', error);
-        }
-      });
+      result
+        .pipe(
+          takeUntil(this.destroy$),
+          finalize(() => this.cdr.detectChanges())
+        )
+        .subscribe({
+          next: () => {
+            console.log('[Dashboard] Admin mode alternado com sucesso');
+          },
+          error: (error) => {
+            console.error('[Dashboard] Erro ao alternar admin mode:', error);
+          }
+        });
     }
   }
 
@@ -774,22 +783,27 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   // CRUD Actions
   onCreateProduct(submission: ProductFormSubmission): void {
-    this.productService.criarProduto(submission.product).subscribe({
-      next: (product) => {
-        this.closeCreateModal();
-        this.loadProdutos();
+    this.productService.criarProduto(submission.product)
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => this.cdr.detectChanges())
+      )
+      .subscribe({
+        next: (product) => {
+          this.closeCreateModal();
+          this.loadProdutos();
 
-        if (submission.publishToFacebookMarketplace) {
-          this.openMarketplacePublishModal(product);
-          return;
+          if (submission.publishToFacebookMarketplace) {
+            this.openMarketplacePublishModal(product);
+            return;
+          }
+
+          this.alertService.success('Produto Criado', 'O produto foi adicionado com sucesso!');
+        },
+        error: (err) => {
+          this.alertService.error('Erro ao criar produto', err.message || 'Não foi possível criar o produto.');
         }
-
-        this.alertService.success('Produto Criado', 'O produto foi adicionado com sucesso!');
-      },
-      error: (err) => {
-        this.alertService.error('Erro ao criar produto', err.message || 'Não foi possível criar o produto.');
-      }
-    });
+      });
   }
 
   onUpdateProduct(submission: ProductFormSubmission): void {
@@ -808,16 +822,21 @@ export class DashboardComponent implements OnInit, OnDestroy {
       (productData as any).originalPrice = null;
     }
     
-    this.productService.atualizarProduto(this.selectedProduct.id, productData).subscribe({
-      next: () => {
-        this.closeEditModal();
-        this.loadProdutos();
-        this.alertService.success('Produto Atualizado', 'As alterações foram salvas com sucesso!');
-      },
-      error: (err) => {
-        this.alertService.error('Erro ao atualizar produto', err.message || 'Não foi possível atualizar o produto.');
-      }
-    });
+    this.productService.atualizarProduto(this.selectedProduct.id, productData)
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => this.cdr.detectChanges())
+      )
+      .subscribe({
+        next: () => {
+          this.closeEditModal();
+          this.loadProdutos();
+          this.alertService.success('Produto Atualizado', 'As alterações foram salvas com sucesso!');
+        },
+        error: (err) => {
+          this.alertService.error('Erro ao atualizar produto', err.message || 'Não foi possível atualizar o produto.');
+        }
+      });
   }
 
   removerProduto(id: number, event: Event): void {
