@@ -58,27 +58,37 @@ export class DashboardComponent implements OnInit, OnDestroy {
     condition: true
   } as { [key: string]: boolean; category: boolean; brand: boolean; price: boolean; condition: boolean };
   
-  brands = [
-    { name: 'Brastemp' },
-    { name: 'Electrolux' },
-    { name: 'Consul' },
-    { name: 'Samsung' },
-    { name: 'LG' },
-    { name: 'Colormaq' },
-    { name: 'Mueller' },
-    { name: 'Madesa' },
-    { name: 'Bertolini' }
-  ];
-  
-  categories = [
-    { label: 'Todas', value: 'Todas' },
-    { label: 'Sofás', value: 'Sofá' },
-    { label: 'Mesas', value: 'Mesa' },
-    { label: 'Armários', value: 'Guarda-Roupa' },
-    { label: 'Cadeiras', value: 'Cadeira' },
-    { label: 'Racks', value: 'Rack' },
-    { label: 'Eletrodomésticos', value: 'Eletrodoméstico' }
-  ];
+  /** Marcas dinâmicas: derivadas dos produtos cadastrados, ordenadas alfabeticamente */
+  get brands(): { name: string }[] {
+    const seen = new Set<string>();
+    return this.produtos
+      .map(p => p.brand?.trim())
+      .filter((b): b is string => !!b)
+      .filter(b => {
+        if (seen.has(b)) return false;
+        seen.add(b);
+        return true;
+      })
+      .sort((a, b) => a.localeCompare(b, 'pt-BR'))
+      .map(name => ({ name }));
+  }
+
+  /** Categorias dinâmicas: "Todas" + categorias únicas dos produtos cadastrados */
+  get categories(): { label: string; value: string }[] {
+    const seen = new Set<string>();
+    const dynamic = this.produtos
+      .map(p => p.category?.trim())
+      .filter((c): c is string => !!c)
+      .filter(c => {
+        if (seen.has(c)) return false;
+        seen.add(c);
+        return true;
+      })
+      .sort((a, b) => a.localeCompare(b, 'pt-BR'))
+      .map(value => ({ label: value, value }));
+
+    return [{ label: 'Todas', value: 'Todas' }, ...dynamic];
+  }
   
   conditions = [
     { label: 'Todas', value: 'Todas' },
