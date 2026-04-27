@@ -435,6 +435,10 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     const newFeaturedStatus = !this.produto.featured;
     const action = newFeaturedStatus ? 'marcar como destaque' : 'remover destaque';
     
+    // ⚡ Atualização otimista: UI muda IMEDIATAMENTE
+    this.produto.featured = newFeaturedStatus;
+    this.cdr.detectChanges();
+    
     this.productService.atualizarProduto(this.produto.id, { featured: newFeaturedStatus } as any)
       .pipe(
         takeUntil(this.destroy$),
@@ -443,21 +447,16 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
       .subscribe({
         next: () => {
           console.log('[ProductDetail] Status de destaque alterado:', newFeaturedStatus);
-          
-          // Atualiza o produto localmente
-          if (this.produto) {
-            this.produto.featured = newFeaturedStatus;
-            this.cdr.detectChanges();
-          }
-          
-          // Mostra feedback ao usuário
-          const message = newFeaturedStatus 
-            ? 'Produto adicionado aos destaques da página inicial!' 
-            : 'Produto removido dos destaques!';
-          this.alertService.success('Destaque Atualizado', message);
         },
         error: (err) => {
           console.error('[ProductDetail] Erro ao alterar destaque:', err);
+          
+          // ⚠️ Reverte a mudança otimista em caso de erro
+          if (this.produto) {
+            this.produto.featured = !newFeaturedStatus;
+            this.cdr.detectChanges();
+          }
+          
           this.alertService.error('Erro', `Não foi possível ${action}. Verifique sua conexão e permissões.`);
         }
       });

@@ -190,7 +190,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.checkWelcomeModal();
 
     console.log('[Dashboard] Chamando loadProdutos');
-    this.loadProdutos();
+    this.loadProdutos(false); // Não força reload - usa cache se disponível
   }
 
   ngOnDestroy(): void {
@@ -200,13 +200,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  private loadProdutos() {
-    console.log('[Dashboard] loadProdutos - começando');
+  /**
+   * Carrega produtos do service
+   * @param forceReload - Se true, força busca do backend. Se false, usa cache se disponível.
+   */
+  private loadProdutos(forceReload = false) {
+    console.log('[Dashboard] loadProdutos - começando (forceReload:', forceReload, ')');
     this.isLoading = true;
     this.errorMessage = '';
     this.cdr.detectChanges();
     
-    this.productService.buscarProdutos()
+    this.productService.buscarProdutos(forceReload)
       .pipe(
         takeUntil(this.destroy$),
         finalize(() => {
@@ -387,21 +391,28 @@ export class DashboardComponent implements OnInit, OnDestroy {
   get filteredProducts(): ProductResponse[] {
     let filtered = [...this.produtos];
     
-    // Filtro de busca
+    // Filtro de busca - tolerante a acentos, maiúsculas/minúsculas e múltiplas palavras
     if (this.searchQuery.trim()) {
-      const query = this.searchQuery.toLowerCase();
-      filtered = filtered.filter(p => 
-        p.name.toLowerCase().includes(query) || 
-        p.category.toLowerCase().includes(query) ||
-        p.brand?.toLowerCase().includes(query)
-      );
+      const tokens = this.normalizeSearchText(this.searchQuery)
+        .split(/\s+/)
+        .filter(t => t.length > 0);
+
+      if (tokens.length > 0) {
+        filtered = filtered.filter(p => {
+          const haystack = this.normalizeSearchText(
+            `${p.name ?? ''} ${p.category ?? ''} ${p.brand ?? ''} ${p.description ?? ''}`
+          );
+          // Todos os tokens precisam estar presentes (busca AND)
+          return tokens.every(token => haystack.includes(token));
+        });
+      }
     }
     
     // Filtro de marca
     if (this.selectedBrand) {
-      const brand = this.selectedBrand.toLowerCase();
+      const brand = this.normalizeSearchText(this.selectedBrand);
       filtered = filtered.filter(p => 
-        p.brand?.toLowerCase().includes(brand)
+        this.normalizeSearchText(p.brand ?? '').includes(brand)
       );
     }
     
@@ -791,7 +802,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (product) => {
           this.closeCreateModal();
-          this.loadProdutos();
+          this.loadProdutos(true); // Força reload pois criou produto
 
           if (submission.publishToFacebookMarketplace) {
             this.openMarketplacePublishModal(product);
@@ -828,9 +839,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
         finalize(() => this.cdr.detectChanges())
       )
       .subscribe({
-        next: () => {
+        next: (updated) => {
           this.closeEditModal();
-          this.loadProdutos();
+          // ⚡ Atualização local imediata sem esperar reload
+          if (this.selectedProduct) {
+            const idx = this.produtos.findIndex(p => p.id === this.selectedProduct!.id);
+            if (idx !== -1) {
+              this.produtos[idx] = { ...this.produtos[idx], ...productData, ...(updated as any) } as ProductResponse;
+              this.produtos = [...this.produtos];
+              this.cdr.detectChanges();
+            }
+          }
           this.alertService.success('Produto Atualizado', 'As alterações foram salvas com sucesso!');
         },
         error: (err) => {
@@ -845,6 +864,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
       'Remover Produto',
       'Tem certeza que deseja remover este produto? Esta ação não pode ser desfeita.',
       () => {
+        // ⚡ Atualização otimista: remove da UI imediatamente
+        const backupProdutos = [...this.produtos];
+        this.produtos = this.produtos.filter(p => p.id !== id);
+        this.cdr.detectChanges();
+
         this.productService.removerProduto(id)
           .pipe(
             takeUntil(this.destroy$),
@@ -852,10 +876,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
           )
           .subscribe({
             next: () => {
-              this.loadProdutos();
               this.alertService.success('Produto Removido', 'O produto foi removido com sucesso!');
             },
             error: (err) => {
+              // ⚠️ Reverte em caso de erro
+              this.produtos = backupProdutos;
+              this.cdr.detectChanges();
               this.alertService.error('Erro ao remover produto', err.message || 'Não foi possível remover o produto.');
             }
           });
@@ -869,6 +895,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
       'Marcar como Vendido',
       'Confirma que este produto foi vendido?',
       () => {
+        // ⚡ Atualização otimista
+        const produto = this.produtos.find(p => p.id === id);
+        const previousState = produto?.disponivel;
+        if (produto) {
+          produto.disponivel = 0;
+          this.cdr.detectChanges();
+        }
+
         this.productService.marcarComoVendido(id)
           .pipe(
             takeUntil(this.destroy$),
@@ -877,11 +911,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
           .subscribe({
             next: () => {
               console.log('[Dashboard] Produto marcado como vendido');
-              this.loadProdutos();
               this.alertService.success('Produto Vendido', 'O produto foi marcado como vendido!');
             },
             error: (err) => {
               console.error('[Dashboard] Erro ao marcar como vendido:', err);
+              // ⚠️ Reverte em caso de erro
+              if (produto && previousState !== undefined) {
+                produto.disponivel = previousState;
+                this.cdr.detectChanges();
+              }
               this.alertService.error('Erro', 'Não foi possível marcar como vendido. Verifique sua conexão e permissões.');
             }
           });
@@ -896,6 +934,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
       'Reativar Produto',
       'Deseja reativar este produto para venda?',
       () => {
+        // ⚡ Atualização otimista
+        const produto = this.produtos.find(p => p.id === id);
+        const previousState = produto?.disponivel;
+        if (produto) {
+          produto.disponivel = 1;
+          this.cdr.detectChanges();
+        }
+
         this.productService.reativarProduto(id)
           .pipe(
             takeUntil(this.destroy$),
@@ -904,11 +950,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
           .subscribe({
             next: () => {
               console.log('[Dashboard] Produto reativado');
-              this.loadProdutos();
               this.alertService.success('Produto Reativado', 'O produto está disponível novamente para venda!');
             },
             error: (err) => {
               console.error('[Dashboard] Erro ao reativar produto:', err);
+              // ⚠️ Reverte em caso de erro
+              if (produto && previousState !== undefined) {
+                produto.disponivel = previousState;
+                this.cdr.detectChanges();
+              }
               this.alertService.error('Erro', 'Não foi possível reativar o produto. Verifique sua conexão e permissões.');
             }
           });
@@ -918,6 +968,21 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   formatarPreco(preco: number): string {
     return (preco / 100).toFixed(2).replace('.', ',');
+  }
+
+  /**
+   * Normaliza texto para busca: remove acentos, converte para minúsculas
+   * e colapsa espaços múltiplos. Tolerante a "Ç", "ã", "É", etc.
+   */
+  private normalizeSearchText(text: string): string {
+    if (!text) return '';
+    return text
+      .toString()
+      .normalize('NFD')                 // separa caracteres dos acentos
+      .replaceAll(/[\u0300-\u036f]/g, '')  // remove diacríticos
+      .toLowerCase()
+      .replaceAll(/\s+/g, ' ')             // colapsa espaços
+      .trim();
   }
 
   clearAllFeatured(): void {
@@ -944,7 +1009,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
           .pipe(
             takeUntil(this.destroy$),
             finalize(() => {
-              this.loadProdutos();
+              this.loadProdutos(true); // Força reload pois removeu featured de múltiplos produtos
               this.cdr.detectChanges();
             })
           )

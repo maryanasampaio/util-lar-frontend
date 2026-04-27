@@ -162,17 +162,36 @@ import { Product, ProductFormData, ProductFormSubmission } from '../../models/pr
             
             <!-- Preview das imagens -->
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div *ngFor="let url of imageUrls; let i = index; trackBy: trackByIndex" class="relative aspect-square rounded-lg overflow-hidden border-2 border-gray-200 group">
-                <img [src]="url" alt="Preview" class="w-full h-full object-cover">
+              <div 
+                *ngFor="let url of imageUrls; let i = index; trackBy: trackByIndex" 
+                class="relative aspect-square rounded-lg overflow-hidden border-2 group cursor-move transition-all"
+                [class.border-gray-200]="draggedIndex !== i && dragOverIndex !== i"
+                [class.opacity-40]="draggedIndex === i"
+                [style.border-color]="dragOverIndex === i ? '#7588A8' : null"
+                [style.transform]="dragOverIndex === i ? 'scale(1.05)' : null"
+                draggable="true"
+                (dragstart)="onDragStart($event, i)"
+                (dragover)="onDragOver($event, i)"
+                (dragleave)="onDragLeave()"
+                (drop)="onDrop($event, i)"
+                (dragend)="onDragEnd()"
+                [title]="imageUrls.length > 1 ? 'Arraste para reordenar' : ''">
+                <img [src]="url" alt="Preview" class="w-full h-full object-cover pointer-events-none">
                 <button 
                   type="button"
                   (click)="removeImage(i)"
-                  class="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  class="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
-                <div *ngIf="i === 0" class="absolute bottom-0 left-0 right-0 text-white text-xs font-bold py-1 text-center" style="background-color: #7588A8;">
+                <!-- Ícone de arraste -->
+                <div *ngIf="imageUrls.length > 1" class="absolute top-1 left-1 bg-white/90 rounded-md p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <svg class="w-4 h-4" fill="none" stroke="#6B7785" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+                  </svg>
+                </div>
+                <div *ngIf="i === 0" class="absolute bottom-0 left-0 right-0 text-white text-xs font-bold py-1 text-center pointer-events-none" style="background-color: #7588A8;">
                   Principal
                 </div>
               </div>
@@ -180,6 +199,10 @@ import { Product, ProductFormData, ProductFormSubmission } from '../../models/pr
             
             <p *ngIf="imageUrls.length === 0" class="text-xs text-gray-500 text-center py-2">
               Nenhuma imagem selecionada
+            </p>
+            
+            <p *ngIf="imageUrls.length > 1" class="text-xs text-center py-1" style="color: #6B7785;">
+              💡 Arraste as imagens para reordenar. A primeira é a imagem principal.
             </p>
           </div>
         </div>
@@ -264,6 +287,10 @@ export class ProductFormModalComponent implements OnInit, OnChanges {
   editMode = false;
   imageUrls: string[] = [];
   publishToFacebookMarketplace = false;
+  
+  // Estado de drag-and-drop
+  draggedIndex: number | null = null;
+  dragOverIndex: number | null = null;
   formData: ProductFormData = {
     name: '',
     description: '',
@@ -385,6 +412,70 @@ export class ProductFormModalComponent implements OnInit, OnChanges {
 
   trackByIndex(index: number): number {
     return index;
+  }
+
+  /**
+   * Drag-and-drop: início do arraste
+   */
+  onDragStart(event: DragEvent, index: number): void {
+    this.draggedIndex = index;
+    if (event.dataTransfer) {
+      event.dataTransfer.effectAllowed = 'move';
+      event.dataTransfer.setData('text/plain', String(index));
+    }
+  }
+
+  /**
+   * Drag-and-drop: arrastando sobre outro item
+   */
+  onDragOver(event: DragEvent, index: number): void {
+    event.preventDefault();
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = 'move';
+    }
+    if (this.draggedIndex !== null && this.draggedIndex !== index) {
+      this.dragOverIndex = index;
+      this.cdr.detectChanges();
+    }
+  }
+
+  /**
+   * Drag-and-drop: saiu da área de drop
+   */
+  onDragLeave(): void {
+    this.dragOverIndex = null;
+    this.cdr.detectChanges();
+  }
+
+  /**
+   * Drag-and-drop: soltou o item - reordena o array
+   */
+  onDrop(event: DragEvent, dropIndex: number): void {
+    event.preventDefault();
+    if (this.draggedIndex === null || this.draggedIndex === dropIndex) {
+      this.resetDragState();
+      return;
+    }
+
+    const draggedItem = this.imageUrls[this.draggedIndex];
+    this.imageUrls.splice(this.draggedIndex, 1);
+    this.imageUrls.splice(dropIndex, 0, draggedItem);
+
+    this.resetDragState();
+    this.cdr.detectChanges();
+  }
+
+  /**
+   * Drag-and-drop: finalizou o arraste
+   */
+  onDragEnd(): void {
+    this.resetDragState();
+  }
+
+  private resetDragState(): void {
+    this.draggedIndex = null;
+    this.dragOverIndex = null;
+    this.cdr.detectChanges();
   }
 
   onSubmit(): void {

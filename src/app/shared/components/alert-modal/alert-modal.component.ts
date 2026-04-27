@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 export interface AlertConfig {
@@ -125,27 +125,33 @@ export class AlertModalComponent {
     type: 'info'
   };
 
+  constructor(private readonly cdr: ChangeDetectorRef) {}
+
   show(config: AlertConfig): void {
     this.config = config;
     this.isOpen = true;
+    this.cdr.detectChanges();
   }
 
   close(): void {
     this.isOpen = false;
+    this.cdr.detectChanges();
   }
 
   onConfirm(): void {
-    if (this.config.onConfirm) {
-      this.config.onConfirm();
-    }
+    const callback = this.config.onConfirm;
     this.close();
+    if (callback) {
+      callback();
+    }
   }
 
   onCancel(): void {
-    if (this.config.onCancel) {
-      this.config.onCancel();
-    }
+    const callback = this.config.onCancel;
     this.close();
+    if (callback) {
+      callback();
+    }
   }
 
   onBackdropClick(event: MouseEvent): void {
