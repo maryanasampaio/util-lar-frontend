@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { Heart, Bell, Download, Menu } from 'lucide-react'
 import { Button } from '@shared/ui/button'
 import { useFavorites } from '@features/favorites/viewmodel/FavoritesContext'
@@ -9,7 +9,9 @@ export function Header() {
   const { favorites } = useFavorites()
   const { isAdmin } = useAdmin()
   const { setOpen } = useAdminSidebar()
+  const location = useLocation()
   const favoritesCount = favorites.length
+  const isProductDetailPage = location.pathname.startsWith('/produto/')
 
   return (
     <header className="absolute top-0 left-0 right-0 z-30 p-4 flex items-center justify-between">
@@ -43,14 +45,16 @@ export function Header() {
           </div>
         </Link>
         
-        <Button
-          variant="outline"
-          size="sm"
-          className="bg-white text-foreground border-0 hover:bg-white/90 gap-2"
-        >
-          <Download className="w-4 h-4" />
-          Instalar
-        </Button>
+        {!isProductDetailPage && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="bg-white text-foreground border-0 hover:bg-white/90 gap-2"
+          >
+            <Download className="w-4 h-4" />
+            Instalar
+          </Button>
+        )}
       </div>
     </header>
   )

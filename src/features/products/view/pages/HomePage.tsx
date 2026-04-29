@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ChevronRight, Plus } from 'lucide-react'
 import { useProducts } from '@features/products/viewmodel/ProductsContext'
 import { useAdmin } from '@features/admin/viewmodel/AdminContext'
@@ -11,9 +11,10 @@ import { WhatsAppButton } from '@shared/components/WhatsAppButton'
 import { ProductFormDialog } from '@features/products/view/components/ProductFormDialog'
 import { Button } from '@shared/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@shared/ui/select'
+import { Spinner } from '@shared/ui/spinner'
 
 export function HomePage() {
-  const { products } = useProducts()
+  const { products, loading, error, refreshProducts } = useProducts()
   const { isAdmin } = useAdmin()
   const [createOpen, setCreateOpen] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState('todas')
@@ -23,6 +24,25 @@ export function HomePage() {
   const [sortBy, setSortBy] = useState('popular')
 
   const maxPrice = products.length > 0 ? Math.max(...products.map(p => p.price)) : 5000
+
+  const categoryOptions = useMemo(
+    () => ['todas', ...new Set(products.map((product) => product.category).filter(Boolean))],
+    [products],
+  )
+
+  const brandOptions = useMemo(
+    () => ['todas', ...new Set(products.map((product) => product.brand).filter(Boolean))],
+    [products],
+  )
+
+  useEffect(() => {
+    setPriceRange(([currentMin, currentMax]) => {
+      const nextMax = maxPrice || 5000
+      const nextMin = Math.min(currentMin, nextMax)
+      const safeMax = currentMax > nextMax || currentMax === 5000 ? nextMax : currentMax
+      return [nextMin, safeMax] as [number, number]
+    })
+  }, [maxPrice])
 
   const featuredProducts = useMemo(() => {
     return products.filter(p => p.featured && !p.sold)
@@ -56,6 +76,50 @@ export function HomePage() {
 
     return filtered
   }, [products, selectedCategory, selectedCondition, selectedBrand, priceRange, sortBy])
+
+  let productsContent = (
+    <div className="flex flex-col items-center justify-center py-16 text-center bg-card rounded-lg">
+      <h3 className="mb-2 text-lg font-semibold text-foreground">
+        Nenhum produto encontrado
+      </h3>
+      <p className="text-muted-foreground">
+        Tente ajustar os filtros para encontrar o que procura.
+      </p>
+    </div>
+  )
+
+  if (loading && products.length === 0) {
+    productsContent = (
+      <div className="flex flex-col items-center justify-center py-16 text-center bg-card rounded-lg gap-4">
+        <Spinner size="lg" />
+        <h3 className="mb-2 text-lg font-semibold text-foreground">
+          Carregando produtos
+        </h3>
+      </div>
+    )
+  } else if (error && products.length === 0) {
+    productsContent = (
+      <div className="flex flex-col items-center justify-center gap-3 py-16 text-center bg-card rounded-lg">
+        <div>
+          <h3 className="mb-2 text-lg font-semibold text-foreground">
+            Não foi possível carregar os produtos
+          </h3>
+          <p className="text-muted-foreground">{error}</p>
+        </div>
+        <Button variant="outline" onClick={() => void refreshProducts()}>
+          Tentar novamente
+        </Button>
+      </div>
+    )
+  } else if (filteredProducts.length > 0) {
+    productsContent = (
+      <div className="grid gap-1.5 sm:gap-4 grid-cols-2 xl:grid-cols-3">
+        {filteredProducts.map((product) => (
+          <ProductCard key={product.id} product={product} />
+        ))}
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -107,6 +171,8 @@ export function HomePage() {
 
         <div className="flex flex-col lg:flex-row gap-6">
           <SidebarFilters
+            categories={categoryOptions}
+            brands={brandOptions}
             selectedCategory={selectedCategory}
             setSelectedCategory={setSelectedCategory}
             selectedCondition={selectedCondition}
@@ -119,22 +185,7 @@ export function HomePage() {
           />
 
           <div className="flex-1">
-            {filteredProducts.length > 0 ? (
-              <div className="grid gap-1.5 sm:gap-4 grid-cols-2 xl:grid-cols-3">
-                {filteredProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-16 text-center bg-card rounded-lg">
-                <h3 className="mb-2 text-lg font-semibold text-foreground">
-                  Nenhum produto encontrado
-                </h3>
-                <p className="text-muted-foreground">
-                  Tente ajustar os filtros para encontrar o que procura.
-                </p>
-              </div>
-            )}
+            {productsContent}
           </div>
         </div>
       </main>

@@ -1,38 +1,60 @@
-export type ProductCondition = 'novo' | 'usado'
+export type ProductCondition = 'novo' | 'seminovo'
 
-export type ProductCategory = 
-  | 'sofas'
-  | 'mesas'
-  | 'armarios'
-  | 'cadeiras'
-  | 'racks'
-  | 'eletrodomesticos'
-  | 'sem-categoria'
+export interface ProductDimensions {
+  width?: number | null
+  height?: number | null
+  depth?: number | null
+  unit?: string | null
+}
 
 export interface Product {
-  id: string
+  id: number
+  slug: string
   name: string
   description: string
   price: number
-  costPrice: number
+  originalPrice: number | null
+  costPrice: number | null
   condition: ProductCondition
-  category: ProductCategory
-  brand: string
+  category: string
+  brand: string | null
   imageUrl: string
-  images?: string[]
+  images: string[]
   stock: number
   sold: boolean
   featured: boolean
-  material?: string
-  color?: string
-  warranty?: string
-  dimensions?: string
-  createdAt: Date
+  material: string | null
+  color: string | null
+  warranty: string | null
+  dimensions: string | null
+  soldDate: string | null
+  disponivel: number
+  createdAt: string | null
+  updatedAt: string | null
+}
+
+export interface ProductFormValues {
+  name: string
+  description: string
+  price: number
+  originalPrice?: number | null
+  costPrice?: number | null
+  condition: ProductCondition
+  category: string
+  brand: string
+  imageUrl: string
+  images: string[]
+  stock: number
+  featured: boolean
+  material: string
+  color: string
+  warranty: string
+  dimensions: string
 }
 
 export interface Sale {
   id: string
-  productId: string
+  productId: number
   productName: string
   quantity: number
   unitPrice: number
@@ -41,7 +63,7 @@ export interface Sale {
   installments?: number
   interestRate?: number
   finalPrice?: number
-  date: Date
+  date: string
 }
 
 export interface DashboardStats {

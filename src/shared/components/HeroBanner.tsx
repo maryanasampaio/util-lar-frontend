@@ -46,9 +46,16 @@ export function HeroBanner() {
   const slide = slides[currentSlide]
 
   return (
-    <div className="relative bg-gradient-to-br from-primary via-primary/90 to-primary/80 text-primary-foreground overflow-hidden">
+    <div className="relative text-primary-foreground overflow-hidden" style={{ background: 'linear-gradient(180deg, hsl(213, 20%, 56%) 0%, hsl(213, 18%, 50%) 100%)' }}>
+      {/* Blur orbs decorativos */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-10 left-10 w-64 h-64 bg-white/5 rounded-full blur-3xl" />
+        <div className="absolute top-40 right-20 w-96 h-96 bg-white/8 rounded-full blur-3xl" />
+        <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-blue-400/10 rounded-full blur-3xl" />
+      </div>
+
       {/* Padrão geométrico de fundo (pontos) */}
-      <div className="absolute inset-0 opacity-10">
+      <div className="absolute inset-0 opacity-[0.07]">
         <div 
           className="absolute top-0 left-0 w-full h-full"
           style={{
@@ -57,15 +64,22 @@ export function HeroBanner() {
         />
       </div>
 
+      {/* Círculos flutuantes sutis */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-white/20 rounded-full animate-pulse" />
+        <div className="absolute top-2/3 left-1/2 w-3 h-3 bg-white/15 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }} />
+        <div className="absolute top-1/3 right-1/3 w-2 h-2 bg-white/25 rounded-full animate-pulse" style={{ animationDelay: '1s' }} />
+      </div>
+
       {/* Decoração em forma de onda */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <svg
-          className="absolute bottom-0 left-0 w-full h-24 text-white/10"
+          className="absolute bottom-0 left-0 w-full h-32 text-white/[0.06]"
           viewBox="0 0 800 100"
           preserveAspectRatio="none"
           fill="none"
           stroke="currentColor"
-          strokeWidth="1"
+          strokeWidth="2"
           aria-hidden="true"
         >
           <path d="M0,80 Q200,20 400,60 T800,40" />
@@ -83,8 +97,8 @@ export function HeroBanner() {
               {slide.description}
             </p>
             <div className="flex flex-wrap gap-6 pt-2">
-              {slide.features.map((feature, index) => (
-                <div key={index} className="flex items-center gap-2">
+              {slide.features.map((feature) => (
+                <div key={feature} className="flex items-center gap-2">
                   <CheckCircle className="w-5 h-5 text-primary-foreground" />
                   <span className="text-sm font-medium">{feature}</span>
                 </div>
@@ -103,9 +117,9 @@ export function HeroBanner() {
         </div>
         
         <div className="flex justify-center gap-2 mt-8">
-          {slides.map((_, index) => (
+          {slides.map((slide, index) => (
             <button
-              key={index}
+              key={slide.title + index}
               onClick={() => setCurrentSlide(index)}
               className={`w-3 h-3 rounded-full transition-all ${
                 index === currentSlide ? 'bg-primary-foreground' : 'bg-primary-foreground/40'

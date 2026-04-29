@@ -11,7 +11,7 @@ interface AdminLoginDialogProps {
   onOpenChange: (open: boolean) => void
 }
 
-export function AdminLoginDialog({ open, onOpenChange }: AdminLoginDialogProps) {
+export function AdminLoginDialog({ open, onOpenChange }: Readonly<AdminLoginDialogProps>) {
   const { login } = useAdmin()
   const navigate = useNavigate()
   const [password, setPassword] = useState('')
@@ -19,7 +19,7 @@ export function AdminLoginDialog({ open, onOpenChange }: AdminLoginDialogProps) 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (login(password)) {
+    if (login(password, '')) {
       setPassword('')
       setError(false)
       onOpenChange(false)
@@ -38,7 +38,7 @@ export function AdminLoginDialog({ open, onOpenChange }: AdminLoginDialogProps) 
             Acesso administrativo
           </DialogTitle>
           <DialogDescription>
-            Digite a senha para entrar no painel.
+            Digite a senha para entrar no painel administrativo.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-3">

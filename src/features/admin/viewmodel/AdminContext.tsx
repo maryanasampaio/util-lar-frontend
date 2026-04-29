@@ -1,23 +1,23 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, useMemo, ReactNode } from 'react'
 import { AdminRepository } from '../repository/AdminRepository'
 
 interface AdminContextType {
   isAdmin: boolean
-  login: (password: string) => boolean
+  login: (password: string, apiToken?: string) => boolean
   logout: () => void
 }
 
 const AdminContext = createContext<AdminContextType | undefined>(undefined)
 
-export function AdminProvider({ children }: { children: ReactNode }) {
+export function AdminProvider({ children }: Readonly<{ children: ReactNode }>) {
   const [isAdmin, setIsAdmin] = useState(false)
 
   useEffect(() => {
     setIsAdmin(AdminRepository.isAuthenticated())
   }, [])
 
-  const login = (password: string) => {
-    const success = AdminRepository.login(password)
+  const login = (password: string, apiToken?: string) => {
+    const success = AdminRepository.login(password, apiToken)
     if (success) {
       setIsAdmin(true)
     }
@@ -29,8 +29,13 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     setIsAdmin(false)
   }
 
+  const value = useMemo(
+    () => ({ isAdmin, login, logout }),
+    [isAdmin],
+  )
+
   return (
-    <AdminContext.Provider value={{ isAdmin, login, logout }}>
+    <AdminContext.Provider value={value}>
       {children}
     </AdminContext.Provider>
   )

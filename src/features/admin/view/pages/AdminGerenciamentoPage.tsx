@@ -27,7 +27,7 @@ interface StatCardProps {
   subtitle?: string
   badge?: string
   badgeIcon?: React.ElementType
-  accent?: 'primary' | 'success' | 'info' | 'warning'
+  accent?: 'primary' | 'success' | 'info' | 'warning' | 'blue'
 }
 
 function StatCard({
@@ -40,10 +40,11 @@ function StatCard({
   accent = 'primary',
 }: Readonly<StatCardProps>) {
   const bgColors = {
-    success: 'hsl(95 30% 40%)',   // verde oliva suave
-    info: 'hsl(30 30% 48%)',      // caramelo / bronze
-    warning: 'hsl(25 20% 32%)',   // marrom escuro
-    primary: 'hsl(210 30% 48%)',  // azul neutro acinzentado
+    success: 'hsl(95 30% 50%)',   // verde oliva suave
+    info: 'hsl(30 30% 58%)',      // caramelo / bronze
+    warning: 'hsl(25 20% 42%)',   // marrom escuro
+    primary: 'hsl(20 15% 45%)',   // marrom neutro acinzentado
+    blue: 'hsl(210 45% 58%)',     // azul suave
   }
   
   const badgeColors: Record<string, string> = {
@@ -51,6 +52,7 @@ function StatCard({
     info: 'bg-black/20',
     warning: 'bg-red-700/60',
     primary: 'bg-black/20',
+    blue: 'bg-black/20',
   }
   
   return (
@@ -132,7 +134,7 @@ export function AdminGerenciamentoPage() {
     const monthProfit = monthSales.reduce((sum, s) => {
       const p = products.find((x) => x.id === s.productId)
       if (p && s.finalPrice !== undefined) {
-        return sum + (s.finalPrice - p.costPrice * s.quantity)
+        return sum + (s.finalPrice - (p.costPrice ?? 0) * s.quantity)
       }
       return sum
     }, 0)
@@ -143,19 +145,20 @@ export function AdminGerenciamentoPage() {
     const totalProfit = sales.reduce((sum, s) => {
       const p = products.find((x) => x.id === s.productId)
       if (p && s.finalPrice !== undefined) {
-        return sum + (s.finalPrice - p.costPrice * s.quantity)
+        return sum + (s.finalPrice - (p.costPrice ?? 0) * s.quantity)
       }
       return sum
     }, 0)
     const totalMargin = totalRevenue > 0 ? (totalProfit / totalRevenue) * 100 : 0
 
     const available = products.filter((p) => !p.sold)
-    const totalInvested = available.reduce((sum, p) => sum + p.costPrice * p.stock, 0)
+    const totalInvested = available.reduce((sum, p) => sum + (p.costPrice ?? 0) * p.stock, 0)
     const totalPotential = available.reduce((sum, p) => sum + p.price * p.stock, 0)
     const potentialProfit = totalPotential - totalInvested
 
     const stale = available.filter((p) => {
-      const days = Math.floor((Date.now() - new Date(p.createdAt).getTime()) / (1000 * 60 * 60 * 24))
+      const createdAt = p.createdAt ? new Date(p.createdAt).getTime() : Date.now()
+      const days = Math.floor((Date.now() - createdAt) / (1000 * 60 * 60 * 24))
       return days > 60
     })
 
@@ -179,7 +182,7 @@ export function AdminGerenciamentoPage() {
   const lowMarginProducts = useMemo(() => {
     return products
       .filter((p) => !p.sold && p.price > 0)
-      .map((p) => ({ ...p, margin: ((p.price - p.costPrice) / p.price) * 100 }))
+      .map((p) => ({ ...p, margin: ((p.price - (p.costPrice ?? 0)) / p.price) * 100 }))
       .sort((a, b) => a.margin - b.margin)
       .slice(0, 4)
   }, [products])
@@ -217,7 +220,7 @@ export function AdminGerenciamentoPage() {
       }
       const p = products.find((x) => x.id === s.productId)
       const revenue = s.finalPrice ?? 0
-      const cost = p ? p.costPrice * s.quantity : 0
+      const cost = p ? (p.costPrice ?? 0) * s.quantity : 0
       existing.sales.push(s)
       existing.revenue += revenue
       existing.cost += cost
@@ -237,8 +240,8 @@ export function AdminGerenciamentoPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
           <div className="flex items-start justify-between flex-wrap gap-4 pl-12 sm:pl-0">
             <div className="flex items-start gap-3 sm:gap-4">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-primary/15 flex items-center justify-center shrink-0">
-                <BarChart3 className="w-6 h-6 sm:w-7 sm:h-7 text-primary" />
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-primary/15 flex items-center justify-center shrink-0">
+                <BarChart3 className="w-8 h-8 sm:w-10 sm:h-10 text-primary" />
               </div>
               <div>
                 <h1 className="text-2xl sm:text-4xl font-bold text-foreground tracking-tight">
@@ -290,7 +293,7 @@ export function AdminGerenciamentoPage() {
             icon={TrendingUp}
             subtitle={`Lucro: ${formatCurrency(stats.totalProfit)}`}
             badge={`Vendido: ${formatCurrency(stats.totalRevenue)}`}
-            accent="primary"
+            accent="blue"
           />
           <StatCard
             title="Estoque"

@@ -1,18 +1,18 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, useMemo, ReactNode } from 'react'
 import { FavoritesRepository } from '../repository/FavoritesRepository'
 
 interface FavoritesContextType {
-  favorites: string[]
-  addFavorite: (productId: string) => void
-  removeFavorite: (productId: string) => void
-  toggleFavorite: (productId: string) => void
-  isFavorite: (productId: string) => boolean
+  favorites: number[]
+  addFavorite: (productId: number) => void
+  removeFavorite: (productId: number) => void
+  toggleFavorite: (productId: number) => void
+  isFavorite: (productId: number) => boolean
 }
 
 const FavoritesContext = createContext<FavoritesContextType | undefined>(undefined)
 
-export function FavoritesProvider({ children }: { children: ReactNode }) {
-  const [favorites, setFavorites] = useState<string[]>([])
+export function FavoritesProvider({ children }: Readonly<{ children: ReactNode }>) {
+  const [favorites, setFavorites] = useState<number[]>([])
   const [mounted, setMounted] = useState(false)
 
   // Load from repository on mount
@@ -28,15 +28,15 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
     }
   }, [favorites, mounted])
 
-  const addFavorite = (productId: string) => {
-    setFavorites(prev => [...prev, productId])
+  const addFavorite = (productId: number) => {
+    setFavorites(prev => (prev.includes(productId) ? prev : [...prev, productId]))
   }
 
-  const removeFavorite = (productId: string) => {
+  const removeFavorite = (productId: number) => {
     setFavorites(prev => prev.filter(id => id !== productId))
   }
 
-  const toggleFavorite = (productId: string) => {
+  const toggleFavorite = (productId: number) => {
     if (favorites.includes(productId)) {
       removeFavorite(productId)
     } else {
@@ -44,10 +44,15 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const isFavorite = (productId: string) => favorites.includes(productId)
+  const isFavorite = (productId: number) => favorites.includes(productId)
+
+  const value = useMemo(
+    () => ({ favorites, addFavorite, removeFavorite, toggleFavorite, isFavorite }),
+    [favorites],
+  )
 
   return (
-    <FavoritesContext.Provider value={{ favorites, addFavorite, removeFavorite, toggleFavorite, isFavorite }}>
+    <FavoritesContext.Provider value={value}>
       {children}
     </FavoritesContext.Provider>
   )

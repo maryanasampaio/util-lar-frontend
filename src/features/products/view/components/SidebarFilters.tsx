@@ -1,13 +1,15 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ChevronDown, SlidersHorizontal, X } from 'lucide-react'
 import { Button } from '@shared/ui/button'
 import { Input } from '@shared/ui/input'
 import { Slider } from '@shared/ui/slider'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@shared/ui/sheet'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@shared/ui/collapsible'
-import { categories, conditions, brands } from '@features/products/model/ProductsData'
+import { conditions } from '@features/products/model/ProductsData'
 
 interface SidebarFiltersProps {
+  readonly categories: string[]
+  readonly brands: string[]
   readonly selectedCategory: string
   readonly setSelectedCategory: (value: string) => void
   readonly selectedCondition: string
@@ -20,6 +22,8 @@ interface SidebarFiltersProps {
 }
 
 function FiltersContent({
+  categories,
+  brands,
   selectedCategory,
   setSelectedCategory,
   selectedCondition,
@@ -36,6 +40,11 @@ function FiltersContent({
   const [brandOpen, setBrandOpen] = useState(true)
   const [tempMinPrice, setTempMinPrice] = useState(priceRange[0].toString())
   const [tempMaxPrice, setTempMaxPrice] = useState(priceRange[1].toString())
+
+  useEffect(() => {
+    setTempMinPrice(priceRange[0].toString())
+    setTempMaxPrice(priceRange[1].toString())
+  }, [priceRange])
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -88,17 +97,17 @@ function FiltersContent({
             <ChevronDown className={`w-5 h-5 transition-transform ${categoryOpen ? 'rotate-180' : ''}`} />
           </CollapsibleTrigger>
           <CollapsibleContent className="mt-3 space-y-1">
-            {categories.map((cat) => (
+            {categories.map((category) => (
               <button
-                key={cat.value}
-                onClick={() => setSelectedCategory(cat.value)}
+                key={category}
+                onClick={() => setSelectedCategory(category)}
                 className={`block w-full text-left px-2 py-1.5 rounded text-sm transition-colors ${
-                  selectedCategory === cat.value
+                  selectedCategory === category
                     ? 'text-accent font-medium'
                     : 'text-foreground hover:text-accent'
                 }`}
               >
-                {cat.label}
+                {category === 'todas' ? 'Todas' : category}
               </button>
             ))}
           </CollapsibleContent>

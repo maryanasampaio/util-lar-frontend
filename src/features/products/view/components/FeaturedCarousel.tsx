@@ -5,7 +5,7 @@ import { Button } from '@shared/ui/button'
 import { Product } from '@features/products/model/Product'
 
 interface FeaturedCarouselProps {
-  products: Product[]
+  readonly products: Product[]
 }
 
 const AUTOPLAY_MS = 3000
@@ -26,7 +26,7 @@ export function FeaturedCarousel({ products }: FeaturedCarouselProps) {
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
-      const scrollAmount = 320
+      const scrollAmount = scrollRef.current.clientWidth / 3
       scrollRef.current.scrollBy({
         left: direction === 'left' ? -scrollAmount : scrollAmount,
         behavior: 'smooth'
@@ -44,7 +44,8 @@ export function FeaturedCarousel({ products }: FeaturedCarouselProps) {
       if (atEnd) {
         el.scrollTo({ left: 0, behavior: 'smooth' })
       } else {
-        el.scrollBy({ left: 320, behavior: 'smooth' })
+        const scrollAmount = el.clientWidth / 3
+        el.scrollBy({ left: scrollAmount, behavior: 'smooth' })
       }
       setTimeout(checkScroll, 300)
     }, AUTOPLAY_MS)
@@ -56,6 +57,7 @@ export function FeaturedCarousel({ products }: FeaturedCarouselProps) {
   }
 
   return (
+    // eslint-disable-next-line jsx-a11y/no-static-element-interactions
     <div
       className="relative"
       onMouseEnter={() => setPaused(true)}
@@ -73,9 +75,9 @@ export function FeaturedCarousel({ products }: FeaturedCarouselProps) {
           <Link
             key={product.id}
             to={`/produto/${product.id}`}
-            className="flex-shrink-0 w-[calc((100%-1rem)/3)] sm:w-72 max-w-[18rem] group"
+            className="flex-shrink-0 w-[calc((100%-1rem)/3)] sm:w-[calc((100%-2rem)/3)] group"
           >
-            <div className="relative aspect-[4/3] rounded-lg overflow-hidden bg-gradient-to-br from-gray-200 to-gray-300">
+            <div className="relative aspect-[4/5] sm:aspect-[3/2] rounded-lg overflow-hidden bg-gradient-to-br from-gray-200 to-gray-300">
               {product.imageUrl ? (
                 <img
                   src={product.imageUrl}
@@ -87,7 +89,7 @@ export function FeaturedCarousel({ products }: FeaturedCarouselProps) {
                   <ImageIcon className="w-16 h-16 text-gray-400" />
                 </div>
               )}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-2 sm:p-4">
                 <h3 className="text-white font-bold text-xs sm:text-lg uppercase tracking-wide line-clamp-2">
                   {product.name}

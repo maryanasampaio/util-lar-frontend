@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Heart, ImageIcon, Share2, Check, Pencil, Trash2, CheckCircle, RotateCcw } from 'lucide-react'
 import { Button } from '@shared/ui/button'
 import { Badge } from '@shared/ui/badge'
@@ -14,6 +14,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@shared/ui/alert-dialog'
+import { Spinner } from '@shared/ui/spinner'
 import { useFavorites } from '@features/favorites/viewmodel/FavoritesContext'
 import { useAdmin } from '@features/admin/viewmodel/AdminContext'
 import { useProducts } from '@features/products/viewmodel/ProductsContext'
@@ -29,8 +30,11 @@ export function ProductCard({ product }: ProductCardProps) {
   const { isFavorite, toggleFavorite } = useFavorites()
   const { isAdmin } = useAdmin()
   const { deleteProduct, toggleSold } = useProducts()
+  const navigate = useNavigate()
   const [editOpen, setEditOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [isToggling, setIsToggling] = useState(false)
   const favorite = isFavorite(product.id)
 
   const formatPrice = (price: number) => {
@@ -68,8 +72,11 @@ export function ProductCard({ product }: ProductCardProps) {
   }
 
   return (
-    <Card className="group relative overflow-hidden border-0 sm:border shadow-sm hover:shadow-md transition-shadow bg-card rounded-lg sm:rounded-xl flex flex-col h-full">
-      <div className="relative aspect-[3/4] sm:aspect-square bg-muted rounded-t-lg sm:rounded-t-xl overflow-hidden shrink-0">
+    <Card 
+      className="group relative overflow-hidden border-0 sm:border shadow-sm hover:shadow-md transition-shadow bg-card rounded-lg sm:rounded-xl flex flex-col h-full cursor-pointer"
+      onClick={() => navigate(`/produto/${product.id}`)}
+    >
+      <div className="relative aspect-[4/5] sm:aspect-square bg-muted rounded-t-lg sm:rounded-t-xl overflow-hidden shrink-0">
         <Badge 
           className={`absolute top-2 left-2 z-10 text-[9px] sm:text-xs px-1.5 py-0.5 ${
             product.condition === 'novo' 
@@ -77,11 +84,11 @@ export function ProductCard({ product }: ProductCardProps) {
               : 'bg-orange-500 text-white'
           }`}
         >
-          {product.condition === 'novo' ? 'NOVO' : 'USADO'}
+          {product.condition === 'novo' ? 'NOVO' : 'SEMINOVO'}
         </Badge>
         
         <button
-          onClick={handleFavorite}
+          onClick={(e) => { e.stopPropagation(); handleFavorite(e); }}
           className={`absolute top-2 right-2 z-10 w-7 h-7 sm:w-9 sm:h-9 rounded-full flex items-center justify-center transition-colors ${
             favorite 
               ? 'bg-red-500 text-white' 
@@ -92,7 +99,7 @@ export function ProductCard({ product }: ProductCardProps) {
         </button>
 
         {product.sold && (
-          <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-10">
+          <div className="absolute inset-0 bg-black/75 flex items-center justify-center z-10">
             <div className="flex items-center gap-2 text-white text-xl font-bold">
               <Check className="w-6 h-6" />
               VENDIDO
@@ -130,20 +137,19 @@ export function ProductCard({ product }: ProductCardProps) {
         </p>
 
         <div className="flex gap-2 mt-auto pt-2 sm:pt-3">
-          <Link to={`/produto/${product.id}`} className="flex-1">
-            <Button 
-              size="sm"
-              className="w-full bg-accent hover:bg-accent/90 text-accent-foreground text-[10px] sm:text-sm h-7 sm:h-9"
-              disabled={product.sold}
-            >
-              <span className="hidden sm:inline">Ver detalhes</span>
-              <span className="sm:hidden">Ver</span>
-            </Button>
-          </Link>
+          <Button 
+            size="sm"
+            className="flex-1 bg-accent hover:bg-accent/90 text-accent-foreground text-[10px] sm:text-sm h-7 sm:h-9"
+            disabled={product.sold}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <span className="hidden sm:inline">Ver detalhes</span>
+            <span className="sm:hidden">Ver</span>
+          </Button>
           <Button
             variant="outline"
             size="icon-sm"
-            onClick={handleShare}
+            onClick={(e) => { e.stopPropagation(); handleShare(e); }}
             className="shrink-0 h-7 w-7 sm:h-9 sm:w-9"
           >
             <Share2 className="w-3 h-3 sm:w-4 sm:h-4" />
@@ -156,11 +162,27 @@ export function ProductCard({ product }: ProductCardProps) {
               variant="outline"
               size="sm"
               className="flex-1 min-w-0 gap-1 h-7 sm:h-9 px-2 text-[10px] sm:text-sm"
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleSold(product.id) }}
+              onClick={async (e) => { 
+                e.preventDefault(); 
+                e.stopPropagation(); 
+                setIsToggling(true);
+                try {
+                  await toggleSold(product.id);
+                } finally {
+                  setIsToggling(false);
+                }
+              }}
+              disabled={isToggling}
               title={product.sold ? 'Marcar como disponível' : 'Marcar como vendido'}
             >
-              {product.sold ? <RotateCcw className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" /> : <CheckCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />}
-              <span className="truncate">{product.sold ? 'Reverter' : 'Vendido'}</span>
+              {isToggling ? (
+                <Spinner size="sm" />
+              ) : (
+                <>
+                  {product.sold ? <RotateCcw className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" /> : <CheckCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />}
+                  <span className="truncate">{product.sold ? 'Reverter' : 'Vendido'}</span>
+                </>
+              )}
             </Button>
             <Button
               variant="outline"
@@ -196,11 +218,22 @@ export function ProductCard({ product }: ProductCardProps) {
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
                 <AlertDialogAction
-                  onClick={() => deleteProduct(product.id)}
-                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  onClick={async (e) => {
+                    e.preventDefault();
+                    setIsDeleting(true);
+                    try {
+                      await deleteProduct(product.id);
+                      setDeleteOpen(false);
+                    } finally {
+                      setIsDeleting(false);
+                    }
+                  }}
+                  disabled={isDeleting}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90 gap-2"
                 >
+                  {isDeleting && <Spinner size="sm" />}
                   Excluir
                 </AlertDialogAction>
               </AlertDialogFooter>
