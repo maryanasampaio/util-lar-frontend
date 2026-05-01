@@ -9,6 +9,7 @@ import { switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
+  standalone: true,
   imports: [RouterOutlet, AlertModalComponent],
   templateUrl: './app.html',
   styleUrl: './app.css'

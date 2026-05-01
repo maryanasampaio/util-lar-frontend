@@ -91,7 +91,10 @@ export class ProductsRepository {
    * @param stock - Estoque opcional (padrão: 1 ou mantém >0 existente)
    */
   reativarProduto(id: number, stock?: number): Observable<Product> {
-    const body = stock !== undefined ? { stock } : {};
+    let body = {};
+    if (stock) {
+      body = { stock };
+    }
     return this.http.post<Product>(`${this.apiUrl}/produtos/${id}/available`, body);
   }
 

@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FavoritesService } from '../../../../core/services/favorites.service';
@@ -150,13 +150,11 @@ export class FavoritesComponent implements OnInit, OnDestroy {
   favoriteProducts: ProductResponse[] = [];
   isLoading = false;
   private readonly destroy$ = new Subject<void>();
-
-  constructor(
-    private readonly favoritesService: FavoritesService,
-    private readonly productService: ProductService,
-    private readonly router: Router,
-    private readonly cdr: ChangeDetectorRef
-  ) {}
+  
+  private readonly favoritesService = inject(FavoritesService);
+  private readonly productService = inject(ProductService);
+  private readonly router = inject(Router);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   ngOnInit(): void {
     this.loadFavorites();

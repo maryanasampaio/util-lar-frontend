@@ -12,7 +12,7 @@ import { ActivatedRouteSnapshot, DetachedRouteHandle, RouteReuseStrategy } from 
  * - /dashboard/produto/:id (detalhes)
  */
 export class CustomRouteReuseStrategy implements RouteReuseStrategy {
-  private handlers = new Map<string, DetachedRouteHandle>();
+  private readonly handlers = new Map<string, DetachedRouteHandle>();
 
   /**
    * Define quais rotas devem ser mantidas em cache
@@ -67,7 +67,9 @@ export class CustomRouteReuseStrategy implements RouteReuseStrategy {
       // Mantém apenas as últimas 10 rotas
       if (this.handlers.size > 10) {
         const firstKey = this.handlers.keys().next().value;
-        this.handlers.delete(firstKey);
+        if (firstKey) {
+          this.handlers.delete(firstKey);
+        }
       }
     }
   }

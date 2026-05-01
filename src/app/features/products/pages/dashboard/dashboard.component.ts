@@ -996,7 +996,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
           if (this.selectedProduct) {
             const idx = this.produtos.findIndex(p => p.id === this.selectedProduct!.id);
             if (idx !== -1) {
-              this.produtos[idx] = { ...this.produtos[idx], ...productData, ...(updated as any) } as ProductResponse;
+              const updatedProduct = { ...this.produtos[idx], ...productData, ...updated };
+              this.produtos[idx] = updatedProduct;
               this.produtos = [...this.produtos];
               this.invalidateFilterCache();
               this.updateFeaturedProductsCache();
