@@ -19,11 +19,23 @@ export class ProductsRepository {
   constructor(private readonly http: HttpClient) {}
 
   /**
-   * Buscar todos os produtos (PÚBLICO - sem token)
-   * GET /produtos
+   * Buscar produtos com paginação (PÚBLICO - sem token)
+   * GET /produtos?page=0&size=24
+   * 
+   * @param page - Número da página (começa em 0)
+   * @param size - Quantidade de itens por página (padrão: 24)
+   * @returns Array de produtos da página solicitada
+   * 
+   * NOTA: Backend retorna apenas a lista de produtos, sem metadados.
+   * Para saber se há mais páginas, verificar se o tamanho retornado < size
    */
-  buscarProdutos(): Observable<ProductResponse[]> {
-    return this.http.get<ProductResponse[]>(`${this.apiUrl}/produtos`).pipe(
+  buscarProdutos(page: number = 0, size: number = 24): Observable<ProductResponse[]> {
+    return this.http.get<ProductResponse[]>(`${this.apiUrl}/produtos`, {
+      params: {
+        page: page.toString(),
+        size: size.toString()
+      }
+    }).pipe(
       map(produtos => produtos.map(produto => this.normalizeProductImages(produto)))
     );
   }

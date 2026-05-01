@@ -340,7 +340,7 @@
           <div *ngIf="filterSections.category" class="space-y-1">
             <button 
               *ngFor="let cat of categories"
-              (click)="selectedCategory = cat.value"
+              (click)="setCategory(cat.value)"
               class="w-full text-left px-2 py-1.5 rounded-lg text-sm transition-colors"
               [style.color]="selectedCategory === cat.value ? '#7588A8' : '#23292A'"
               [style.font-weight]="selectedCategory === cat.value ? '600' : '400'"
@@ -428,7 +428,7 @@
           <div *ngIf="filterSections.condition" class="space-y-1">
             <button 
               *ngFor="let cond of conditions"
-              (click)="selectedCondition = cond.value"
+              (click)="setCondition(cond.value)"
               class="w-full text-left px-2 py-1.5 rounded-lg text-sm transition-colors"
               [style.color]="selectedCondition === cond.value ? '#7588A8' : '#23292A'"
               [style.font-weight]="selectedCondition === cond.value ? '600' : '400'"
@@ -498,7 +498,7 @@
               <div class="flex flex-wrap gap-2">
                 <button 
                   *ngFor="let cat of categories"
-                  (click)="selectedCategory = cat.value"
+                  (click)="setCategory(cat.value)"
                   class="px-3 py-1.5 rounded-full text-xs font-semibold transition-colors"
                   [style.background-color]="selectedCategory === cat.value ? '#7588A8' : '#EEF2F5'"
                   [style.color]="selectedCategory === cat.value ? 'white' : '#23292A'">
@@ -512,7 +512,7 @@
               <div class="flex flex-wrap gap-2">
                 <button 
                   *ngFor="let cond of conditions"
-                  (click)="selectedCondition = cond.value"
+                  (click)="setCondition(cond.value)"
                   class="px-3 py-1.5 rounded-full text-xs font-semibold transition-colors"
                   [style.background-color]="selectedCondition === cond.value ? '#7588A8' : '#EEF2F5'"
                   [style.color]="selectedCondition === cond.value ? 'white' : '#23292A'">
@@ -605,11 +605,22 @@
 
       <!-- CONTEÚDO: Produtos -->
       <div class="flex-1 min-w-0">
-        <!-- Loading -->
-        <div *ngIf="isLoading" class="flex justify-center items-center py-20">
-          <div class="text-center">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-4 mx-auto mb-3" style="border-color: #7588A8;"></div>
-            <p class="text-sm" style="color: #6B7785;">Carregando produtos...</p>
+        <!-- Loading Skeleton -->
+        <div *ngIf="isLoading" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 gap-2 sm:gap-4 lg:gap-5">
+          <div *ngFor="let i of [1,2,3,4,5,6]" class="bg-white rounded-xl overflow-hidden shadow-sm animate-pulse" style="border: 1px solid #E6EBEF;">
+            <!-- Imagem skeleton -->
+            <div class="bg-gray-200 w-full aspect-square"></div>
+            <!-- Conteúdo skeleton -->
+            <div class="p-3 sm:p-4 space-y-3">
+              <!-- Título -->
+              <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+              <!-- Categoria -->
+              <div class="h-3 bg-gray-200 rounded w-1/2"></div>
+              <!-- Preço -->
+              <div class="h-6 bg-gray-200 rounded w-2/3"></div>
+              <!-- Botão -->
+              <div class="h-10 bg-gray-200 rounded w-full"></div>
+            </div>
           </div>
         </div>
 
@@ -635,6 +646,27 @@
             <ng-container *ngFor="let produto of filteredProducts; trackBy: trackByProductId">
               <ng-container *ngTemplateOutlet="productCard; context: { $implicit: produto }"></ng-container>
             </ng-container>
+          </div>
+
+          <!-- Botão Carregar Mais -->
+          <div *ngIf="hasMoreProducts" class="flex justify-center mt-8 mb-4">
+            <button 
+              (click)="loadMoreProducts()"
+              [disabled]="isLoadingMore"
+              class="px-8 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all transform hover:scale-105 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              style="background-color: #4A5E78; color: white;">
+              <span *ngIf="!isLoadingMore">Carregar mais produtos</span>
+              <span *ngIf="isLoadingMore">Carregando...</span>
+              <svg *ngIf="!isLoadingMore" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+              <div *ngIf="isLoadingMore" class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+            </button>
+          </div>
+
+          <!-- Indicador de todos os produtos carregados -->
+          <div *ngIf="!hasMoreProducts && filteredProducts.length > 24" class="text-center py-6 text-sm" style="color: #6B7785;">
+            <p>✓ Todos os produtos foram carregados</p>
           </div>
         </ng-container>
       </div>

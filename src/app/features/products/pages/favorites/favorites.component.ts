@@ -185,7 +185,7 @@ export class FavoritesComponent implements OnInit, OnDestroy {
 
     this.isLoading = true;
     this.cdr.detectChanges();
-    this.productService.buscarProdutos()
+    this.productService.buscarTodosProdutos()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (products) => {

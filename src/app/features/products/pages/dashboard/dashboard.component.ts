@@ -16,7 +16,7 @@ import { CapitalizePipe } from '../../../../shared/pipes/capitalize.pipe';
 import { AlertService } from '../../../../shared/services/alert.service';
 import { FavoritesService } from '../../../../core/services/favorites.service';
 import { SimulationService } from '../../../simulations/services/simulation.service';
-import { finalize, Subject, takeUntil, forkJoin } from 'rxjs';
+import { finalize, Subject, takeUntil, forkJoin, debounceTime, distinctUntilChanged } from 'rxjs';
 
 
 @Component({
@@ -30,11 +30,20 @@ export class DashboardComponent implements OnInit, OnDestroy {
   
   errorMessage = '';
   isLoading = false;
+  isLoadingMore = false; // Indica se está carregando mais produtos
+  isInitialLoad = true; // Indica se é o primeiro carregamento
   produtos: ProductResponse[] = [];
   cachedFeaturedProducts: ProductResponse[] = [];
   isAdmin = false;
   favoritesCount = 0;
   private readonly destroy$ = new Subject<void>();
+  private readonly searchSubject$ = new Subject<string>();
+  private searchQueryInternal: string = '';
+  
+  // Cache para filtros (memoização)
+  private filteredProductsCache: ProductResponse[] | null = null;
+  private lastFilterSignature: string = '';
+  
   currentFeaturedIndex = 0;
   currentCarouselPage = 0;
   readonly itemsPerPage = 3;
@@ -44,7 +53,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
   selectedCategory: string = 'Todas';
   selectedCondition: string = 'Todas';
   selectedSort: string = 'populares';
-  searchQuery: string = '';
+  
+  // Propriedade com debounce para busca
+  get searchQuery(): string {
+    return this.searchQueryInternal;
+  }
+  set searchQuery(value: string) {
+    this.searchQueryInternal = value;
+    this.searchSubject$.next(value);
+  }
+  
   selectedBrand: string = '';
   priceMin: number | null = null;
   priceMax: number | null = null;
@@ -141,6 +159,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     console.log('[Dashboard] ngOnInit - iniciando componente');
     
+    // Configura debounce para busca (300ms)
+    this.searchSubject$.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      takeUntil(this.destroy$)
+    ).subscribe(() => {
+      // Força detecção de mudanças quando a busca é atualizada
+      this.cdr.detectChanges();
+    });
+    
     // Inscreve para mudanças no modo admin
     this.adminModeService.isAdmin$
       .pipe(takeUntil(this.destroy$))
@@ -216,7 +244,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
    */
   private loadProdutos(forceReload = false) {
     console.log('[Dashboard] loadProdutos - começando (forceReload:', forceReload, ')');
-    this.isLoading = true;
+    
+    // Só mostra loading skeleton no carregamento inicial ou se não houver produtos
+    if (this.isInitialLoad || this.produtos.length === 0) {
+      this.isLoading = true;
+    }
+    
     this.errorMessage = '';
     this.cdr.detectChanges();
     
@@ -226,6 +259,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         finalize(() => {
           console.log('[Dashboard] loadProdutos - finalizando (isLoading = false)');
           this.isLoading = false;
+          this.isInitialLoad = false;
           this.cdr.detectChanges();
         })
       )
@@ -233,6 +267,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
         next: (resp: ProductResponse[]) => {
           console.log('[Dashboard] loadProdutos - produtos recebidos:', resp.length);
           this.produtos = resp;
+          
+          // Invalida cache de filtros quando produtos mudam
+          this.invalidateFilterCache();
+          
+          // Reseta produtos exibidos (lazy loading) se for reload forçado
+          // Não precisa mais, pois o backend já gerencia paginação
           
           // Atualiza cache de produtos featured
           this.updateFeaturedProductsCache();
@@ -339,6 +379,27 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.selectedBrand = this.selectedBrand === brand ? '' : brand;
   }
 
+  /**
+   * Define a categoria selecionada
+   */
+  setCategory(category: string): void {
+    this.selectedCategory = category;
+  }
+
+  /**
+   * Define a condição selecionada
+   */
+  setCondition(condition: string): void {
+    this.selectedCondition = condition;
+  }
+
+  /**
+   * Define a ordenação
+   */
+  setSort(sort: string): void {
+    this.selectedSort = sort;
+  }
+
   // Índice onde inserir a seção de marcas (após a 1ª fileira: 2 colunas mobile = 4 itens, 3 colunas xl = 6 itens)
   readonly brandsInsertIndex = 8;
 
@@ -348,6 +409,44 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   get productsAfterBrands(): ProductResponse[] {
     return this.filteredProducts.slice(this.brandsInsertIndex);
+  }
+
+  /**
+   * Verifica se há mais produtos para carregar do backend
+   */
+  get hasMoreProducts(): boolean {
+    return this.productService.temMaisPaginas();
+  }
+
+  /**
+   * Carrega mais produtos do backend (próxima página)
+   */
+  loadMoreProducts(): void {
+    if (this.isLoadingMore || !this.hasMoreProducts) {
+      return;
+    }
+
+    this.isLoadingMore = true;
+    this.productService.carregarProximaPagina()
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => {
+          this.isLoadingMore = false;
+          this.cdr.detectChanges();
+        })
+      )
+      .subscribe({
+        next: (produtos) => {
+          this.produtos = produtos;
+          this.invalidateFilterCache();
+          this.updateFeaturedProductsCache();
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error('[Dashboard] Erro ao carregar mais produtos:', err);
+          this.alertService.error('Erro', 'Não foi possível carregar mais produtos.');
+        }
+      });
   }
 
   /**
@@ -397,13 +496,31 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return this.cachedFeaturedProducts;
   }
 
-  // Filtros combinados
+  // Filtros combinados com memoização
   get filteredProducts(): ProductResponse[] {
+    // Criar assinatura dos filtros para detectar mudanças
+    const currentSignature = JSON.stringify({
+      search: this.searchQueryInternal,
+      brand: this.selectedBrand,
+      category: this.selectedCategory,
+      condition: this.selectedCondition,
+      priceMin: this.priceMinApplied,
+      priceMax: this.priceMaxApplied,
+      sort: this.selectedSort,
+      productsLength: this.produtos.length
+    });
+
+    // Se a assinatura não mudou, retorna cache
+    if (this.lastFilterSignature === currentSignature && this.filteredProductsCache) {
+      return this.filteredProductsCache;
+    }
+
+    // Recalcula os filtros
     let filtered = [...this.produtos];
     
     // Filtro de busca - tolerante a acentos, maiúsculas/minúsculas e múltiplas palavras
-    if (this.searchQuery.trim()) {
-      const tokens = this.normalizeSearchText(this.searchQuery)
+    if (this.searchQueryInternal.trim()) {
+      const tokens = this.normalizeSearchText(this.searchQueryInternal)
         .split(/\s+/)
         .filter(t => t.length > 0);
 
@@ -466,6 +583,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
         });
     }
     
+    // Atualiza cache e assinatura
+    this.filteredProductsCache = filtered;
+    this.lastFilterSignature = currentSignature;
+    
     return filtered;
   }
 
@@ -504,6 +625,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.priceMinApplied = null;
     this.priceMaxApplied = null;
     this.searchQuery = '';
+    this.invalidateFilterCache();
+  }
+
+  /**
+   * Invalida o cache de filtros
+   * Deve ser chamado quando os produtos são alterados
+   */
+  private invalidateFilterCache(): void {
+    this.filteredProductsCache = null;
+    this.lastFilterSignature = '';
   }
 
   get globalMinPrice(): number {
@@ -812,7 +943,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (product) => {
           this.closeCreateModal();
-          this.loadProdutos(true); // Força reload pois criou produto
+          
+          // ⚡ Atualização otimista: adiciona o produto localmente
+          const newProduct = {
+            ...product,
+            images: product.images || null
+          } as ProductResponse;
+          
+          this.produtos = [newProduct, ...this.produtos];
+          this.invalidateFilterCache();
+          this.updateFeaturedProductsCache();
+          this.cdr.detectChanges();
 
           if (submission.publishToFacebookMarketplace) {
             this.openMarketplacePublishModal(product);
@@ -857,6 +998,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
             if (idx !== -1) {
               this.produtos[idx] = { ...this.produtos[idx], ...productData, ...(updated as any) } as ProductResponse;
               this.produtos = [...this.produtos];
+              this.invalidateFilterCache();
+              this.updateFeaturedProductsCache();
               this.cdr.detectChanges();
             }
           }
@@ -877,6 +1020,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
         // ⚡ Atualização otimista: remove da UI imediatamente
         const backupProdutos = [...this.produtos];
         this.produtos = this.produtos.filter(p => p.id !== id);
+        this.invalidateFilterCache();
+        this.updateFeaturedProductsCache();
         this.cdr.detectChanges();
 
         this.productService.removerProduto(id)
@@ -891,6 +1036,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
             error: (err) => {
               // ⚠️ Reverte em caso de erro
               this.produtos = backupProdutos;
+              this.invalidateFilterCache();
+              this.updateFeaturedProductsCache();
               this.cdr.detectChanges();
               this.alertService.error('Erro ao remover produto', err.message || 'Não foi possível remover o produto.');
             }
@@ -910,6 +1057,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
         const previousState = produto?.disponivel;
         if (produto) {
           produto.disponivel = 0;
+          this.invalidateFilterCache();
+          this.updateFeaturedProductsCache();
           this.cdr.detectChanges();
         }
 
@@ -928,6 +1077,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
               // ⚠️ Reverte em caso de erro
               if (produto && previousState !== undefined) {
                 produto.disponivel = previousState;
+                this.invalidateFilterCache();
+                this.updateFeaturedProductsCache();
                 this.cdr.detectChanges();
               }
               this.alertService.error('Erro', 'Não foi possível marcar como vendido. Verifique sua conexão e permissões.');
@@ -949,6 +1100,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
         const previousState = produto?.disponivel;
         if (produto) {
           produto.disponivel = 1;
+          this.invalidateFilterCache();
+          this.updateFeaturedProductsCache();
           this.cdr.detectChanges();
         }
 
@@ -967,6 +1120,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
               // ⚠️ Reverte em caso de erro
               if (produto && previousState !== undefined) {
                 produto.disponivel = previousState;
+                this.invalidateFilterCache();
+                this.updateFeaturedProductsCache();
                 this.cdr.detectChanges();
               }
               this.alertService.error('Erro', 'Não foi possível reativar o produto. Verifique sua conexão e permissões.');
@@ -1009,6 +1164,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
       () => {
         console.log('[Dashboard] Limpando todos os destaques...');
         
+        // ⚡ Atualização otimista: atualiza localmente
+        const backupProdutos = [...this.produtos];
+        this.produtos = this.produtos.map(p => {
+          if (p.featured) {
+            return { ...p, featured: false };
+          }
+          return p;
+        });
+        this.invalidateFilterCache();
+        this.updateFeaturedProductsCache();
+        this.cdr.detectChanges();
+        
         // Cria um array de observables para todas as atualizações
         const updates$ = featuredProducts.map(produto => 
           this.productService.atualizarProduto(produto.id, { featured: false } as any)
@@ -1018,10 +1185,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         forkJoin(updates$)
           .pipe(
             takeUntil(this.destroy$),
-            finalize(() => {
-              this.loadProdutos(true); // Força reload pois removeu featured de múltiplos produtos
-              this.cdr.detectChanges();
-            })
+            finalize(() => this.cdr.detectChanges())
           )
           .subscribe({
             next: () => {
@@ -1030,6 +1194,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
             },
             error: (err) => {
               console.error('[Dashboard] Erro ao limpar destaques:', err);
+              // ⚠️ Reverte em caso de erro
+              this.produtos = backupProdutos;
+              this.invalidateFilterCache();
+              this.updateFeaturedProductsCache();
+              this.cdr.detectChanges();
               this.alertService.error('Erro', 'Não foi possível remover todos os produtos dos destaques. Alguns podem ter sido removidos.');
             }
           });
