@@ -959,8 +959,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
             this.openMarketplacePublishModal(product);
             return;
           }
-
-          this.alertService.success('Produto Criado', 'O produto foi adicionado com sucesso!');
         },
         error: (err) => {
           this.alertService.error('Erro ao criar produto', err.message || 'Não foi possível criar o produto.');
@@ -1004,7 +1002,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
               this.cdr.detectChanges();
             }
           }
-          this.alertService.success('Produto Atualizado', 'As alterações foram salvas com sucesso!');
         },
         error: (err) => {
           this.alertService.error('Erro ao atualizar produto', err.message || 'Não foi possível atualizar o produto.');
@@ -1032,7 +1029,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
           )
           .subscribe({
             next: () => {
-              this.alertService.success('Produto Removido', 'O produto foi removido com sucesso!');
+              // Sucesso: estado já atualizado otimisticamente.
             },
             error: (err) => {
               // ⚠️ Reverte em caso de erro
@@ -1071,7 +1068,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
           .subscribe({
             next: () => {
               console.log('[Dashboard] Produto marcado como vendido');
-              this.alertService.success('Produto Vendido', 'O produto foi marcado como vendido!');
             },
             error: (err) => {
               console.error('[Dashboard] Erro ao marcar como vendido:', err);
@@ -1114,7 +1110,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
           .subscribe({
             next: () => {
               console.log('[Dashboard] Produto reativado');
-              this.alertService.success('Produto Reativado', 'O produto está disponível novamente para venda!');
             },
             error: (err) => {
               console.error('[Dashboard] Erro ao reativar produto:', err);

@@ -390,7 +390,6 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
           )
           .subscribe({
             next: () => {
-              this.alertService.success('Produto Vendido', 'O produto foi marcado como vendido!');
               this.loadProduto(this.produto!.id);
             },
             error: (err) => {
@@ -416,7 +415,6 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
           )
           .subscribe({
             next: () => {
-              this.alertService.success('Produto Reativado', 'O produto está disponível novamente para venda!');
               this.loadProduto(this.produto!.id);
             },
             error: (err) => {

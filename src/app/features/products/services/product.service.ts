@@ -125,20 +125,40 @@ export class ProductService {
 
   /**
    * Busca produto por ID
-   * Tenta buscar do cache local primeiro, depois do backend se não encontrar
+   *
+   * IMPORTANTE: sempre busca do backend para garantir que todas as imagens
+   * sejam carregadas. O endpoint de listagem (GET /produtos) pode retornar
+   * apenas a imagem de capa, enquanto GET /produtos/:id retorna a galeria
+   * completa. Usar o cache da listagem aqui causava o bug de "só aparece a
+   * foto da capa" no detalhe do produto.
+   *
+   * Após buscar do backend, atualiza o item correspondente no cache da
+   * listagem para que o restante da app passe a enxergar a galeria completa.
    */
   buscarProdutoPorId(id: number): Observable<ProductResponse> {
-    // Tenta buscar do cache primeiro
-    const cachedData = this.produtosCache$.value;
-    if (cachedData.length > 0) {
-      const produto = cachedData.find(p => p.id === id);
-      if (produto) {
-        return of(produto);
-      }
-    }
+    return this.repository.buscarProdutoPorId(id).pipe(
+      tap(produtoDetalhado => this.atualizarProdutoNoCache(produtoDetalhado))
+    );
+  }
 
-    // Se não encontrou no cache, busca do backend
-    return this.repository.buscarProdutoPorId(id);
+  /**
+   * Atualiza (ou insere) um produto dentro do cache de listagem mantendo a
+   * ordem original. Usado para propagar dados mais completos (ex.: galeria
+   * de imagens vinda do endpoint de detalhe) para os componentes que
+   * observam o cache.
+   */
+  private atualizarProdutoNoCache(produto: ProductResponse): void {
+    const cache = this.produtosCache$.value;
+    if (cache.length === 0) {
+      return;
+    }
+    const index = cache.findIndex(p => p.id === produto.id);
+    if (index === -1) {
+      return;
+    }
+    const novoCache = [...cache];
+    novoCache[index] = produto;
+    this.produtosCache$.next(novoCache);
   }
 
   /**
@@ -169,20 +189,31 @@ export class ProductService {
   }
 
   /**
-   * Marca como vendido e invalida cache
+   * Marca como vendido.
+   *
+   * Usa a resposta do backend (que já vem com `disponivel = 0` e `soldDate`
+   * preenchidos) para atualizar imediatamente o item no cache observável,
+   * evitando que um GET /produtos servido por algum cache intermediário
+   * "ressuscite" o produto como disponível.
    */
   marcarComoVendido(id: number): Observable<Product> {
     return this.repository.marcarComoVendido(id).pipe(
-      tap(() => this.invalidateCache())
+      tap(produto => {
+        this.atualizarProdutoNoCache(produto);
+      })
     );
   }
 
   /**
-   * Reativa produto e invalida cache
+   * Reativa produto. Mesma estratégia de `marcarComoVendido`: usa a resposta
+   * do backend para manter o cache consistente sem precisar refazer toda a
+   * listagem.
    */
   reativarProduto(id: number, stock?: number): Observable<Product> {
     return this.repository.reativarProduto(id, stock).pipe(
-      tap(() => this.invalidateCache())
+      tap(produto => {
+        this.atualizarProdutoNoCache(produto);
+      })
     );
   }
 
