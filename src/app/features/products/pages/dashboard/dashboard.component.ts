@@ -229,6 +229,24 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     console.log('[Dashboard] Chamando loadProdutos');
     this.loadProdutos(false); // Não força reload - usa cache se disponível
+
+    // Reatividade em tempo real: qualquer mudança no cache do ProductService
+    // (criar / atualizar / remover / marcar vendido / reativar — vinda deste
+    // componente OU de outras telas como o detalhe do produto) atualiza o
+    // dashboard automaticamente, sem precisar de refresh manual.
+    this.productService.getProdutosCache$()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(produtos => {
+        // Ignora a emissão inicial vazia da BehaviorSubject antes do
+        // primeiro carregamento (evita "piscar" para tela vazia).
+        if (produtos.length === 0 && this.produtos.length === 0) {
+          return;
+        }
+        this.produtos = produtos;
+        this.invalidateFilterCache();
+        this.updateFeaturedProductsCache();
+        this.cdr.detectChanges();
+      });
   }
 
   ngOnDestroy(): void {

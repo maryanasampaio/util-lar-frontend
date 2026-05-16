@@ -319,6 +319,18 @@ export class ProductFormModalComponent implements OnInit, OnChanges {
     // Detecta mudanças no @Input() product
     if (changes['product'] && !changes['product'].firstChange) {
       this.loadProductData();
+      return;
+    }
+
+    // Recarrega/reseta o formulário toda vez que o modal é aberto.
+    // Sem isso, ao abrir o modal de criação após um envio anterior, os
+    // campos permanecem preenchidos com os valores do último produto
+    // (porque @Input() product continua undefined e ngOnChanges não dispara).
+    if (changes['isOpen'] && !changes['isOpen'].firstChange) {
+      const becameOpen = changes['isOpen'].currentValue && !changes['isOpen'].previousValue;
+      if (becameOpen) {
+        this.loadProductData();
+      }
     }
   }
 

@@ -162,29 +162,57 @@ export class ProductService {
   }
 
   /**
-   * Cria produto e invalida cache
+   * Adiciona um produto recém-criado ao topo do cache (ou atualiza, caso
+   * já exista um item com o mesmo id). Garante que a UI veja o novo item
+   * imediatamente sem precisar refazer a listagem.
+   */
+  private adicionarProdutoNoCache(produto: ProductResponse): void {
+    const cache = this.produtosCache$.value;
+    const index = cache.findIndex(p => p.id === produto.id);
+    if (index !== -1) {
+      const novoCache = [...cache];
+      novoCache[index] = produto;
+      this.produtosCache$.next(novoCache);
+      return;
+    }
+    this.produtosCache$.next([produto, ...cache]);
+  }
+
+  /**
+   * Remove um produto do cache pelo id. No-op se não estiver presente.
+   */
+  private removerProdutoDoCache(id: number): void {
+    const cache = this.produtosCache$.value;
+    const novoCache = cache.filter(p => p.id !== id);
+    if (novoCache.length !== cache.length) {
+      this.produtosCache$.next(novoCache);
+    }
+  }
+
+  /**
+   * Cria produto e propaga para o cache observável.
    */
   criarProduto(data: ProductFormData): Observable<Product> {
     return this.repository.criarProduto(data).pipe(
-      tap(() => this.invalidateCache())
+      tap(produto => this.adicionarProdutoNoCache(produto))
     );
   }
 
   /**
-   * Atualiza produto e invalida cache
+   * Atualiza produto e propaga para o cache observável.
    */
   atualizarProduto(id: number, data: Partial<ProductFormData>): Observable<Product> {
     return this.repository.atualizarProduto(id, data).pipe(
-      tap(() => this.invalidateCache())
+      tap(produto => this.atualizarProdutoNoCache(produto))
     );
   }
 
   /**
-   * Remove produto e invalida cache
+   * Remove produto e propaga para o cache observável.
    */
   removerProduto(id: number): Observable<void> {
     return this.repository.removerProduto(id).pipe(
-      tap(() => this.invalidateCache())
+      tap(() => this.removerProdutoDoCache(id))
     );
   }
 

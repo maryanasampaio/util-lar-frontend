@@ -77,7 +77,7 @@ import { Subject, takeUntil, finalize } from 'rxjs';
                 </div>
 
                 <!-- Imagem Principal -->
-                <div class="relative flex-1 aspect-square rounded-2xl overflow-hidden bg-white shadow-lg" style="border: 1px solid #D7DDE3;">
+                <div class="relative flex-1 w-full aspect-[4/3] sm:aspect-square max-h-[70vh] rounded-2xl overflow-hidden bg-white shadow-lg" style="border: 1px solid #D7DDE3;">
                   <!-- Overlay Vendido -->
                   <div *ngIf="produto.disponivel === 0" 
                     class="absolute inset-0 bg-black/50 z-20 flex items-center justify-center">
@@ -134,7 +134,7 @@ import { Subject, takeUntil, finalize } from 'rxjs';
                     *ngIf="produto.images && produto.images.length > 0" 
                     [src]="produto.images[imagemPrincipalIndex]" 
                     [alt]="produto.name"
-                    class="w-full h-full object-cover">
+                    class="w-full h-full object-contain">
                   <div *ngIf="!produto.images || produto.images.length === 0"
                     class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
                     <svg class="h-24 w-24 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -347,6 +347,23 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     } else {
       this.isLoading = false;
     }
+
+    // Reatividade em tempo real: se o produto exibido for atualizado em
+    // qualquer outra tela do mesmo navegador (dashboard, modal de edição,
+    // marcar como vendido, reativar...), o ProductService atualiza o cache
+    // e este componente reflete a mudança automaticamente.
+    this.productService.getProdutosCache$()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(produtos => {
+        if (!this.produto || produtos.length === 0) {
+          return;
+        }
+        const atualizado = produtos.find(p => p.id === this.produto!.id);
+        if (atualizado && atualizado !== this.produto) {
+          this.produto = atualizado;
+          this.cdr.detectChanges();
+        }
+      });
   }
 
   loadProduto(id: number): void {
