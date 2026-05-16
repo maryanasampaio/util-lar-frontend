@@ -377,7 +377,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (event) {
       event.stopPropagation();
     }
-    const url = `${globalThis.location.origin}/produto/${produto.id}`;
+    const url = `${globalThis.location.origin}/dashboard/produto/${produto.id}`;
     const text = `${produto.name} - R$ ${this.formatarPreco(produto.price)}`;
 
     if (navigator.share) {

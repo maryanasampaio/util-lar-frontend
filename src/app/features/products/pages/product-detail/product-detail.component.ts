@@ -134,7 +134,7 @@ import { Subject, takeUntil, finalize } from 'rxjs';
                     *ngIf="produto.images && produto.images.length > 0" 
                     [src]="produto.images[imagemPrincipalIndex]" 
                     [alt]="produto.name"
-                    class="w-full h-full object-contain">
+                    class="w-full h-full object-cover sm:object-contain">
                   <div *ngIf="!produto.images || produto.images.length === 0"
                     class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
                     <svg class="h-24 w-24 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
