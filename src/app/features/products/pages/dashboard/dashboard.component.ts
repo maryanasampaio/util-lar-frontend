@@ -476,18 +476,21 @@ export class DashboardComponent implements OnInit, OnDestroy {
    * Criamos um NOVO array para garantir que o Angular detecte a mudança.
    */
   private updateFeaturedProductsCache(): void {
+    // Limite máximo de produtos no carrossel: 3 páginas × itemsPerPage (3) = 9
+    const maxFeatured = this.itemsPerPage * 3;
+
     // Tenta buscar produtos marcados como featured
     let featured = this.produtos
       .filter(p => !!p.featured && p.disponivel === 1)
-      .slice(0, 4);
+      .slice(0, maxFeatured);
     
-    // FALLBACK: Se não houver produtos featured, usa os 4 mais recentes disponíveis
+    // FALLBACK: Se não houver produtos featured, usa os mais recentes disponíveis
     if (featured.length === 0 && this.produtos.length > 0) {
       console.warn('[Dashboard] Nenhum produto featured encontrado. Usando fallback com produtos recentes.');
       featured = this.produtos
         .filter(p => p.disponivel === 1)
         .sort((a, b) => b.id - a.id)
-        .slice(0, 4);
+        .slice(0, maxFeatured);
     }
     
     // CRÍTICO: Criar um NOVO array para garantir que o Angular detecte a mudança
