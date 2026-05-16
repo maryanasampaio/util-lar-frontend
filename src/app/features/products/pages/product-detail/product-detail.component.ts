@@ -40,8 +40,20 @@ import { Subject, takeUntil, finalize } from 'rxjs';
 
       <!-- Detalhes do Produto -->
       <div *ngIf="!isLoading && produto">
-        <!-- Breadcrumb / Navegação -->
+        <!-- Botão Voltar + Breadcrumb -->
         <div class="max-w-6xl mx-auto px-3 sm:px-4 pt-4 sm:pt-6">
+          <!-- Botão Voltar Explícito -->
+          <button 
+            (click)="voltar()"
+            class="inline-flex items-center gap-2 mb-3 px-3 py-2 rounded-lg transition-all hover:scale-105 font-semibold text-sm"
+            style="background-color: rgba(117, 136, 168, 0.1); color: #7588A8;">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            Voltar
+          </button>
+
+          <!-- Breadcrumb / Navegação -->
           <nav class="flex items-center gap-2 text-xs sm:text-sm" style="color: #6B7785;">
             <button (click)="voltar()" class="hover:underline transition-colors" style="color: #7588A8;">Produtos</button>
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -134,7 +146,7 @@ import { Subject, takeUntil, finalize } from 'rxjs';
                     *ngIf="produto.images && produto.images.length > 0" 
                     [src]="produto.images[imagemPrincipalIndex]" 
                     [alt]="produto.name"
-                    class="w-full h-full object-cover sm:object-contain">
+                    class="w-full h-full object-contain">
                   <div *ngIf="!produto.images || produto.images.length === 0"
                     class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
                     <svg class="h-24 w-24 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
