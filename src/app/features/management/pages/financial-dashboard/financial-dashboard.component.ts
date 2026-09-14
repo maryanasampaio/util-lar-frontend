@@ -55,298 +55,244 @@ interface ProductWithMargin {
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="min-h-screen overflow-x-hidden" style="background: linear-gradient(135deg, #EEF2F5, #E6EBEF);">
-      <!-- Header com botão sidebar -->
-      <div class="sticky top-0 z-10" style="background: linear-gradient(135deg, #EEF2F5, #E6EBEF);">
-        <div class="max-w-7xl mx-auto px-3 sm:px-4 md:px-8 py-2">
-          <button 
-            (click)="toggleSidebar()"
-            class="p-2 rounded-lg transition-all hover:scale-110 shadow-md" 
-            style="background-color: #FFFFFF; border: 1px solid #D7DDE3; color: #6B7785;"
-            title="Menu">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
-            </svg>
+    <div class="bg-canvas">
+      <!-- Cabeçalho -->
+      <div class="bg-white border-b border-line">
+        <div class="container-store py-6 sm:py-8 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p class="section-kicker mb-1">Gerenciamento</p>
+            <h1 class="section-title">Visão geral do negócio</h1>
+            <p class="text-sm text-muted mt-1">
+              Resumo financeiro, vendas e estoque
+              <span *ngIf="lastUpdatedLabel"> · atualizado em {{ lastUpdatedLabel }}</span>
+            </p>
+          </div>
+          <button type="button" (click)="refreshNow()" [disabled]="loading" class="btn-secondary h-10 px-4 text-sm">
+            <svg class="w-4 h-4" [class.animate-spin]="loading" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+            Atualizar
           </button>
         </div>
       </div>
-      
-      <div class="max-w-7xl mx-auto px-3 sm:px-4 md:px-8 pb-8">
-        <!-- Header -->
-        <div class="mb-5 sm:mb-8 flex flex-col gap-2 sm:gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 class="text-xl sm:text-2xl md:text-4xl font-bold mb-1" style="color: #23292A;">📊 Visão Geral</h1>
-            <p class="text-xs sm:text-sm" style="color: #6B7785;">Resumo financeiro do negócio</p>
-            <p *ngIf="lastUpdatedLabel" class="text-xs mt-1" style="color: #6B7785;">Atualizado em {{ lastUpdatedLabel }}</p>
-          </div>
-          <button
-            type="button"
-            (click)="refreshNow()"
-            class="inline-flex self-start items-center justify-center gap-2 rounded-lg px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold text-white transition-colors disabled:opacity-50" style="background-color: #7588A8;"
-            [disabled]="loading">
-            <span>↻</span>
-            <span>Atualizar agora</span>
-          </button>
-        </div>
 
-        <!-- LINHA 1: Resumo Rápido -->
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-5 sm:mb-8">
-          
-          <!-- 💰 Lucro do Mês -->
-          <div class="rounded-xl sm:rounded-2xl p-3 sm:p-5 text-white shadow-lg" style="background: linear-gradient(135deg, #5a8a6a, #4a7a5a);">
-            <div class="flex items-center justify-between mb-2">
-              <h3 class="text-[11px] sm:text-sm font-medium opacity-90">💰 Lucro do Mês</h3>
-              <svg class="w-5 h-5 sm:w-8 sm:h-8 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+      <div class="container-store py-8 space-y-6">
+        <!-- ================= KPIs ================= -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-5">
+          <div class="kpi">
+            <div class="flex items-center justify-between">
+              <p class="kpi-label">Lucro do mês</p>
+              <span class="w-9 h-9 rounded-lg bg-success-50 text-success-600 flex items-center justify-center">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              </span>
             </div>
-            <div class="text-base sm:text-2xl md:text-3xl font-bold mb-1">R$ {{ formatarPreco(currentMonthProfit) }}</div>
-            <div class="text-[10px] sm:text-sm opacity-90 mb-1 sm:mb-2">Margem: {{ currentMonthMargin }}%</div>
-            <div *ngIf="profitVariation !== 0" 
-              [class]="profitVariation > 0 ? 'bg-white/20' : 'bg-red-900/30'"
-              class="text-[10px] sm:text-xs font-semibold px-1.5 sm:px-2 py-0.5 sm:py-1 rounded inline-flex items-center gap-1">
-              <span *ngIf="profitVariation > 0">↑</span>
-              <span *ngIf="profitVariation < 0">↓</span>
-              {{ Math.abs(profitVariation) }}% vs mês passado
+            <p class="kpi-value">R$ {{ formatarPreco(currentMonthProfit) }}</p>
+            <div class="flex flex-wrap items-center gap-2 text-xs text-muted">
+              <span>Margem {{ currentMonthMargin }}%</span>
+              <span *ngIf="profitVariation !== 0"
+                    class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md font-semibold"
+                    [class.bg-success-50]="profitVariation > 0" [class.text-success-700]="profitVariation > 0"
+                    [class.bg-danger-50]="profitVariation < 0" [class.text-danger-700]="profitVariation < 0">
+                {{ profitVariation > 0 ? '↑' : '↓' }} {{ Math.abs(profitVariation) }}% vs. mês anterior
+              </span>
             </div>
           </div>
 
-          <!-- 📦 Vendas do Mês -->
-          <div class="rounded-xl sm:rounded-2xl p-3 sm:p-5 text-white shadow-lg" style="background: linear-gradient(135deg, #4a6fa5, #6889b5);">
-            <div class="flex items-center justify-between mb-2">
-              <h3 class="text-[11px] sm:text-sm font-medium opacity-90">📦 Vendas do Mês</h3>
-              <svg class="w-5 h-5 sm:w-8 sm:h-8 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-              </svg>
+          <div class="kpi">
+            <div class="flex items-center justify-between">
+              <p class="kpi-label">Vendas do mês</p>
+              <span class="w-9 h-9 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+              </span>
             </div>
-            <div class="text-base sm:text-2xl md:text-3xl font-bold mb-1">{{ currentMonthItemsSold }}</div>
-            <div class="text-[10px] sm:text-sm opacity-90 mb-1 sm:mb-2">Ticket: R$ {{ formatarPreco(ticketMedio) }}</div>
-            <div *ngIf="topSellingProduct" class="text-[10px] sm:text-xs bg-white/20 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded truncate">
-              🔥 Mais vendido: {{ topSellingProduct }}
-            </div>
-          </div>
-
-          <!-- 📊 Margem Média -->
-          <div class="rounded-xl sm:rounded-2xl p-3 sm:p-5 text-white shadow-lg" style="background: linear-gradient(135deg, #5a9e8f, #3d7a6e);">
-            <div class="flex items-center justify-between mb-2">
-              <h3 class="text-[11px] sm:text-sm font-medium opacity-90">📊 Margem Geral</h3>
-              <svg class="w-5 h-5 sm:w-8 sm:h-8 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-              </svg>
-            </div>
-            <div class="text-base sm:text-2xl md:text-3xl font-bold mb-1">{{ margemMedia }}%</div>
-            <div class="text-[10px] sm:text-sm opacity-90 mb-1 sm:mb-2">Lucro: R$ {{ formatarPreco(totalProfit) }}</div>
-            <div class="text-[10px] sm:text-xs bg-white/20 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded">
-              Vendido: R$ {{ formatarPreco(totalSalesAmount) }}
+            <p class="kpi-value">{{ currentMonthItemsSold }} <span class="text-base font-semibold text-muted">itens</span></p>
+            <div class="text-xs text-muted space-y-0.5">
+              <p>Ticket médio R$ {{ formatarPreco(ticketMedio) }}</p>
+              <p *ngIf="topSellingProduct" class="truncate">Mais vendido: <span class="font-semibold text-ink">{{ topSellingProduct }}</span></p>
             </div>
           </div>
 
-          <!-- 🧊 Estoque Atual -->
-          <div class="rounded-xl sm:rounded-2xl p-3 sm:p-5 text-white shadow-lg" style="background: linear-gradient(135deg, #6B7785, #394049);">
-            <div class="flex items-center justify-between mb-2">
-              <h3 class="text-[11px] sm:text-sm font-medium opacity-90">🧊 Estoque</h3>
-              <svg class="w-5 h-5 sm:w-8 sm:h-8 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-              </svg>
+          <div class="kpi">
+            <div class="flex items-center justify-between">
+              <p class="kpi-label">Margem geral</p>
+              <span class="w-9 h-9 rounded-lg bg-accent-50 text-accent-600 flex items-center justify-center">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+              </span>
             </div>
-            <div class="text-base sm:text-2xl md:text-3xl font-bold mb-1">{{ stockCount }}</div>
-            <div class="text-[10px] sm:text-sm opacity-90 mb-1 sm:mb-2">Investido: R$ {{ formatarPreco(stockValue) }}</div>
-            <div *ngIf="oldStockCount > 0" class="text-[10px] sm:text-xs bg-red-900/40 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded">
-              ⚠️ {{ oldStockCount }} parados há +60 dias
+            <p class="kpi-value">{{ margemMedia }}%</p>
+            <div class="text-xs text-muted space-y-0.5">
+              <p>Lucro total R$ {{ formatarPreco(totalProfit) }}</p>
+              <p>Vendido R$ {{ formatarPreco(totalSalesAmount) }}</p>
+            </div>
+          </div>
+
+          <div class="kpi">
+            <div class="flex items-center justify-between">
+              <p class="kpi-label">Estoque</p>
+              <span class="w-9 h-9 rounded-lg bg-canvas-deep text-muted flex items-center justify-center">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+              </span>
+            </div>
+            <p class="kpi-value">{{ stockCount }} <span class="text-base font-semibold text-muted">itens</span></p>
+            <div class="flex flex-wrap items-center gap-2 text-xs text-muted">
+              <span>Investido R$ {{ formatarPreco(stockValue) }}</span>
+              <span *ngIf="oldStockCount > 0" class="inline-flex px-1.5 py-0.5 rounded-md font-semibold bg-warning-50 text-warning-700">{{ oldStockCount }} parados +60 dias</span>
             </div>
           </div>
         </div>
 
-        <!-- LINHA 2: Estratégia -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:gap-6 mb-5 sm:mb-8">
-          
-          <!-- 📈 Evolução Mensal -->
-          <div class="bg-white rounded-xl sm:rounded-2xl shadow-lg p-3 sm:p-5">
-            <h2 class="text-sm sm:text-xl font-bold mb-3 sm:mb-6 flex items-center gap-2" style="color: #23292A;">
-              <span>📈</span> Evolução de Lucro
-            </h2>
-            <div class="space-y-2 sm:space-y-3">
-              <div *ngFor="let stat of monthlyStats.slice(0, 6); trackBy: trackByMes" class="flex items-center gap-1.5 sm:gap-4">
-                <div class="w-12 sm:w-24 text-[10px] sm:text-sm font-medium text-gray-600">{{ stat.mes }}</div>
-                <div class="flex-1 bg-gray-100 rounded-full h-6 sm:h-8 relative overflow-hidden">
-                  <div 
-                    [style.width.%]="(stat.lucro / maxMonthProfit * 100)"
-                    [class]="stat.lucro > 0 ? 'bg-gradient-to-r from-green-400 to-green-500' : 'bg-gray-300'"
-                    class="h-full flex items-center justify-end px-1.5 sm:px-3 text-white text-[9px] sm:text-xs font-bold transition-all duration-500">
-                    <span *ngIf="stat.lucro > 0">R$ {{ formatarPreco(stat.lucro) }}</span>
+        <!-- ================= EVOLUÇÃO + TOP PRODUTOS ================= -->
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-5">
+          <section class="card p-5 sm:p-6 lg:col-span-3">
+            <div class="flex items-center justify-between mb-5">
+              <div>
+                <h2 class="font-display text-base font-bold text-ink">Evolução do lucro</h2>
+                <p class="text-xs text-muted">Últimos 6 meses</p>
+              </div>
+            </div>
+            <div class="space-y-3">
+              <div *ngFor="let stat of monthlyStats.slice(0, 6); trackBy: trackByMes" class="grid grid-cols-[5.5rem_1fr_auto] sm:grid-cols-[9rem_1fr_auto] items-center gap-3">
+                <span class="text-xs sm:text-sm font-medium text-muted truncate">{{ stat.mes }}</span>
+                <div class="h-7 rounded-md bg-canvas-deep overflow-hidden">
+                  <div class="h-full rounded-md flex items-center justify-end px-2 text-[11px] font-bold text-white transition-all duration-700 min-w-[2px]"
+                       [style.width.%]="maxMonthProfit > 0 ? (stat.lucro / maxMonthProfit * 100) : 0"
+                       [class.bg-brand-700]="stat.lucro > 0" [class.bg-line-strong]="stat.lucro <= 0">
+                    <span *ngIf="stat.lucro > 0 && (stat.lucro / maxMonthProfit) > 0.35">R$ {{ formatarPreco(stat.lucro) }}</span>
                   </div>
                 </div>
-                <div class="text-[10px] sm:text-sm font-semibold" 
-                  [class]="stat.margem >= 15 ? 'text-green-600' : ''" [style.color]="stat.margem < 15 ? '#7588A8' : ''">
-                  {{ stat.margem }}%
-                </div>
+                <span class="text-xs sm:text-sm font-semibold w-12 text-right" [class.text-success-700]="stat.margem >= 15" [class.text-muted]="stat.margem < 15">{{ stat.margem }}%</span>
               </div>
+              <p *ngIf="monthlyStats.length === 0" class="text-sm text-muted text-center py-8">Sem dados de vendas ainda.</p>
             </div>
-          </div>
+          </section>
 
-          <!-- 🔥 Top 3 Mais Vendidos -->
-          <div class="bg-white rounded-xl sm:rounded-2xl shadow-lg p-3 sm:p-5">
-            <h2 class="text-sm sm:text-xl font-bold mb-3 sm:mb-6 flex items-center gap-2" style="color: #23292A;">
-              <span>🔥</span> Top 3 Produtos
-            </h2>
-            <div class="space-y-2 sm:space-y-4">
-              <div *ngFor="let item of topProducts; let i = index; trackBy: trackByProdutoFinanceiro" 
-                class="flex items-center gap-2 sm:gap-4 p-2 sm:p-4 rounded-lg sm:rounded-xl"
-                [class]="i === 0 ? 'border-2' : 'bg-gray-50'"
-                [style.background]="i === 0 ? 'linear-gradient(to right, #EEF2F5, #E6EBEF)' : ''"
-                [style.border-color]="i === 0 ? '#D7DDE3' : ''">
-                <div class="text-xl sm:text-3xl font-bold" 
-                  [style.color]="i === 0 ? '#7588A8' : '#9CA3AF'">
-                  #{{ i + 1 }}
-                </div>
+          <section class="card p-5 sm:p-6 lg:col-span-2">
+            <h2 class="font-display text-base font-bold text-ink mb-1">Mais vendidos</h2>
+            <p class="text-xs text-muted mb-5">Top 3 por receita</p>
+            <ol class="space-y-2.5">
+              <li *ngFor="let item of topProducts; let i = index; trackBy: trackByProdutoFinanceiro"
+                  class="flex items-center gap-3 p-3 rounded-xl border"
+                  [class.border-accent-200]="i === 0" [class.bg-accent-50]="i === 0"
+                  [class.border-line]="i !== 0">
+                <span class="w-8 h-8 shrink-0 rounded-lg flex items-center justify-center font-display font-extrabold text-sm"
+                      [class.bg-accent-500]="i === 0" [class.text-white]="i === 0"
+                      [class.bg-canvas-deep]="i !== 0" [class.text-muted]="i !== 0">{{ i + 1 }}</span>
                 <div class="flex-1 min-w-0">
-                  <h3 class="font-bold text-gray-900 text-xs sm:text-sm truncate">{{ item.nome }}</h3>
-                  <p class="text-[10px] sm:text-sm text-gray-600">{{ item.vezesVendido }}x • {{ item.margem }}%</p>
+                  <p class="text-sm font-semibold text-ink truncate">{{ item.nome }}</p>
+                  <p class="text-xs text-muted">{{ item.vezesVendido }}x vendido · margem {{ item.margem }}%</p>
                 </div>
-                <div class="text-right shrink-0">
-                  <div class="text-sm sm:text-lg font-bold text-green-600">R$ {{ formatarPreco(item.receitaTotal!) }}</div>
-                  <div class="text-[10px] sm:text-xs text-gray-500">receita</div>
-                </div>
-              </div>
-              <div *ngIf="topProducts.length === 0" class="text-center py-8 text-gray-400">
-                Nenhuma venda registrada ainda
-              </div>
-            </div>
-          </div>
+                <p class="text-sm font-bold text-ink shrink-0">R$ {{ formatarPreco(item.receitaTotal!) }}</p>
+              </li>
+              <li *ngIf="topProducts.length === 0" class="text-sm text-muted text-center py-8">Nenhuma venda registrada ainda.</li>
+            </ol>
+          </section>
         </div>
 
-        <!-- LINHA 3: Alertas e Ações -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:gap-6 mb-5 sm:mb-8">
-          
-          <!-- 💸 Valor em Estoque -->
-          <div class="bg-white rounded-xl sm:rounded-2xl shadow-lg p-3 sm:p-5">
-            <h2 class="text-sm sm:text-xl font-bold mb-3 sm:mb-6 flex items-center gap-2" style="color: #23292A;">
-              <span>💸</span> Capital em Estoque
-            </h2>
-            <div class="space-y-2 sm:space-y-4">
-              <div class="bg-blue-50 rounded-lg sm:rounded-xl p-3 sm:p-4 border-2 border-blue-200">
-                <div class="text-[10px] sm:text-sm text-blue-600 font-medium mb-0.5">Valor Investido</div>
-                <div class="text-base sm:text-2xl font-bold text-blue-700">R$ {{ formatarPreco(stockValue) }}</div>
-                <div class="text-[10px] sm:text-xs text-blue-600 mt-0.5">{{ stockCount }} produtos</div>
+        <!-- ================= ESTOQUE + MENOR MARGEM ================= -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <section class="card p-5 sm:p-6">
+            <h2 class="font-display text-base font-bold text-ink mb-1">Capital em estoque</h2>
+            <p class="text-xs text-muted mb-5">Quanto está parado e quanto pode virar receita</p>
+            <dl class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div class="rounded-xl border border-line p-4">
+                <dt class="kpi-label">Valor investido</dt>
+                <dd class="font-display text-xl font-extrabold text-ink mt-1">R$ {{ formatarPreco(stockValue) }}</dd>
+                <dd class="text-xs text-muted">{{ stockCount }} produtos</dd>
               </div>
-              <div class="bg-green-50 rounded-lg sm:rounded-xl p-3 sm:p-4 border-2 border-green-200">
-                <div class="text-[10px] sm:text-sm text-green-600 font-medium mb-0.5">Potencial de Venda</div>
-                <div class="text-base sm:text-2xl font-bold text-green-700">R$ {{ formatarPreco(stockPotentialValue) }}</div>
-                <div class="text-[10px] sm:text-xs text-green-600 mt-0.5">Lucro: R$ {{ formatarPreco(stockPotentialProfit) }}</div>
+              <div class="rounded-xl border border-success-100 bg-success-50 p-4">
+                <dt class="kpi-label text-success-700">Potencial de venda</dt>
+                <dd class="font-display text-xl font-extrabold text-success-700 mt-1">R$ {{ formatarPreco(stockPotentialValue) }}</dd>
+                <dd class="text-xs text-success-700/80">Lucro previsto R$ {{ formatarPreco(stockPotentialProfit) }}</dd>
               </div>
-              <div *ngIf="oldStockCount > 0" class="rounded-lg sm:rounded-xl p-3 sm:p-4" style="background-color: #EEF2F5; border: 2px solid #D7DDE3;">
-                <div class="text-[10px] sm:text-sm font-medium mb-0.5" style="color: #7588A8;">⚠️ Produtos Parados</div>
-                <div class="text-base sm:text-2xl font-bold" style="color: #7588A8;">{{ oldStockCount }}</div>
-                <div class="text-[10px] sm:text-xs mt-0.5" style="color: #6B7785;">Considere fazer promoção</div>
+              <div *ngIf="oldStockCount > 0" class="sm:col-span-2 rounded-xl border border-warning-100 bg-warning-50 p-4 flex items-center gap-3">
+                <span class="w-9 h-9 shrink-0 rounded-lg bg-warning-100 text-warning-700 flex items-center justify-center">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </span>
+                <div>
+                  <dt class="text-sm font-bold text-warning-700">{{ oldStockCount }} produto{{ oldStockCount !== 1 ? 's' : '' }} parado{{ oldStockCount !== 1 ? 's' : '' }} há mais de 60 dias</dt>
+                  <dd class="text-xs text-warning-700/80">Considere uma promoção ou destaque na vitrine.</dd>
+                </div>
               </div>
-            </div>
-          </div>
+            </dl>
+          </section>
 
-          <!-- 📉 Produtos com Menor Margem -->
-          <div class="bg-white rounded-xl sm:rounded-2xl shadow-lg p-3 sm:p-5">
-            <h2 class="text-sm sm:text-xl font-bold mb-3 sm:mb-6 flex items-center gap-2" style="color: #23292A;">
-              <span>📉</span> Menor Margem
-            </h2>
-            <div class="space-y-2 sm:space-y-3">
-              <div *ngFor="let produto of lowMarginProducts.slice(0, 5); trackBy: trackByProdutoFinanceiro" 
-                class="flex items-center justify-between p-2 sm:p-3 rounded-lg border border-gray-200">
-                <div class="flex-1 min-w-0">
-                  <h3 class="font-bold text-gray-900 text-xs sm:text-sm truncate">{{ produto.nome }}</h3>
-                  <p class="text-[10px] sm:text-xs text-gray-500">{{ produto.categoria }}</p>
+          <section class="card p-5 sm:p-6">
+            <h2 class="font-display text-base font-bold text-ink mb-1">Menor margem</h2>
+            <p class="text-xs text-muted mb-5">Produtos que merecem revisão de preço</p>
+            <ul class="divide-y divide-line">
+              <li *ngFor="let produto of lowMarginProducts.slice(0, 5); trackBy: trackByProdutoFinanceiro" class="flex items-center justify-between gap-3 py-2.5">
+                <div class="min-w-0">
+                  <p class="text-sm font-semibold text-ink truncate">{{ produto.nome }}</p>
+                  <p class="text-xs text-muted capitalize">{{ produto.categoria }}</p>
                 </div>
-                <div class="text-right shrink-0">
-                  <div class="text-sm sm:text-lg font-bold" 
-                    [class]="produto.margem < 10 ? 'text-red-600' : ''" [style.color]="produto.margem >= 10 ? '#7588A8' : ''">
-                    {{ produto.margem }}%
-                  </div>
-                  <div class="text-[10px] sm:text-xs text-gray-500">margem</div>
-                </div>
-              </div>
-              <div *ngIf="lowMarginProducts.length === 0" class="text-center py-8 text-gray-400">
-                Todas as margens estão saudáveis!
-              </div>
-            </div>
-          </div>
+                <span class="shrink-0 px-2 py-1 rounded-md text-xs font-bold"
+                      [class.bg-danger-50]="produto.margem < 10" [class.text-danger-700]="produto.margem < 10"
+                      [class.bg-warning-50]="produto.margem >= 10" [class.text-warning-700]="produto.margem >= 10">
+                  {{ produto.margem }}%
+                </span>
+              </li>
+              <li *ngIf="lowMarginProducts.length === 0" class="text-sm text-muted text-center py-8">Todas as margens estão saudáveis.</li>
+            </ul>
+          </section>
         </div>
 
-        <!-- LINHA 4: Histórico Detalhado -->
-        <div class="bg-white rounded-xl sm:rounded-2xl shadow-lg p-3 sm:p-5">
-          <div class="mb-3 sm:mb-6">
-            <h2 class="text-sm sm:text-xl font-bold flex items-center gap-2" style="color: #23292A;">
-              <span>📋</span> Histórico Completo
-            </h2>
-            <p class="text-[10px] sm:text-xs text-gray-500 mt-0.5">Clique em um mês para ver os produtos vendidos.</p>
+        <!-- ================= HISTÓRICO ================= -->
+        <section class="card overflow-hidden">
+          <div class="px-5 sm:px-6 py-4 border-b border-line">
+            <h2 class="font-display text-base font-bold text-ink">Histórico mensal</h2>
+            <p class="text-xs text-muted">Clique em um mês para ver os produtos vendidos.</p>
           </div>
           <div class="overflow-x-auto">
-            <table class="w-full min-w-[320px]">
+            <table class="table-store min-w-[560px]">
               <thead>
-                <tr class="border-b-2 border-gray-200">
-                  <th class="text-left py-3 px-2 md:px-4 text-xs md:text-sm font-semibold text-gray-700">Mês</th>
-                  <th class="text-right py-3 px-2 md:px-4 text-xs md:text-sm font-semibold text-gray-700 hidden sm:table-cell">Vendas</th>
-                  <th class="text-right py-3 px-2 md:px-4 text-xs md:text-sm font-semibold text-gray-700 hidden sm:table-cell">Custo</th>
-                  <th class="text-right py-3 px-2 md:px-4 text-xs md:text-sm font-semibold text-gray-700">Lucro</th>
-                  <th class="text-right py-3 px-2 md:px-4 text-xs md:text-sm font-semibold text-gray-700">Margem</th>
-                  <th class="text-right py-3 px-2 md:px-4 text-xs md:text-sm font-semibold text-gray-700">Qtd</th>
+                <tr>
+                  <th>Mês</th>
+                  <th class="text-right">Vendas</th>
+                  <th class="text-right hidden sm:table-cell">Custo</th>
+                  <th class="text-right">Lucro</th>
+                  <th class="text-right">Margem</th>
+                  <th class="text-right">Qtd</th>
                 </tr>
               </thead>
               <tbody>
-                <tr
-                  *ngFor="let stat of monthlyStats; trackBy: trackByMes"
-                  class="border-b border-gray-100 hover:bg-gray-50 cursor-pointer"
-                  (click)="openMonthSoldModal(stat)">
-                  <td class="py-3 px-2 md:px-4 text-xs md:text-sm font-medium">{{ stat.mes }}</td>
-                  <td class="py-3 px-2 md:px-4 text-right text-xs md:text-sm hidden sm:table-cell">R$ {{ formatarPreco(stat.vendas) }}</td>
-                  <td class="py-3 px-2 md:px-4 text-right text-xs md:text-sm text-red-600 hidden sm:table-cell">R$ {{ formatarPreco(stat.custo) }}</td>
-                  <td class="py-3 px-2 md:px-4 text-right text-xs md:text-sm font-bold text-green-600">R$ {{ formatarPreco(stat.lucro) }}</td>
-                  <td class="py-3 px-2 md:px-4 text-right text-xs md:text-sm font-semibold" 
-                    [class]="stat.margem >= 15 ? 'text-green-600' : 'text-orange-600'">
-                    {{ stat.margem }}%
-                  </td>
-                  <td class="py-3 px-2 md:px-4 text-right text-xs md:text-sm">{{ stat.itensVendidos }}</td>
+                <tr *ngFor="let stat of monthlyStats; trackBy: trackByMes" (click)="openMonthSoldModal(stat)" class="hover:bg-canvas cursor-pointer transition-colors">
+                  <td class="font-semibold">{{ stat.mes }}</td>
+                  <td class="text-right">R$ {{ formatarPreco(stat.vendas) }}</td>
+                  <td class="text-right text-muted hidden sm:table-cell">R$ {{ formatarPreco(stat.custo) }}</td>
+                  <td class="text-right font-bold text-success-700">R$ {{ formatarPreco(stat.lucro) }}</td>
+                  <td class="text-right font-semibold" [class.text-success-700]="stat.margem >= 15" [class.text-warning-700]="stat.margem < 15">{{ stat.margem }}%</td>
+                  <td class="text-right">{{ stat.itensVendidos }}</td>
                 </tr>
+                <tr *ngIf="monthlyStats.length === 0"><td colspan="6" class="text-center text-muted py-8">Sem histórico ainda.</td></tr>
               </tbody>
             </table>
           </div>
-        </div>
+        </section>
       </div>
 
-      <!-- Modal: Vendidos por mês -->
-        <div *ngIf="isSoldMonthModalOpen" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-        <div class="absolute inset-0 bg-black/40" (click)="closeSoldMonthModal()"></div>
-
-        <div class="relative z-10 w-full sm:max-w-2xl rounded-t-2xl sm:rounded-2xl bg-white shadow-xl border border-gray-200 p-4 md:p-6">
-          <div class="flex items-start justify-between gap-4 mb-4">
+      <!-- Modal: vendidos no mês -->
+      <div *ngIf="isSoldMonthModalOpen" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="absolute inset-0 bg-brand-900/60 backdrop-blur-sm" (click)="closeSoldMonthModal()"></div>
+        <div class="relative z-10 w-full sm:max-w-2xl rounded-t-3xl sm:rounded-2xl bg-white shadow-2xl animate-fade-in">
+          <div class="flex items-start justify-between gap-4 px-5 sm:px-6 py-4 border-b border-line">
             <div>
-              <h3 class="text-lg font-bold text-gray-900">Produtos vendidos em {{ selectedMonthLabel }}</h3>
-              <p class="text-sm text-gray-500">Total: {{ soldProductsByMonth.length }}</p>
+              <h3 class="font-display text-base font-bold text-ink">Vendas em {{ selectedMonthLabel }}</h3>
+              <p class="text-xs text-muted">{{ soldProductsByMonth.length }} produto{{ soldProductsByMonth.length !== 1 ? 's' : '' }}</p>
             </div>
-            <button
-              type="button"
-              (click)="closeSoldMonthModal()"
-              class="rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors"
-              aria-label="Fechar modal">
-              ✕
+            <button type="button" (click)="closeSoldMonthModal()" class="btn-ghost w-9 h-9 rounded-lg p-0" aria-label="Fechar">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
           </div>
-
-          <div *ngIf="loadingSoldMonth" class="text-sm text-gray-500 py-6 text-center">
-            Carregando produtos vendidos...
-          </div>
-
-          <div *ngIf="!loadingSoldMonth && soldProductsByMonth.length === 0" class="text-sm text-gray-500 py-6 text-center">
-            Nenhum produto vendido neste mês.
-          </div>
-
-          <div *ngIf="!loadingSoldMonth && soldProductsByMonth.length > 0" class="space-y-2 max-h-80 overflow-y-auto pr-1">
-            <div
-              *ngFor="let sold of soldProductsByMonth; trackBy: trackByProdutoVendido"
-              class="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50 px-3 py-2">
-              <div>
-                <p class="text-sm font-semibold text-gray-900">{{ sold.nome }}</p>
-                <p class="text-xs text-gray-500">{{ sold.categoria }} • vendido em {{ formatDate(sold.dataVenda) }}</p>
-              </div>
-              <p class="text-sm font-bold text-green-600">R$ {{ formatarPreco(sold.preco) }}</p>
-            </div>
+          <div class="p-5 sm:p-6">
+            <p *ngIf="loadingSoldMonth" class="text-sm text-muted py-6 text-center">Carregando produtos vendidos...</p>
+            <p *ngIf="!loadingSoldMonth && soldProductsByMonth.length === 0" class="text-sm text-muted py-6 text-center">Nenhum produto vendido neste mês.</p>
+            <ul *ngIf="!loadingSoldMonth && soldProductsByMonth.length > 0" class="divide-y divide-line max-h-80 overflow-y-auto">
+              <li *ngFor="let sold of soldProductsByMonth; trackBy: trackByProdutoVendido" class="flex items-center justify-between gap-3 py-2.5">
+                <div class="min-w-0">
+                  <p class="text-sm font-semibold text-ink truncate">{{ sold.nome }}</p>
+                  <p class="text-xs text-muted capitalize">{{ sold.categoria }} · vendido em {{ formatDate(sold.dataVenda) }}</p>
+                </div>
+                <p class="text-sm font-bold text-success-700 shrink-0">R$ {{ formatarPreco(sold.preco) }}</p>
+              </li>
+            </ul>
           </div>
         </div>
       </div>

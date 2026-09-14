@@ -8,19 +8,19 @@ import { FormsModule } from '@angular/forms';
   imports: [CommonModule, FormsModule],
   template: `
     <div 
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      class="fixed inset-0 bg-brand-900/60 backdrop-blur-sm flex items-center justify-center z-50"
       (click)="onClose()">
       
       <div 
-        class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4"
+        class="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 max-w-md w-full mx-4 animate-fade-in"
         (click)="$event.stopPropagation()">
         
         <!-- Header -->
         <div class="flex items-center justify-between mb-6">
-          <h2 class="text-2xl font-bold" style="color: #23292A;">Acesso Admin</h2>
+          <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-ink">Acesso Admin</h2>
           <button 
             (click)="onClose()"
-            class="text-gray-400 hover:text-gray-600 transition-colors">
+            class="btn-ghost w-9 h-9 rounded-lg p-0" aria-label="Fechar">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -30,7 +30,7 @@ import { FormsModule } from '@angular/forms';
         <!-- Form -->
         <form (ngSubmit)="onSubmit()">
           <div class="mb-6">
-            <label class="block text-sm font-medium text-gray-700 mb-2">
+            <label class="block text-sm font-semibold text-ink mb-2">
               Senha de Administrador
             </label>
             <input 
@@ -38,20 +38,18 @@ import { FormsModule } from '@angular/forms';
               [(ngModel)]="password"
               name="password"
               placeholder="Digite a senha secreta"
-              class="w-full px-4 py-3 rounded-lg focus:ring-2 focus:outline-none" style="border: 1px solid #D7DDE3; background-color: #EDF1F4;"
+              class="input px-4 py-3"
               autofocus>
           </div>
 
-          <div *ngIf="errorMessage" class="mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm">
+          <div *ngIf="errorMessage" class="mb-4 p-3 bg-danger-50 border border-danger-200 text-danger-600 rounded-xl text-sm font-medium">
             {{ errorMessage }}
           </div>
 
           <button 
             type="submit"
             [disabled]="isLoading"
-            [class.opacity-50]="isLoading"
-            [class.cursor-not-allowed]="isLoading"
-            class="w-full text-white font-bold py-3 px-6 rounded-lg transition-all" style="background-color: #7588A8;">
+            class="btn-primary w-full py-3 px-6 text-sm">
             {{ isLoading ? 'Verificando...' : 'Entrar como Admin' }}
           </button>
         </form>

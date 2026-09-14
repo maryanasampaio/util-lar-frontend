@@ -8,16 +8,16 @@ import { Router } from '@angular/router';
   imports: [CommonModule],
   template: `
     <div 
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      class="fixed inset-0 bg-brand-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
       (click)="onClose()">
       
       <div 
-        class="bg-white rounded-2xl shadow-2xl p-5 sm:p-8 max-w-lg w-full max-h-[90vh] overflow-y-auto"
+        class="bg-white rounded-3xl shadow-2xl p-5 sm:p-8 max-w-lg w-full max-h-[90vh] overflow-y-auto animate-fade-in"
         (click)="$event.stopPropagation()">
         
         <!-- Icon -->
         <div class="flex justify-center mb-3 sm:mb-6">
-          <div class="rounded-full p-3 sm:p-4" style="background: linear-gradient(135deg, #7588A8, #95A7C1);">
+          <div class="rounded-2xl p-3 sm:p-4 bg-gradient-to-br from-brand-700 to-brand-500 shadow-lg shadow-brand-500/30">
             <svg class="w-8 h-8 sm:w-12 sm:h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
             </svg>
@@ -25,11 +25,11 @@ import { Router } from '@angular/router';
         </div>
 
         <!-- Header -->
-        <h2 class="text-xl sm:text-3xl font-bold text-center mb-2 sm:mb-4" style="color: #23292A;">
+        <h2 class="text-xl sm:text-3xl font-extrabold tracking-tight text-center mb-2 sm:mb-3 text-ink">
           Bem-vindo ao Util Lar!
         </h2>
         
-        <p class="text-sm sm:text-base text-center mb-4 sm:mb-8" style="color: #6B7785;">
+        <p class="text-sm sm:text-base text-center mb-4 sm:mb-8 text-muted leading-relaxed">
           Quer receber notificações quando novos produtos forem publicados? 
           Fique por dentro das melhores ofertas!
         </p>
@@ -38,7 +38,7 @@ import { Router } from '@angular/router';
         <div class="space-y-2 sm:space-y-3 mb-4 sm:mb-8">
           <button 
             (click)="onConfigureNotifications('whatsapp')"
-            class="w-full p-3 sm:p-4 border-2 border-gray-200 rounded-xl hover:border-green-500 hover:bg-green-50 transition-all group text-left">
+            class="w-full p-3 sm:p-4 border border-brand-300 rounded-2xl hover:border-green-500 hover:bg-green-50 transition-all group text-left">
             <div class="flex items-center gap-3 sm:gap-4">
               <div class="bg-green-500 rounded-full p-2 sm:p-3 group-hover:scale-110 transition-transform flex-shrink-0">
                 <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -57,7 +57,7 @@ import { Router } from '@angular/router';
 
           <button 
             (click)="onConfigureNotifications('email')"
-            class="w-full p-3 sm:p-4 border-2 border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all group text-left">
+            class="w-full p-3 sm:p-4 border border-brand-300 rounded-2xl hover:border-blue-500 hover:bg-blue-50 transition-all group text-left">
             <div class="flex items-center gap-3 sm:gap-4">
               <div class="bg-blue-500 rounded-full p-2 sm:p-3 group-hover:scale-110 transition-transform flex-shrink-0">
                 <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -76,7 +76,7 @@ import { Router } from '@angular/router';
 
           <button 
             (click)="onConfigureNotifications('push')"
-            class="w-full p-3 sm:p-4 border-2 border-gray-200 rounded-xl hover:border-purple-500 hover:bg-purple-50 transition-all group text-left">
+            class="w-full p-3 sm:p-4 border border-brand-300 rounded-2xl hover:border-purple-500 hover:bg-purple-50 transition-all group text-left">
             <div class="flex items-center gap-3 sm:gap-4">
               <div class="bg-purple-500 rounded-full p-2 sm:p-3 group-hover:scale-110 transition-transform flex-shrink-0">
                 <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -97,7 +97,7 @@ import { Router } from '@angular/router';
         <!-- Skip Button -->
         <button 
           (click)="onClose()"
-          class="w-full text-gray-500 hover:text-gray-700 font-medium py-2 transition-colors">
+          class="btn-ghost w-full py-2.5 text-sm">
           Agora não
         </button>
       </div>

@@ -16,106 +16,66 @@ export interface AlertConfig {
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div *ngIf="isOpen" 
-      class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4"
+    <div *ngIf="isOpen"
+      class="fixed inset-0 z-[60] overflow-y-auto flex items-center justify-center p-4"
       (click)="onBackdropClick($event)">
       <!-- Backdrop -->
-      <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"></div>
-      
+      <div class="fixed inset-0 bg-brand-900/60 backdrop-blur-sm"></div>
+
       <!-- Modal -->
-      <div class="relative bg-white rounded-2xl shadow-2xl max-w-md w-full transform transition-all animate-fade-in"
+      <div class="relative bg-white rounded-2xl shadow-2xl max-w-md w-full animate-fade-in overflow-hidden"
+        role="alertdialog"
         (click)="$event.stopPropagation()">
-        
-        <!-- Header com ícone -->
-        <div class="p-6 pb-4">
+
+        <!-- Faixa de cor no topo -->
+        <div class="h-1.5" [ngClass]="accentBarClass"></div>
+
+        <div class="p-6 pb-5">
           <div class="flex items-start gap-4">
-            <!-- Ícone baseado no tipo -->
-            <div class="flex-shrink-0">
-              <!-- Success -->
-              <div *ngIf="config.type === 'success'" class="w-12 h-12 rounded-full flex items-center justify-center" style="background-color: #d4f4dd;">
-                <svg class="w-6 h-6" style="color: #2d6a3f;" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                </svg>
-              </div>
-              
-              <!-- Error -->
-              <div *ngIf="config.type === 'error'" class="w-12 h-12 rounded-full flex items-center justify-center" style="background-color: #fee;">
-                <svg class="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                </svg>
-              </div>
-              
-              <!-- Warning -->
-              <div *ngIf="config.type === 'warning'" class="w-12 h-12 rounded-full flex items-center justify-center" style="background-color: #fef3cd;">
-                <svg class="w-6 h-6" style="color: #8b6914;" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-                </svg>
-              </div>
-              
-              <!-- Info -->
-              <div *ngIf="config.type === 'info'" class="w-12 h-12 rounded-full flex items-center justify-center" style="background-color: #E6EBEF;">
-                <svg class="w-6 h-6" style="color: #7588A8;" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
-                </svg>
-              </div>
-              
-              <!-- Confirm -->
-              <div *ngIf="config.type === 'confirm'" class="w-12 h-12 rounded-full flex items-center justify-center" style="background-color: #E6EBEF;">
-                <svg class="w-6 h-6" style="color: #7588A8;" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
-                </svg>
-              </div>
+            <!-- Ícone -->
+            <div class="flex-shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center" [ngClass]="iconWrapperClass">
+              <svg *ngIf="config.type === 'success'" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+              </svg>
+              <svg *ngIf="config.type === 'error'" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+              <svg *ngIf="config.type === 'warning'" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+              </svg>
+              <svg *ngIf="config.type === 'info'" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              <svg *ngIf="config.type === 'confirm'" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
             </div>
-            
-            <div class="flex-1">
-              <h3 class="text-xl font-bold mb-2" style="color: #23292A;">{{ config.title }}</h3>
-              <p class="text-base leading-relaxed" style="color: #6B7785;">{{ config.message }}</p>
+
+            <div class="flex-1 min-w-0 pt-0.5">
+              <h3 class="text-lg font-bold text-ink tracking-tight mb-1.5">{{ config.title }}</h3>
+              <p class="text-sm leading-relaxed text-muted">{{ config.message }}</p>
             </div>
           </div>
         </div>
-        
-        <!-- Actions -->
+
+        <!-- Ações -->
         <div class="px-6 pb-6 flex gap-3 justify-end">
-          <!-- Botão de Cancelar (apenas para confirm) -->
-          <button 
+          <button
             *ngIf="config.type === 'confirm'"
             (click)="onCancel()"
-            class="px-5 py-2.5 rounded-lg font-semibold transition-colors" 
-            style="background-color: #E6EBEF; color: #23292A;"
-            onmouseover="this.style.backgroundColor='#D7DDE3'" 
-            onmouseout="this.style.backgroundColor='#E6EBEF'">
+            class="btn-secondary px-5 py-2.5 text-sm">
             {{ config.cancelText || 'Cancelar' }}
           </button>
-          
-          <!-- Botão de Confirmar/OK -->
-          <button 
+          <button
             (click)="onConfirm()"
-            class="px-5 py-2.5 rounded-lg font-semibold transition-colors shadow-md"
-            [style.background-color]="getButtonColor()"
-            style="color: #FFFFFF;"
-            [attr.onmouseover]="getButtonHoverStyle()"
-            [attr.onmouseout]="getButtonOutStyle()">
+            class="btn px-5 py-2.5 text-sm text-white shadow-md"
+            [ngClass]="confirmButtonClass">
             {{ config.confirmText || (config.type === 'confirm' ? 'Confirmar' : 'OK') }}
           </button>
         </div>
       </div>
     </div>
-  `,
-  styles: [`
-    @keyframes fade-in {
-      from {
-        opacity: 0;
-        transform: scale(0.95);
-      }
-      to {
-        opacity: 1;
-        transform: scale(1);
-      }
-    }
-    .animate-fade-in {
-      animation: fade-in 0.2s ease-out;
-    }
-  `]
+  `
 })
 export class AlertModalComponent {
   isOpen = false;
@@ -164,28 +124,30 @@ export class AlertModalComponent {
     }
   }
 
-  getButtonColor(): string {
+  get accentBarClass(): string {
     switch (this.config.type) {
-      case 'success': return '#5a8a6a';
-      case 'error': return '#c85a54';
-      case 'warning': return '#d4a650';
-      case 'confirm': return '#7588A8';
-      default: return '#7588A8';
+      case 'success': return 'bg-success-600';
+      case 'error': return 'bg-danger-600';
+      case 'warning': return 'bg-amber-500';
+      default: return 'bg-brand-500';
     }
   }
 
-  getButtonHoverStyle(): string {
-    const hoverColors: Record<string, string> = {
-      success: '#4a7a5a',
-      error: '#b84a44',
-      warning: '#c49640',
-      confirm: '#95A7C1',
-      info: '#95A7C1'
-    };
-    return `this.style.backgroundColor='${hoverColors[this.config.type] || '#95A7C1'}'`;
+  get iconWrapperClass(): string {
+    switch (this.config.type) {
+      case 'success': return 'bg-success-100 text-success-700';
+      case 'error': return 'bg-danger-100 text-danger-600';
+      case 'warning': return 'bg-amber-100 text-amber-700';
+      default: return 'bg-brand-100 text-brand-600';
+    }
   }
 
-  getButtonOutStyle(): string {
-    return `this.style.backgroundColor='${this.getButtonColor()}'`;
+  get confirmButtonClass(): string {
+    switch (this.config.type) {
+      case 'success': return 'bg-success-600 hover:bg-success-700 shadow-success-600/25';
+      case 'error': return 'bg-danger-600 hover:bg-red-700 shadow-danger-600/25';
+      case 'warning': return 'bg-amber-500 hover:bg-amber-600 shadow-amber-500/25';
+      default: return 'bg-brand-500 hover:bg-brand-600 shadow-brand-500/25';
+    }
   }
 }

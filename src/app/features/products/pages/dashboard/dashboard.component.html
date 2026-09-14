@@ -1,844 +1,528 @@
-<div class="min-h-screen" style="background-color: #EEF2F5;">
-  <!-- Hero Banner -->
-  <header class="relative overflow-hidden" style="background: linear-gradient(135deg, #4A5E78 0%, #7588A8 50%, #95A7C1 100%); min-height: 280px;">
-    <!-- Formas geométricas decorativas -->
-    <div class="absolute inset-0 overflow-hidden opacity-20">
-      <div class="absolute -bottom-20 -left-20 w-80 h-80" style="background: linear-gradient(135deg, #FFFFFF 0%, transparent 70%); clip-path: polygon(0 0, 100% 0, 0 100%);"></div>
-      <div class="absolute -bottom-20 -right-20 w-80 h-80" style="background: linear-gradient(135deg, transparent 30%, #FFFFFF 100%); clip-path: polygon(100% 0, 100% 100%, 0 100%);"></div>
-    </div>
-
-    <div class="relative z-10 h-full flex flex-col">
-      <!-- Barra superior: Botão Menu + PWA Install -->
-      <div class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center gap-3 sm:gap-4 py-2 sm:py-3" [class.justify-between]="isAdmin" [class.justify-end]="!isAdmin">
-          <!-- Botão Menu Sidebar (apenas admin) -->
-          <button 
-            *ngIf="isAdmin"
-            (click)="toggleSidebar()"
-            class="p-1.5 transition-all hover:scale-110"
-            title="Menu">
-            <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
-            </svg>
-          </button>
-
-          <!-- Container direito -->
-          <div class="flex items-center gap-3 sm:gap-4">
-            <!-- Ícones do cliente (não-admin) -->
-            <ng-container *ngIf="!isAdmin">
-              <!-- Favoritos -->
-              <button 
-                (click)="goToFavorites()"
-                class="relative p-1 transition-opacity hover:opacity-70"
-                title="Meus Favoritos">
-                <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="white" viewBox="0 0 24 24">
-                  <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-                </svg>
-                <span 
-                  *ngIf="favoritesCount > 0"
-                  class="absolute -top-0.5 -right-0.5 w-4.5 h-4.5 rounded-full text-white text-[9px] font-bold flex items-center justify-center shadow-md"
-                  style="background-color: #DC2626;">
-                  {{ favoritesCount }}
-                </span>
-              </button>
-              <!-- Notificações -->
-              <button 
-                (click)="goToNotifications()"
-                class="p-1 transition-opacity hover:opacity-70"
-                title="Notificações">
-                <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-                </svg>
-              </button>
-            </ng-container>
-            <!-- Botão Instalar App -->
-            <button 
-              *ngIf="canInstallPwa"
-              (click)="installPwa()"
-              class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all font-semibold shadow-lg hover:shadow-xl hover:scale-105"
-              style="background-color: rgba(255, 255, 255, 0.95); color: #4A5E78;">
-              <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-              </svg>
-              <span class="text-xs font-bold">Instalar</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Conteúdo Hero - Logo à direita -->
-      <div class="flex-1 flex items-center">
-        <div class="max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
-          <div class="grid grid-cols-12 gap-3 sm:gap-4 lg:gap-4 items-center">
-            <!-- Conteúdo Textual - 8 colunas -->
-            <div class="col-span-8 text-white text-left pl-2 sm:pl-6 lg:pl-24 space-y-1 sm:space-y-2 lg:space-y-4">
-              <p class="text-[10px] sm:text-xs lg:text-sm font-bold tracking-widest uppercase" style="color: rgba(255, 255, 255, 0.85);">
-                Bem-vindo ao
-              </p>
-              <h1 class="text-2xl sm:text-3xl lg:text-5xl xl:text-6xl font-extrabold leading-tight tracking-tight">
-                UTIL LAR
-              </h1>
-              <h2 class="text-base sm:text-lg lg:text-2xl font-semibold" style="color: rgba(255, 255, 255, 0.95);">
-                Móveis e Eletrodomésticos
-              </h2>
-              <p class="text-xs sm:text-sm lg:text-lg leading-relaxed max-w-3xl lg:max-w-none" style="color: rgba(255, 255, 255, 0.9);">
-                Especializados em produtos novos e seminovos de alta qualidade. Transforme sua casa em um lar acolhedor!
-              </p>
-
-              <!-- Bullets de benefícios -->
-              <div class="flex flex-wrap justify-start gap-2 sm:gap-3 lg:gap-6 text-[10px] sm:text-xs lg:text-sm font-semibold pt-1 sm:pt-2">
-                <div class="flex items-center gap-2">
-                  <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                  </svg>
-                  <span>Qualidade Garantida</span>
-                </div>
-                <div class="flex items-center gap-2">
-                  <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                  </svg>
-                  <span>Melhor Preço</span>
-                </div>
-                <div class="flex items-center gap-2">
-                  <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                  </svg>
-                  <span>Entrega Rápida</span>
-                </div>
-              </div>
-
-              <!-- Botão Admin (se logado) -->
-              <div *ngIf="isAdmin" class="pt-2 flex justify-start">
-                <button 
-                  (click)="openCreateModal()"
-                  class="px-5 sm:px-6 py-2.5 sm:py-3 rounded-lg font-bold shadow-xl transition-all text-sm sm:text-base whitespace-nowrap" 
-                  style="background-color: #FFFFFF; color: #23292A;">
-                  <span class="flex items-center gap-2">
-                    <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                    </svg>
-                    Adicionar Produto
-                  </span>
-                </button>
-              </div>
-            </div>
-
-            <!-- Logo - 4 colunas -->
-            <div class="col-span-4 flex justify-end pr-2 sm:pr-4">
-              <div 
-                class="cursor-pointer transform hover:scale-105 transition-all" 
-                (dblclick)="onLogoDoubleClick()" 
-                title="Duplo clique para modo admin">
-                <img src="logo-branca.png" alt="Util Lar" class="w-20 h-20 sm:w-40 sm:h-40 lg:w-64 lg:h-64 object-contain drop-shadow-2xl">
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Indicadores decorativos -->
-      <div class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-center gap-1.5 sm:gap-2 pb-4 sm:pb-6 lg:pb-8">
-          <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-white shadow-lg"></div>
-          <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-white/30"></div>
-          <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-white/30"></div>
-        </div>
-      </div>
-    </div>
-  </header>
-
-  <!-- Breadcrumb -->
-  <div class="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 pt-3 sm:pt-4">
-    <nav class="flex items-center gap-1.5 text-xs sm:text-sm" style="color: #6B7785;">
-      <span class="font-semibold" style="color: #7588A8;">Util Lar</span>
-      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-      <span>{{ selectedCategory !== 'Todas' ? selectedCategory : 'Todos os Produtos' }}</span>
-    </nav>
-  </div>
-
-  <!-- Carrossel: Destaques -->
-  <div *ngIf="!isLoading && featuredProducts.length > 0" class="max-w-7xl mx-auto px-2 sm:px-4 lg:px-6 pt-4 pb-2">
-    <div class="flex items-center justify-between mb-3 sm:mb-4">
-      <h2 class="text-sm sm:text-base font-bold" style="color: #23292A;">Destaques</h2>
-      <button 
-        *ngIf="isAdmin"
-        (click)="clearAllFeatured()"
-        class="px-3 py-1.5 text-xs font-semibold rounded-lg transition-all hover:scale-105 flex items-center gap-1.5"
-        style="background-color: #FEE2E2; color: #DC2626; border: 1px solid #FECACA;">
-        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-        </svg>
-        Limpar
-      </button>
-    </div>
-    
-    <div class="relative px-1 sm:px-4">
-      <button 
-        *ngIf="featuredProducts.length > 3"
-        (click)="scrollFeatured('left')"
-        class="absolute left-0 sm:left-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 sm:w-10 sm:h-10 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110"
-        style="background-color: rgba(255, 255, 255, 0.95); color: #7588A8;">
-        <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-        </svg>
-      </button>
-
-      <div #featuredCarousel class="flex gap-2 sm:gap-3 lg:gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scroll-smooth" style="-ms-overflow-style: none; scrollbar-width: none;">
-        <div 
-          *ngFor="let produto of featuredProducts; trackBy: trackByProductId"
-          (click)="verDetalhes(produto.id)"
-          class="flex-shrink-0 w-[calc(33.333%-0.5rem)] sm:w-[calc(33.333%-0.75rem)] lg:w-[calc(33.333%-1rem)] h-32 sm:h-40 md:h-56 lg:h-64 xl:h-72 rounded-xl lg:rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer group relative snap-start snap-always"
-          [style.background]="'linear-gradient(135deg, rgba(117, 136, 168, 0.15), rgba(149, 167, 193, 0.15))'">
-          <div class="w-full h-full relative">
-            <img 
-              *ngIf="produto.images && produto.images.length > 0" 
-              [src]="produto.images[0]" 
-              [alt]="produto.name"
-              class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
-            <div *ngIf="!produto.images || produto.images.length === 0" 
-              class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
-              <svg class="h-12 w-12 sm:h-12 sm:w-12 lg:h-16 lg:w-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-              </svg>
-            </div>
-            <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 sm:via-black/40 to-black/10 sm:to-transparent pointer-events-none"></div>
-            <div class="absolute bottom-0 left-0 right-0 p-2 sm:p-3 lg:p-4">
-              <h3 class="text-[11px] leading-tight sm:text-sm lg:text-lg font-bold text-white uppercase tracking-wide sm:tracking-wider drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] line-clamp-2">
+<div class="bg-canvas">
+  <!-- ======================================================================
+       BANNER ROTATIVO — largura total, um destaque por slide
+       ====================================================================== -->
+  <section class="relative overflow-hidden bg-gradient-to-br from-brand-600 via-brand-500 to-brand-700 text-white" aria-roledescription="carrossel" aria-label="Destaques da loja" (touchstart)="onHeroTouchStart($event)" (touchend)="onHeroTouchEnd($event)">
+    <ng-container *ngIf="!isLoading && heroSlides.length > 0; else heroFallback">
+      <div class="flex transition-transform duration-700 ease-out" [style.transform]="'translateX(-' + (heroIndex * 100) + '%)'">
+        <article *ngFor="let produto of heroSlides; let i = index; trackBy: trackByProductId"
+                 class="w-full shrink-0" [attr.aria-hidden]="i !== heroIndex">
+          <div class="container-store grid grid-cols-1 md:grid-cols-12 items-center gap-6 md:gap-10 py-10 sm:py-14 lg:py-16 min-h-[420px] lg:min-h-[500px]">
+            <!-- Texto -->
+            <div class="md:col-span-5 order-2 md:order-1 md:pl-10">
+              <p class="section-kicker text-brand-200 mb-3">Destaque da semana</p>
+              <h1 class="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-[1.05] tracking-tight text-white mb-3">
                 {{ produto.name | capitalize }}
-              </h3>
+              </h1>
+              <p class="text-sm sm:text-base text-white/80 leading-relaxed mb-5 line-clamp-2 max-w-md">{{ produto.description }}</p>
+              <div class="flex items-end gap-3 mb-6">
+                <p class="font-display text-3xl sm:text-4xl font-extrabold tracking-tight text-white leading-none">R$ {{ formatarPreco(produto.price) }}</p>
+                <p class="text-xs sm:text-sm text-white/75 pb-1">ou 12x de R$ {{ calculateInstallment12x(produto.price) }}</p>
+              </div>
+              <div class="flex flex-wrap gap-3">
+                <button (click)="verDetalhes(produto.id)" class="btn h-12 px-7 text-sm uppercase tracking-wide bg-white text-ink shadow-md hover:bg-brand-50">Comprar</button>
+                <a href="#produtos" class="btn h-12 px-6 text-sm border border-white/40 text-white hover:bg-white/10">Ver todos os produtos</a>
+              </div>
             </div>
+            <!-- Foto inteira, sem corte -->
+            <div class="md:col-span-7 order-1 md:order-2 flex items-center justify-center md:pr-10">
+              <div class="relative w-full h-[260px] sm:h-[340px] lg:h-[420px] rounded-2xl bg-white shadow-float p-4 sm:p-6 flex items-center justify-center cursor-pointer" (click)="verDetalhes(produto.id)">
+                <img *ngIf="produto.images && produto.images.length > 0" [src]="produto.images[0]" [alt]="produto.name"
+                     class="max-w-full max-h-full w-auto h-auto object-contain">
+                <div *ngIf="!produto.images || produto.images.length === 0" class="flex items-center justify-center text-brand-200">
+                  <svg class="w-16 h-16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <!-- Setas -->
+      <ng-container *ngIf="heroSlides.length > 1">
+        <button (click)="prevHero()" class="overlay-btn hidden sm:flex absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 w-11 h-11 z-10" aria-label="Banner anterior">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+        </button>
+        <button (click)="nextHero()" class="overlay-btn hidden sm:flex absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 w-11 h-11 z-10" aria-label="Próximo banner">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+        </button>
+        <!-- Bolinhas -->
+        <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+          <button *ngFor="let s of heroSlides; let i = index" (click)="goHero(i)"
+                  class="h-2 rounded-full transition-all duration-300"
+                  [class.w-6]="i === heroIndex" [class.w-2]="i !== heroIndex"
+                  [class.bg-white]="i === heroIndex" [class.bg-white/40]="i !== heroIndex"
+                  [attr.aria-label]="'Ir para o banner ' + (i + 1)"></button>
+        </div>
+      </ng-container>
+    </ng-container>
+
+    <!-- Sem destaques: banner institucional -->
+    <ng-template #heroFallback>
+      <div class="container-store grid grid-cols-1 md:grid-cols-12 items-center gap-8 py-12 sm:py-16 lg:py-20 min-h-[420px]">
+        <div class="md:col-span-7 md:pl-10">
+          <p class="section-kicker text-brand-200 mb-3">Móveis · Eletrodomésticos · Novos e seminovos</p>
+          <h1 class="font-display text-4xl sm:text-5xl lg:text-[3.4rem] font-extrabold leading-[1.05] tracking-tight text-white mb-4">
+            Sua casa completa,<br class="hidden sm:block"> <span class="text-brand-200">pelo preço certo.</span>
+          </h1>
+          <p class="text-base sm:text-lg text-white/80 leading-relaxed max-w-xl mb-7">
+            Sofás, geladeiras, mesas, guarda-roupas e muito mais — produtos revisados, com garantia e parcelamento em até 12x no cartão.
+          </p>
+          <div class="flex flex-wrap gap-3">
+            <a href="#produtos" class="btn h-12 px-7 text-sm uppercase tracking-wide bg-white text-ink shadow-md hover:bg-brand-50">Ver produtos</a>
+            <button *ngIf="isAdmin" (click)="openCreateModal()" class="btn h-12 px-5 text-sm border border-white/40 text-white hover:bg-white/10">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"/></svg>
+              Adicionar produto
+            </button>
+          </div>
+        </div>
+        <div class="md:col-span-5 grid grid-cols-2 gap-3">
+          <div *ngFor="let item of heroHighlights" class="bg-white/10 border border-white/15 rounded-2xl p-5">
+            <div class="w-10 h-10 rounded-lg bg-white/15 text-white flex items-center justify-center mb-3">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" [attr.d]="item.icon"/></svg>
+            </div>
+            <p class="font-display font-bold text-sm leading-tight text-white">{{ item.title }}</p>
           </div>
         </div>
       </div>
+    </ng-template>
+  </section>
 
-      <button 
-        *ngIf="featuredProducts.length > 3"
-        (click)="scrollFeatured('right')"
-        class="absolute right-0 sm:right-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 sm:w-10 sm:h-10 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110"
-        style="background-color: rgba(255, 255, 255, 0.95); color: #7588A8;">
-        <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-        </svg>
-      </button>
-    </div>
-
-    <div *ngIf="featuredProducts.length > 3" class="flex justify-center gap-2 mt-3">
-      <button 
-        *ngFor="let page of carouselPages; let i = index" 
-        (click)="goToFeaturedPage(i)"
-        class="w-2.5 h-2.5 rounded-full transition-all duration-300 cursor-pointer"
-        [style.background-color]="i === currentCarouselPage ? '#7588A8' : 'rgba(117, 136, 168, 0.3)'"
-        [style.transform]="i === currentCarouselPage ? 'scale(1.3)' : 'scale(1)'">
-      </button>
-    </div>
-    
-    <style>
-      div::-webkit-scrollbar {
-        display: none;
-      }
-      .price-range-slider {
-        -webkit-appearance: none;
-        appearance: none;
-        position: absolute;
-        width: 100%;
-        top: 50%;
-        transform: translateY(-50%);
-        background: transparent;
-        pointer-events: none;
-        height: 6px;
-        margin: 0;
-        padding: 0;
-        outline: none;
-      }
-      .price-range-slider::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        appearance: none;
-        pointer-events: auto;
-        width: 18px;
-        height: 18px;
-        border-radius: 50%;
-        background: white;
-        border: 2px solid #7588A8;
-        cursor: pointer;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.15);
-      }
-      .price-range-slider::-moz-range-thumb {
-        pointer-events: auto;
-        width: 18px;
-        height: 18px;
-        border-radius: 50%;
-        background: white;
-        border: 2px solid #7588A8;
-        cursor: pointer;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.15);
-      }
-    </style>
+  <!-- Admin: atalho para cadastrar (fica fora do banner para não poluir a vitrine) -->
+  <div *ngIf="isAdmin && !isLoading && heroSlides.length > 0" class="container-store pt-4 flex justify-end">
+    <button (click)="openCreateModal()" class="btn-secondary h-10 px-4 text-sm">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"/></svg>
+      Adicionar produto
+    </button>
   </div>
 
-  <!-- Barra de Busca -->
-  <div class="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 pt-4">
-    <div class="relative">
-      <svg class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5" fill="none" stroke="#6B7785" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-      </svg>
-      <input 
-        type="text" 
-        [(ngModel)]="searchQuery"
-        placeholder="Buscar produtos, marcas e categorias..."
-        aria-label="Buscar produtos"
-        class="w-full pl-12 pr-4 py-3 sm:py-3.5 rounded-xl shadow-sm focus:outline-none focus:ring-2 text-sm sm:text-base"
-        style="background-color: #FFFFFF; border: 1px solid #D7DDE3; color: #23292A; --tw-ring-color: #95A7C1;">
-    </div>
-  </div>
-
-  <!-- Contagem de resultados + Ordenação -->
-  <div class="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 pt-4">
-    <div class="flex items-center justify-between gap-3">
-      <div class="flex items-center gap-2 lg:hidden">
-        <button 
-          (click)="showMobileFilters = !showMobileFilters"
-          class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition-all shadow-md hover:shadow-lg"
-          style="background-color: #7588A8;">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
-          </svg>
-          Filtros
-          <span *ngIf="activeFilterCount > 0" class="bg-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold" style="color: #7588A8;">{{ activeFilterCount }}</span>
-        </button>
+  <!-- ======================================================================
+       FAIXA DE SERVIÇOS
+       ====================================================================== -->
+  <section class="container-store pt-6">
+    <div class="rounded-2xl bg-white border border-line grid grid-cols-2 lg:grid-cols-4 divide-y lg:divide-y-0 divide-line lg:divide-x">
+      <div *ngFor="let item of heroHighlights" class="flex items-center gap-3 p-4 sm:p-5">
+        <div class="w-10 h-10 shrink-0 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" [attr.d]="item.icon"/></svg>
+        </div>
+        <div class="min-w-0">
+          <p class="text-sm font-bold text-ink leading-tight">{{ item.title }}</p>
+          <p class="text-xs text-muted leading-snug hidden sm:block">{{ item.text }}</p>
+        </div>
       </div>
-      <p class="text-xs sm:text-sm" style="color: #6B7785;">
-        <span *ngIf="!isLoading">{{ filteredProducts.length }} produto{{ filteredProducts.length !== 1 ? 's' : '' }} encontrado{{ filteredProducts.length !== 1 ? 's' : '' }}</span>
-      </p>
+    </div>
+  </section>
+
+  <!-- ======================================================================
+       NOVIDADES
+       ====================================================================== -->
+  <section *ngIf="!isLoading && recentProducts.length > 0" class="container-store pt-12 sm:pt-16">
+    <div class="flex items-end justify-between gap-4 mb-5">
+      <div>
+        <p class="section-kicker mb-1">Acabaram de chegar</p>
+        <h2 class="section-title">Novidades</h2>
+      </div>
+      <a href="#produtos" class="text-sm font-semibold text-brand-600 hover:text-brand-700 whitespace-nowrap">Ver todos →</a>
+    </div>
+    <div class="flex gap-3 sm:gap-5 overflow-x-auto snap-x snap-mandatory hide-scrollbar pb-1 -mx-4 px-4 sm:mx-0 sm:px-0">
+      <div *ngFor="let produto of recentProducts; trackBy: trackByProductId" class="shrink-0 snap-start w-[72%] sm:w-[47%] lg:w-[31.5%]">
+        <ng-container *ngTemplateOutlet="productCard; context: { $implicit: produto }"></ng-container>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================================
+       CATEGORIAS
+       ====================================================================== -->
+  <section *ngIf="categories.length > 2" class="container-store pt-12 sm:pt-16">
+    <div class="flex items-end justify-between gap-4 mb-5">
+      <div>
+        <p class="section-kicker mb-1">Navegue por</p>
+        <h2 class="section-title">Categorias</h2>
+      </div>
+    </div>
+    <div class="flex gap-2.5 overflow-x-auto hide-scrollbar pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap">
+      <button *ngFor="let cat of categories | slice:1" (click)="setCategory(cat.value); scrollToProducts()"
+              class="chip h-10 px-4 capitalize text-sm shrink-0"
+              [class.chip-active]="selectedCategory === cat.value">
+        {{ cat.label }}
+      </button>
+    </div>
+  </section>
+
+  <!-- ======================================================================
+       DESTAQUES (carrossel)
+       ====================================================================== -->
+  <section *ngIf="!isLoading && featuredProducts.length > 3" class="container-store pt-12 sm:pt-16">
+    <div class="flex flex-wrap items-end justify-between gap-4 mb-5">
+      <div>
+        <p class="section-kicker mb-1">Selecionados para você</p>
+        <h2 class="section-title">Destaques da semana</h2>
+      </div>
       <div class="flex items-center gap-2">
-        <label for="filter-sort" class="text-xs sm:text-sm whitespace-nowrap hidden sm:inline" style="color: #6B7785;">Ordenar por</label>
-        <select 
-          id="filter-sort"
-          [(ngModel)]="selectedSort"
-          class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm rounded-lg focus:outline-none focus:ring-1 appearance-none cursor-pointer"
-          style="background-color: #FFFFFF; border: 1px solid #D7DDE3; color: #23292A; --tw-ring-color: #7588A8;">
-          <option *ngFor="let sort of sortOptions" [value]="sort.value">{{ sort.label }}</option>
-        </select>
+        <button *ngIf="isAdmin" (click)="clearAllFeatured()" class="btn-danger-soft h-9 px-3 text-xs">Limpar destaques</button>
+        <button (click)="scrollFeatured('left')" class="btn-secondary w-9 h-9 p-0 rounded-full" aria-label="Anterior">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+        </button>
+        <button (click)="scrollFeatured('right')" class="btn-secondary w-9 h-9 p-0 rounded-full" aria-label="Próximo">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+        </button>
       </div>
     </div>
-  </div>
 
-  <!-- Layout principal: Filtros + Produtos -->
-  <div class="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-4">
-    <div class="flex gap-6">
-      
-      <!-- PAINEL DE FILTROS (lado esquerdo) - escondido no mobile -->
-      <aside class="hidden lg:block w-64 flex-shrink-0 space-y-4">
-        
-        <!-- Categoria -->
-        <div class="bg-white rounded-xl p-4 shadow-sm" style="border: 1px solid #E6EBEF;">
-          <button (click)="toggleFilterSection('category')" class="w-full flex items-center justify-between mb-3">
-            <h3 class="text-sm font-bold" style="color: #23292A;">Categoria</h3>
-            <svg class="w-4 h-4 transition-transform" [class.rotate-180]="!filterSections.category" fill="none" stroke="#6B7785" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-            </svg>
-          </button>
-          <div *ngIf="filterSections.category" class="space-y-1">
-            <button 
-              *ngFor="let cat of categories"
-              (click)="setCategory(cat.value)"
-              class="w-full text-left px-2 py-1.5 rounded-lg text-sm transition-colors"
-              [style.color]="selectedCategory === cat.value ? '#7588A8' : '#23292A'"
-              [style.font-weight]="selectedCategory === cat.value ? '600' : '400'"
-              [style.background-color]="selectedCategory === cat.value ? '#EEF2F5' : 'transparent'">
-              {{ cat.label }}
-            </button>
-          </div>
-        </div>
+    <div #featuredCarousel class="flex gap-3 sm:gap-5 overflow-x-auto snap-x snap-mandatory scroll-smooth hide-scrollbar pb-1">
+      <div *ngFor="let produto of featuredProducts; trackBy: trackByProductId"
+           class="shrink-0 snap-start w-[72%] sm:w-[47%] lg:w-[calc(33.333%-0.85rem)]">
+        <ng-container *ngTemplateOutlet="productCard; context: { $implicit: produto }"></ng-container>
+      </div>
+    </div>
 
-        <!-- Preço -->
-        <div class="bg-white rounded-xl p-4 shadow-sm" style="border: 1px solid #E6EBEF;">
-          <button (click)="toggleFilterSection('price')" class="w-full flex items-center justify-between mb-3">
-            <h3 class="text-sm font-bold" style="color: #23292A;">Preço</h3>
-            <svg class="w-4 h-4 transition-transform" [class.rotate-180]="!filterSections.price" fill="none" stroke="#6B7785" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-            </svg>
-          </button>
-          <div *ngIf="filterSections.price" class="space-y-3">
-            <!-- Labels com valores formatados -->
-            <div class="flex items-center justify-between">
-              <div>
-                <span class="text-[10px] uppercase tracking-wide block" style="color: #7588A8;">Mínimo:</span>
-                <span class="text-xs font-medium" style="color: #7588A8;">R$ {{ formatPriceDisplay(priceMin ?? globalMinPrice) }}</span>
-              </div>
-              <div class="text-right">
-                <span class="text-[10px] uppercase tracking-wide block" style="color: #7588A8;">Máximo:</span>
-                <span class="text-xs font-medium" style="color: #7588A8;">R$ {{ formatPriceDisplay(priceMax ?? globalMaxPrice) }}</span>
-              </div>
-            </div>
-            <!-- Inputs -->
-            <div class="flex items-center gap-2">
-              <div class="flex-1 relative">
-                <span class="absolute left-2 top-1/2 -translate-y-1/2 text-xs" style="color: #6B7785;">R$</span>
-                <input 
-                  type="number" 
-                  [(ngModel)]="priceMin"
-                  [placeholder]="formatPriceDisplay(globalMinPrice)"
-                  step="0.01"
-                  class="w-full pl-8 pr-2 py-2 text-sm rounded-lg focus:outline-none focus:ring-1"
-                  style="background-color: #F8FAFC; border: 1px solid #D7DDE3; color: #23292A; --tw-ring-color: #7588A8;">
-              </div>
-              <div class="flex-1 relative">
-                <span class="absolute left-2 top-1/2 -translate-y-1/2 text-xs" style="color: #6B7785;">R$</span>
-                <input 
-                  type="number" 
-                  [(ngModel)]="priceMax"
-                  [placeholder]="formatPriceDisplay(globalMaxPrice)"
-                  step="0.01"
-                  class="w-full pl-8 pr-2 py-2 text-sm rounded-lg focus:outline-none focus:ring-1"
-                  style="background-color: #F8FAFC; border: 1px solid #D7DDE3; color: #23292A; --tw-ring-color: #7588A8;">
-              </div>
-            </div>
-            <!-- Range Slider duplo -->
-            <div class="relative h-1.5 rounded-full mt-1 mb-2" style="background-color: #D7DDE3;">
-              <div class="absolute h-full rounded-full" style="background-color: #7588A8;"
-                [style.left.%]="sliderMinPercent" [style.width.%]="sliderMaxPercent - sliderMinPercent"></div>
-              <input type="range" 
-                class="price-range-slider"
-                [min]="globalMinPrice" [max]="globalMaxPrice" step="1"
-                [value]="priceMin ?? globalMinPrice"
-                (input)="onSliderMinInput($event)">
-              <input type="range" 
-                class="price-range-slider"
-                [min]="globalMinPrice" [max]="globalMaxPrice" step="1"
-                [value]="priceMax ?? globalMaxPrice"
-                (input)="onSliderMaxInput($event)">
-            </div>
-            <button 
-              (click)="applyPriceFilter()"
-              class="w-full py-2.5 text-xs font-bold uppercase tracking-wide rounded-lg transition-colors"
-              style="background-color: #EEF2F5; color: #23292A; border: 1px solid #D7DDE3;">
-              Aplicar Filtro
-            </button>
-          </div>
-        </div>
+    <div class="hidden lg:flex justify-center gap-1.5 mt-4">
+      <button *ngFor="let page of carouselPages; let i = index" (click)="goToFeaturedPage(i)"
+              class="h-1.5 rounded-full transition-all duration-300"
+              [class.w-6]="i === currentCarouselPage" [class.w-1.5]="i !== currentCarouselPage"
+              [class.bg-accent-500]="i === currentCarouselPage" [class.bg-line-strong]="i !== currentCarouselPage"
+              [attr.aria-label]="'Página ' + (i + 1)"></button>
+    </div>
+  </section>
 
-        <!-- Condição -->
-        <div class="bg-white rounded-xl p-4 shadow-sm" style="border: 1px solid #E6EBEF;">
-          <button (click)="toggleFilterSection('condition')" class="w-full flex items-center justify-between mb-3">
-            <h3 class="text-sm font-bold" style="color: #23292A;">Condição</h3>
-            <svg class="w-4 h-4 transition-transform" [class.rotate-180]="!filterSections.condition" fill="none" stroke="#6B7785" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-            </svg>
-          </button>
-          <div *ngIf="filterSections.condition" class="space-y-1">
-            <button 
-              *ngFor="let cond of conditions"
-              (click)="setCondition(cond.value)"
-              class="w-full text-left px-2 py-1.5 rounded-lg text-sm transition-colors"
-              [style.color]="selectedCondition === cond.value ? '#7588A8' : '#23292A'"
-              [style.font-weight]="selectedCondition === cond.value ? '600' : '400'"
-              [style.background-color]="selectedCondition === cond.value ? '#EEF2F5' : 'transparent'">
-              {{ cond.label }}
-            </button>
-          </div>
-        </div>
+  <!-- ======================================================================
+       PRODUTOS
+       ====================================================================== -->
+  <section id="produtos" class="container-store pt-12 sm:pt-16 scroll-mt-36">
+    <div class="flex flex-wrap items-end justify-between gap-4 mb-5">
+      <div>
+        <p class="section-kicker mb-1">Catálogo</p>
+        <h2 class="section-title"><span [class.capitalize]="selectedCategory !== 'Todas'">{{ selectedCategory !== 'Todas' ? selectedCategory : 'Todos os produtos' }}</span></h2>
+        <p *ngIf="!isLoading" class="text-sm text-muted mt-1">
+          <span class="font-semibold text-ink">{{ filteredProducts.length }}</span>
+          produto{{ filteredProducts.length !== 1 ? 's' : '' }}
+          <ng-container *ngIf="searchQuery"> para “<span class="font-semibold text-ink">{{ searchQuery }}</span>”</ng-container>
+        </p>
+      </div>
 
-        <!-- Marca -->
-        <div class="bg-white rounded-xl p-4 shadow-sm" style="border: 1px solid #E6EBEF;">
-          <button (click)="toggleFilterSection('brand')" class="w-full flex items-center justify-between mb-3">
-            <h3 class="text-sm font-bold" style="color: #23292A;">Marca</h3>
-            <svg class="w-4 h-4 transition-transform" [class.rotate-180]="!filterSections.brand" fill="none" stroke="#6B7785" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-            </svg>
-          </button>
-          <div *ngIf="filterSections.brand" class="grid grid-cols-3 gap-2">
-            <button 
-              (click)="filterByBrand('')"
-              class="flex flex-col items-center gap-1 group cursor-pointer">
-              <div 
-                class="w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-105 shadow-md"
-                [style.background]="!selectedBrand ? 'linear-gradient(135deg, #4A5E78, #7588A8)' : 'linear-gradient(135deg, #636E72, #B2BEC3)'">
-                <span class="text-white text-[10px] font-bold text-center leading-tight px-1">Todas</span>
-              </div>
-            </button>
-            <button 
-              *ngFor="let brand of brands"
-              (click)="filterByBrand(brand.name)"
-              class="flex flex-col items-center gap-1 group cursor-pointer">
-              <div 
-                class="w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-105 shadow-md"
-                [style.background]="selectedBrand === brand.name ? 'linear-gradient(135deg, #4A5E78, #7588A8)' : 'linear-gradient(135deg, #636E72, #B2BEC3)'">
-                <span class="text-white text-[10px] font-bold text-center leading-tight px-1">{{ brand.name }}</span>
-              </div>
-            </button>
-          </div>
-        </div>
-
-        <!-- Limpar Filtros -->
-        <button 
-          *ngIf="hasActiveFilters"
-          (click)="clearAllFilters()"
-          class="w-full py-2.5 text-sm font-semibold rounded-xl transition-colors"
-          style="color: #DC2626; background-color: #FEF2F2; border: 1px solid #FECACA;">
-          Limpar todos os filtros
+      <div class="flex items-center gap-2">
+        <button (click)="showMobileFilters = !showMobileFilters" class="btn-secondary lg:hidden h-10 px-3.5 text-xs">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+          Filtros
+          <span *ngIf="activeFilterCount > 0" class="bg-accent-500 text-white rounded-full min-w-[18px] h-[18px] px-1 flex items-center justify-center text-[10px] font-bold">{{ activeFilterCount }}</span>
         </button>
+        <label for="filter-sort" class="text-xs text-muted whitespace-nowrap hidden sm:inline">Ordenar por</label>
+        <div class="relative">
+          <select id="filter-sort" [(ngModel)]="selectedSort"
+                  class="input appearance-none h-10 pl-3 pr-9 text-xs sm:text-sm cursor-pointer font-medium">
+            <option *ngFor="let sort of sortOptions" [value]="sort.value">{{ sort.label }}</option>
+          </select>
+          <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex gap-8 items-start">
+      <!-- Filtros (desktop) -->
+      <aside class="hidden lg:block w-64 shrink-0 sticky top-36">
+        <div class="card divide-y divide-line">
+          <div class="p-4 flex items-center justify-between">
+            <h3 class="font-display font-bold text-ink">Filtrar</h3>
+            <button *ngIf="hasActiveFilters" (click)="clearAllFilters()" class="text-xs font-semibold text-accent-600 hover:text-accent-700">Limpar tudo</button>
+          </div>
+
+          <!-- Categoria -->
+          <div class="p-4">
+            <button (click)="toggleFilterSection('category')" class="w-full flex items-center justify-between">
+              <span class="label mb-0">Categoria</span>
+              <svg class="w-4 h-4 text-muted transition-transform" [class.rotate-180]="!filterSections.category" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+            <div *ngIf="filterSections.category" class="mt-3 space-y-0.5">
+              <button *ngFor="let cat of categories" (click)="setCategory(cat.value)"
+                      class="w-full text-left px-3 py-2 rounded-lg text-sm capitalize flex items-center justify-between transition-colors"
+                      [class.bg-brand-50]="selectedCategory === cat.value"
+                      [class.text-brand-800]="selectedCategory === cat.value"
+                      [class.font-semibold]="selectedCategory === cat.value"
+                      [class.text-muted]="selectedCategory !== cat.value"
+                      [class.hover:bg-canvas]="selectedCategory !== cat.value">
+                {{ cat.label }}
+                <svg *ngIf="selectedCategory === cat.value" class="w-4 h-4 text-accent-500" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Preço -->
+          <div class="p-4">
+            <button (click)="toggleFilterSection('price')" class="w-full flex items-center justify-between">
+              <span class="label mb-0">Preço</span>
+              <svg class="w-4 h-4 text-muted transition-transform" [class.rotate-180]="!filterSections.price" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+            <div *ngIf="filterSections.price" class="mt-3 space-y-3">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-semibold text-brand-700">R$ {{ formatPriceDisplay(priceMin ?? globalMinPrice) }}</span>
+                <span class="text-subtle">até</span>
+                <span class="font-semibold text-brand-700">R$ {{ formatPriceDisplay(priceMax ?? globalMaxPrice) }}</span>
+              </div>
+              <div class="relative h-1.5 rounded-full bg-canvas-deep mx-2">
+                <div class="absolute h-full rounded-full bg-brand-700" [style.left.%]="sliderMinPercent" [style.width.%]="sliderMaxPercent - sliderMinPercent"></div>
+                <input type="range" class="price-range-slider" [min]="globalMinPrice" [max]="globalMaxPrice" step="1" [value]="priceMin ?? globalMinPrice" (input)="onSliderMinInput($event)" aria-label="Preço mínimo">
+                <input type="range" class="price-range-slider" [min]="globalMinPrice" [max]="globalMaxPrice" step="1" [value]="priceMax ?? globalMaxPrice" (input)="onSliderMaxInput($event)" aria-label="Preço máximo">
+              </div>
+              <div class="flex items-center gap-2">
+                <div class="flex-1 relative">
+                  <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-subtle">R$</span>
+                  <input type="number" [(ngModel)]="priceMin" [placeholder]="formatPriceDisplay(globalMinPrice)" step="0.01" class="input pl-8 pr-2 py-2 text-sm" aria-label="Preço mínimo">
+                </div>
+                <span class="text-subtle text-xs">–</span>
+                <div class="flex-1 relative">
+                  <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-subtle">R$</span>
+                  <input type="number" [(ngModel)]="priceMax" [placeholder]="formatPriceDisplay(globalMaxPrice)" step="0.01" class="input pl-8 pr-2 py-2 text-sm" aria-label="Preço máximo">
+                </div>
+              </div>
+              <button (click)="applyPriceFilter()" class="btn-soft w-full h-9 text-xs">Aplicar faixa</button>
+            </div>
+          </div>
+
+          <!-- Condição -->
+          <div class="p-4">
+            <button (click)="toggleFilterSection('condition')" class="w-full flex items-center justify-between">
+              <span class="label mb-0">Condição</span>
+              <svg class="w-4 h-4 text-muted transition-transform" [class.rotate-180]="!filterSections.condition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+            <div *ngIf="filterSections.condition" class="mt-3 flex flex-wrap gap-2">
+              <button *ngFor="let cond of conditions" (click)="setCondition(cond.value)" class="chip" [class.chip-active]="selectedCondition === cond.value">{{ cond.label }}</button>
+            </div>
+          </div>
+
+          <!-- Marca -->
+          <div *ngIf="brands.length > 0" class="p-4">
+            <button (click)="toggleFilterSection('brand')" class="w-full flex items-center justify-between">
+              <span class="label mb-0">Marca</span>
+              <svg class="w-4 h-4 text-muted transition-transform" [class.rotate-180]="!filterSections.brand" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+            <div *ngIf="filterSections.brand" class="mt-3 flex flex-wrap gap-2">
+              <button (click)="filterByBrand('')" class="chip" [class.chip-active]="!selectedBrand">Todas</button>
+              <button *ngFor="let brand of brands" (click)="filterByBrand(brand.name)" class="chip" [class.chip-active]="selectedBrand === brand.name">{{ brand.name }}</button>
+            </div>
+          </div>
+        </div>
       </aside>
 
-      <!-- Modal de filtros mobile -->
+      <!-- Filtros (mobile, bottom sheet) -->
       <div *ngIf="showMobileFilters" class="lg:hidden fixed inset-0 z-50 flex items-end">
-        <div (click)="showMobileFilters = false" class="absolute inset-0 bg-black/50"></div>
-        <div class="relative w-full max-h-[80vh] bg-white rounded-t-2xl overflow-y-auto" style="border-top: 2px solid #D7DDE3;">
-          <div class="sticky top-0 bg-white px-4 py-3 flex items-center justify-between" style="border-bottom: 1px solid #E6EBEF;">
-            <h3 class="text-base font-bold" style="color: #23292A;">Filtros</h3>
-            <button (click)="showMobileFilters = false" class="p-1.5 rounded-lg" style="color: #6B7785;">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-              </svg>
-            </button>
+        <div (click)="showMobileFilters = false" class="absolute inset-0 bg-brand-900/50 backdrop-blur-sm animate-fade-in"></div>
+        <div class="relative w-full max-h-[85vh] bg-white rounded-t-3xl overflow-y-auto shadow-2xl animate-fade-up">
+          <div class="sticky top-0 bg-white/95 backdrop-blur px-5 pt-3 pb-3 border-b border-line z-10">
+            <div class="w-10 h-1 rounded-full bg-line-strong mx-auto mb-3"></div>
+            <div class="flex items-center justify-between">
+              <h3 class="font-display text-base font-bold text-ink">Filtros</h3>
+              <button (click)="showMobileFilters = false" class="btn-ghost w-8 h-8 rounded-lg p-0" aria-label="Fechar">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
           </div>
-          <div class="p-4 space-y-5">
-            <!-- Categoria mobile -->
+          <div class="p-5 space-y-6">
             <div>
-              <h4 class="text-sm font-bold mb-2" style="color: #23292A;">Categoria</h4>
+              <p class="label">Categoria</p>
               <div class="flex flex-wrap gap-2">
-                <button 
-                  *ngFor="let cat of categories"
-                  (click)="setCategory(cat.value)"
-                  class="px-3 py-1.5 rounded-full text-xs font-semibold transition-colors"
-                  [style.background-color]="selectedCategory === cat.value ? '#7588A8' : '#EEF2F5'"
-                  [style.color]="selectedCategory === cat.value ? 'white' : '#23292A'">
-                  {{ cat.label }}
-                </button>
+                <button *ngFor="let cat of categories" (click)="setCategory(cat.value)" class="chip capitalize" [class.chip-active]="selectedCategory === cat.value">{{ cat.label }}</button>
               </div>
             </div>
-            <!-- Condição mobile -->
             <div>
-              <h4 class="text-sm font-bold mb-2" style="color: #23292A;">Condição</h4>
+              <p class="label">Condição</p>
               <div class="flex flex-wrap gap-2">
-                <button 
-                  *ngFor="let cond of conditions"
-                  (click)="setCondition(cond.value)"
-                  class="px-3 py-1.5 rounded-full text-xs font-semibold transition-colors"
-                  [style.background-color]="selectedCondition === cond.value ? '#7588A8' : '#EEF2F5'"
-                  [style.color]="selectedCondition === cond.value ? 'white' : '#23292A'">
-                  {{ cond.label }}
-                </button>
+                <button *ngFor="let cond of conditions" (click)="setCondition(cond.value)" class="chip" [class.chip-active]="selectedCondition === cond.value">{{ cond.label }}</button>
               </div>
             </div>
-            <!-- Preço mobile -->
             <div>
-              <h4 class="text-sm font-bold mb-2" style="color: #23292A;">Preço</h4>
-              <div class="flex items-center justify-between mb-2">
-                <div>
-                  <span class="text-[10px] uppercase tracking-wide block" style="color: #7588A8;">Mínimo:</span>
-                  <span class="text-xs font-medium" style="color: #7588A8;">R$ {{ formatPriceDisplay(priceMin ?? globalMinPrice) }}</span>
-                </div>
-                <div class="text-right">
-                  <span class="text-[10px] uppercase tracking-wide block" style="color: #7588A8;">Máximo:</span>
-                  <span class="text-xs font-medium" style="color: #7588A8;">R$ {{ formatPriceDisplay(priceMax ?? globalMaxPrice) }}</span>
-                </div>
+              <p class="label">Preço</p>
+              <div class="flex items-center justify-between text-xs mb-3">
+                <span class="font-semibold text-brand-700">R$ {{ formatPriceDisplay(priceMin ?? globalMinPrice) }}</span>
+                <span class="text-subtle">até</span>
+                <span class="font-semibold text-brand-700">R$ {{ formatPriceDisplay(priceMax ?? globalMaxPrice) }}</span>
               </div>
-              <div class="flex items-center gap-2 mb-3">
-                <div class="flex-1 relative">
-                  <span class="absolute left-2 top-1/2 -translate-y-1/2 text-xs" style="color: #6B7785;">R$</span>
-                  <input type="number" [(ngModel)]="priceMin" [placeholder]="formatPriceDisplay(globalMinPrice)" step="0.01" class="w-full pl-8 pr-2 py-2 text-sm rounded-lg" style="background-color: #F8FAFC; border: 1px solid #D7DDE3; color: #23292A;">
-                </div>
-                <div class="flex-1 relative">
-                  <span class="absolute left-2 top-1/2 -translate-y-1/2 text-xs" style="color: #6B7785;">R$</span>
-                  <input type="number" [(ngModel)]="priceMax" [placeholder]="formatPriceDisplay(globalMaxPrice)" step="0.01" class="w-full pl-8 pr-2 py-2 text-sm rounded-lg" style="background-color: #F8FAFC; border: 1px solid #D7DDE3; color: #23292A;">
-                </div>
+              <div class="relative h-1.5 rounded-full bg-canvas-deep mx-2 mb-4">
+                <div class="absolute h-full rounded-full bg-brand-700" [style.left.%]="sliderMinPercent" [style.width.%]="sliderMaxPercent - sliderMinPercent"></div>
+                <input type="range" class="price-range-slider" [min]="globalMinPrice" [max]="globalMaxPrice" step="1" [value]="priceMin ?? globalMinPrice" (input)="onSliderMinInput($event)" aria-label="Preço mínimo">
+                <input type="range" class="price-range-slider" [min]="globalMinPrice" [max]="globalMaxPrice" step="1" [value]="priceMax ?? globalMaxPrice" (input)="onSliderMaxInput($event)" aria-label="Preço máximo">
               </div>
-              <!-- Range Slider duplo mobile -->
-              <div class="relative h-1.5 rounded-full" style="background-color: #D7DDE3;">
-                <div class="absolute h-full rounded-full" style="background-color: #7588A8;"
-                  [style.left.%]="sliderMinPercent" [style.width.%]="sliderMaxPercent - sliderMinPercent"></div>
-                <input type="range" 
-                  class="price-range-slider"
-                  [min]="globalMinPrice" [max]="globalMaxPrice" step="1"
-                  [value]="priceMin ?? globalMinPrice"
-                  (input)="onSliderMinInput($event)">
-                <input type="range" 
-                  class="price-range-slider"
-                  [min]="globalMinPrice" [max]="globalMaxPrice" step="1"
-                  [value]="priceMax ?? globalMaxPrice"
-                  (input)="onSliderMaxInput($event)">
+              <div class="flex items-center gap-2">
+                <div class="flex-1 relative">
+                  <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-subtle">R$</span>
+                  <input type="number" [(ngModel)]="priceMin" [placeholder]="formatPriceDisplay(globalMinPrice)" step="0.01" class="input pl-8 pr-2 py-2 text-sm" aria-label="Preço mínimo">
+                </div>
+                <span class="text-subtle text-xs">–</span>
+                <div class="flex-1 relative">
+                  <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-subtle">R$</span>
+                  <input type="number" [(ngModel)]="priceMax" [placeholder]="formatPriceDisplay(globalMaxPrice)" step="0.01" class="input pl-8 pr-2 py-2 text-sm" aria-label="Preço máximo">
+                </div>
               </div>
             </div>
-            <!-- Marca mobile -->
-            <div>
-              <h4 class="text-sm font-bold mb-2" style="color: #23292A;">Marca</h4>
-              <div class="flex flex-wrap gap-3 justify-center">
-                <button 
-                  (click)="filterByBrand('')"
-                  class="flex flex-col items-center gap-1 cursor-pointer">
-                  <div 
-                    class="w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300 shadow-md"
-                    [style.background]="!selectedBrand ? 'linear-gradient(135deg, #4A5E78, #7588A8)' : 'linear-gradient(135deg, #636E72, #B2BEC3)'">
-                    <span class="text-white text-[10px] font-bold text-center leading-tight px-1">Todas</span>
-                  </div>
-                </button>
-                <button 
-                  *ngFor="let brand of brands"
-                  (click)="filterByBrand(brand.name)"
-                  class="flex flex-col items-center gap-1 cursor-pointer">
-                  <div 
-                    class="w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300 shadow-md"
-                    [style.background]="selectedBrand === brand.name ? 'linear-gradient(135deg, #4A5E78, #7588A8)' : 'linear-gradient(135deg, #636E72, #B2BEC3)'">
-                    <span class="text-white text-[10px] font-bold text-center leading-tight px-1">{{ brand.name }}</span>
-                  </div>
-                </button>
+            <div *ngIf="brands.length > 0">
+              <p class="label">Marca</p>
+              <div class="flex flex-wrap gap-2">
+                <button (click)="filterByBrand('')" class="chip" [class.chip-active]="!selectedBrand">Todas</button>
+                <button *ngFor="let brand of brands" (click)="filterByBrand(brand.name)" class="chip" [class.chip-active]="selectedBrand === brand.name">{{ brand.name }}</button>
               </div>
             </div>
-            <!-- Botões mobile -->
-            <div class="flex gap-3 pt-2">
-              <button 
-                (click)="clearAllFilters(); showMobileFilters = false"
-                class="flex-1 py-2.5 text-sm font-semibold rounded-xl"
-                style="color: #6B7785; border: 1px solid #D7DDE3;">
-                Limpar
-              </button>
-              <button 
-                (click)="applyPriceFilter(); showMobileFilters = false"
-                class="flex-1 py-2.5 text-sm font-bold text-white rounded-xl"
-                style="background-color: #7588A8;">
-                Aplicar
-              </button>
+            <div class="flex gap-3 pt-2 pb-2">
+              <button (click)="clearAllFilters(); showMobileFilters = false" class="btn-secondary flex-1 h-11 text-sm">Limpar</button>
+              <button (click)="applyPriceFilter(); showMobileFilters = false" class="btn-primary flex-1 h-11 text-sm">Ver resultados</button>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- CONTEÚDO: Produtos -->
+      <!-- Grid -->
       <div class="flex-1 min-w-0">
-        <!-- Loading Skeleton -->
-        <div *ngIf="isLoading" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 gap-2 sm:gap-4 lg:gap-5">
-          <div *ngFor="let i of [1,2,3,4,5,6]" class="bg-white rounded-xl overflow-hidden shadow-sm animate-pulse" style="border: 1px solid #E6EBEF;">
-            <!-- Imagem skeleton -->
-            <div class="bg-gray-200 w-full aspect-square"></div>
-            <!-- Conteúdo skeleton -->
-            <div class="p-3 sm:p-4 space-y-3">
-              <!-- Título -->
-              <div class="h-4 bg-gray-200 rounded w-3/4"></div>
-              <!-- Categoria -->
-              <div class="h-3 bg-gray-200 rounded w-1/2"></div>
-              <!-- Preço -->
-              <div class="h-6 bg-gray-200 rounded w-2/3"></div>
-              <!-- Botão -->
-              <div class="h-10 bg-gray-200 rounded w-full"></div>
+        <div *ngIf="isLoading" class="grid grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3 sm:gap-5">
+          <div *ngFor="let i of [1,2,3,4,5,6,7,8]" class="card overflow-hidden">
+            <div class="skeleton rounded-none w-full aspect-square"></div>
+            <div class="p-3 sm:p-4 space-y-2.5">
+              <div class="skeleton h-3 w-1/3"></div>
+              <div class="skeleton h-4 w-3/4"></div>
+              <div class="skeleton h-6 w-1/2 mt-3"></div>
+              <div class="skeleton h-9 w-full"></div>
             </div>
           </div>
         </div>
 
-        <!-- Erro -->
-        <div *ngIf="errorMessage && !isLoading" 
-          class="bg-red-50 border-l-4 border-red-500 text-red-800 px-6 py-4 rounded-lg mb-6">
-          <p class="font-bold">{{ errorMessage }}</p>
+        <div *ngIf="errorMessage && !isLoading" class="card border-danger-200 bg-danger-50 px-5 py-4 mb-6 flex items-center gap-3 text-danger-700">
+          <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <p class="font-semibold text-sm">{{ errorMessage }}</p>
         </div>
 
-        <!-- Lista Vazia -->
-        <div *ngIf="!isLoading && !errorMessage && filteredProducts.length === 0" 
-          class="bg-white rounded-xl p-12 text-center shadow-sm" style="border: 1px solid #E6EBEF;">
-          <svg class="w-16 h-16 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
-          </svg>
-          <p class="text-base font-semibold mb-1" style="color: #23292A;">Nenhum produto encontrado</p>
-          <p class="text-sm" style="color: #6B7785;">Tente ajustar os filtros ou a busca</p>
+        <div *ngIf="!isLoading && !errorMessage && filteredProducts.length === 0" class="card p-10 sm:p-16 text-center">
+          <div class="w-16 h-16 rounded-2xl bg-canvas text-subtle flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          </div>
+          <p class="font-display text-lg font-bold text-ink mb-1">Nenhum produto encontrado</p>
+          <p class="text-sm text-muted mb-5">Tente outra busca ou remova alguns filtros.</p>
+          <button *ngIf="hasActiveFilters" (click)="clearAllFilters()" class="btn-secondary h-10 px-5 text-sm">Limpar filtros</button>
         </div>
 
-        <!-- Grid de Produtos -->
         <ng-container *ngIf="!isLoading && filteredProducts.length > 0">
-          <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 gap-2 sm:gap-4 lg:gap-5">
+          <div class="grid grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3 sm:gap-5">
             <ng-container *ngFor="let produto of filteredProducts; trackBy: trackByProductId">
               <ng-container *ngTemplateOutlet="productCard; context: { $implicit: produto }"></ng-container>
             </ng-container>
           </div>
 
-          <!-- Botão Carregar Mais -->
-          <div *ngIf="hasMoreProducts" class="flex justify-center mt-8 mb-4">
-            <button 
-              (click)="loadMoreProducts()"
-              [disabled]="isLoadingMore"
-              class="px-8 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all transform hover:scale-105 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              style="background-color: #4A5E78; color: white;">
-              <span *ngIf="!isLoadingMore">Carregar mais produtos</span>
-              <span *ngIf="isLoadingMore">Carregando...</span>
-              <svg *ngIf="!isLoadingMore" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-              </svg>
-              <div *ngIf="isLoadingMore" class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+          <div *ngIf="hasMoreProducts" class="flex justify-center mt-10">
+            <button (click)="loadMoreProducts()" [disabled]="isLoadingMore" class="btn-secondary h-11 px-8 text-sm">
+              <ng-container *ngIf="!isLoadingMore">Carregar mais produtos</ng-container>
+              <ng-container *ngIf="isLoadingMore">
+                <span class="animate-spin rounded-full h-4 w-4 border-2 border-brand-200 border-t-brand-700"></span>
+                Carregando...
+              </ng-container>
             </button>
           </div>
-
-          <!-- Indicador de todos os produtos carregados -->
-          <div *ngIf="!hasMoreProducts && filteredProducts.length > 24" class="text-center py-6 text-sm" style="color: #6B7785;">
-            <p>✓ Todos os produtos foram carregados</p>
-          </div>
+          <p *ngIf="!hasMoreProducts && filteredProducts.length > 24" class="text-center py-8 text-sm text-muted">Você viu todos os produtos.</p>
         </ng-container>
       </div>
     </div>
-  </div>
+  </section>
 
-  <!-- Botão Flutuante WhatsApp -->
-  <a 
-    href="https://wa.me/5582996572843?text=Ol%C3%A1!%20Gostaria%20de%20mais%20informa%C3%A7%C3%B5es%20sobre%20os%20produtos."
-    target="_blank"
-    rel="noopener noreferrer"
-    class="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 p-4 bg-green-600 hover:bg-green-700 text-white rounded-full shadow-2xl hover:shadow-3xl transition-all transform hover:scale-110 z-50 group"
-    title="Fale conosco no WhatsApp">
-    <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="currentColor" viewBox="0 0 24 24">
-      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-    </svg>
-    <span class="absolute right-full mr-3 px-3 py-2 bg-gray-800 text-white text-sm font-medium rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-      Fale conosco
-    </span>
+  <!-- ======================================================================
+       CTA WHATSAPP
+       ====================================================================== -->
+  <section class="container-store pt-16">
+    <div class="relative overflow-hidden rounded-3xl bg-brand-900 text-white px-6 py-10 sm:px-12 sm:py-14 grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+      <div class="absolute -right-24 -top-24 w-80 h-80 rounded-full bg-white/15 blur-3xl pointer-events-none"></div>
+      <div class="relative">
+        <p class="section-kicker text-brand-300 mb-2">Não encontrou o que procura?</p>
+        <h2 class="font-display text-2xl sm:text-3xl font-extrabold tracking-tight mb-2">Fale com a gente pelo WhatsApp</h2>
+        <p class="text-white/75 text-sm sm:text-base">Tiramos dúvidas, enviamos mais fotos e combinamos entrega e pagamento — resposta rápida em horário comercial.</p>
+      </div>
+      <div class="relative flex lg:justify-end">
+        <a href="https://wa.me/5582996572843?text=Ol%C3%A1!%20Gostaria%20de%20mais%20informa%C3%A7%C3%B5es%20sobre%20os%20produtos." target="_blank" rel="noopener noreferrer" class="btn-whatsapp h-12 px-7 text-base">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          (82) 99657-2843
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- WhatsApp flutuante (mobile) -->
+  <a href="https://wa.me/5582996572843?text=Ol%C3%A1!%20Gostaria%20de%20mais%20informa%C3%A7%C3%B5es%20sobre%20os%20produtos."
+     target="_blank" rel="noopener noreferrer"
+     class="sm:hidden fixed bottom-5 right-5 z-40 flex items-center justify-center w-14 h-14 rounded-full bg-whatsapp text-white shadow-float"
+     aria-label="Fale conosco no WhatsApp">
+    <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
   </a>
 </div>
 
-<!-- Template reutilizável do card de produto -->
+<!-- ========================================================================
+     CARD DE PRODUTO
+     ======================================================================== -->
 <ng-template #productCard let-produto>
-  <article 
-    (click)="verDetalhes(produto.id)"
-    class="flex flex-col rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer h-full" style="background-color: #FFFFFF; border: 1px solid #D7DDE3;">
-    
-    <!-- Imagem -->
-    <div class="aspect-square sm:aspect-[4/3] bg-gray-100 relative overflow-hidden">
-      <div class="absolute top-1.5 sm:top-2 left-1.5 sm:left-2 z-10 flex flex-col gap-0.5 sm:gap-1">
-        <span 
-          *ngIf="produto.condition === 'novo'"
-          class="px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[8px] sm:text-xs font-bold uppercase shadow-md"
-          style="background-color: #d4f4dd; color: #2d6a3f;">
-          Novo
-        </span>
-        <span 
-          *ngIf="produto.condition === 'seminovo'"
-          class="px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[8px] sm:text-xs font-bold uppercase shadow-md"
-          style="background-color: #f5ebd4; color: #8b6914;">
-          Seminovo
-        </span>
+  <article (click)="verDetalhes(produto.id)" class="card-hover flex flex-col overflow-hidden group cursor-pointer h-full">
+    <!-- Imagem: sem corte, foto inteira sobre fundo branco -->
+    <div class="relative aspect-square bg-white border-b border-line overflow-hidden">
+      <img *ngIf="produto.images && produto.images.length > 0"
+           [src]="produto.images[0]" [alt]="produto.name" loading="lazy"
+           class="absolute inset-0 w-full h-full object-contain p-3 transition-transform duration-500 group-hover:scale-[1.04]">
+      <div *ngIf="!produto.images || produto.images.length === 0" class="absolute inset-0 flex items-center justify-center text-line-strong bg-canvas">
+        <svg class="h-14 w-14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
       </div>
 
-      <!-- Badge Desconto -->
-      <div *ngIf="getDiscountPercent(produto) > 0" class="absolute top-9 sm:top-12 right-1.5 sm:right-2 z-10">
-        <span class="px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[8px] sm:text-xs font-bold shadow-md" style="background-color: #DC2626; color: #FFFFFF;">
-          -{{ getDiscountPercent(produto) }}%
-        </span>
+      <div class="absolute top-2 left-2 z-10 flex flex-col items-start gap-1">
+        <span *ngIf="produto.condition === 'novo'" class="badge-new">Novo</span>
+        <span *ngIf="produto.condition === 'seminovo'" class="badge-used">Seminovo</span>
+        <span *ngIf="getDiscountPercent(produto) > 0" class="badge-discount">-{{ getDiscountPercent(produto) }}%</span>
       </div>
 
-      <!-- Botão Favoritar -->
-      <button 
-        *ngIf="!isAdmin"
-        (click)="toggleFavorite(produto.id, $event)"
-        class="absolute top-1.5 sm:top-2 right-1.5 sm:right-2 z-10 w-7 h-7 sm:w-9 sm:h-9 rounded-full flex items-center justify-center shadow-md transition-all duration-200 hover:scale-110"
-        [style.backgroundColor]="isFavorite(produto.id) ? '#DC2626' : 'rgba(255,255,255,0.9)'"
-        [title]="isFavorite(produto.id) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'">
-        <svg class="w-4 h-4 sm:w-5 sm:h-5" 
-          [attr.fill]="isFavorite(produto.id) ? 'white' : 'none'" 
-          [attr.stroke]="isFavorite(produto.id) ? 'white' : '#6B7A8D'" 
-          viewBox="0 0 24 24" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-        </svg>
-      </button>
-
-      <!-- Botão Compartilhar -->
-      <button 
-        (click)="shareProduct(produto, $event)"
-        class="absolute top-1.5 sm:top-2 z-10 w-7 h-7 sm:w-9 sm:h-9 rounded-full flex items-center justify-center shadow-md transition-all duration-200 hover:scale-110"
-        [class.right-1.5]="isAdmin"
-        [class.right-9]="!isAdmin"
-        [class.sm:right-2]="isAdmin"
-        [class.sm:right-13]="!isAdmin"
-        style="background-color: rgba(255,255,255,0.9);"
-        title="Compartilhar">
-        <svg class="w-4 h-4 sm:w-4.5 sm:h-4.5" fill="none" stroke="#6B7A8D" viewBox="0 0 24 24" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
-        </svg>
-      </button>
-
-      <div *ngIf="produto.disponivel === 0" 
-        class="absolute inset-0 bg-black/60 z-20 flex items-center justify-center">
-        <span class="bg-gray-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg text-sm sm:text-xl font-bold shadow-xl">
-          ✓ VENDIDO
-        </span>
+      <div class="absolute top-2 right-2 z-10 flex gap-1.5">
+        <button (click)="shareProduct(produto, $event)" class="overlay-btn w-8 h-8" title="Compartilhar" aria-label="Compartilhar">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+        </button>
+        <button *ngIf="!isAdmin" (click)="toggleFavorite(produto.id, $event)" class="overlay-btn w-8 h-8"
+                [class.is-active]="isFavorite(produto.id)"
+                [title]="isFavorite(produto.id) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'"
+                [attr.aria-label]="isFavorite(produto.id) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'">
+          <svg class="w-4 h-4" [attr.fill]="isFavorite(produto.id) ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+        </button>
       </div>
-      
-      <img 
-        *ngIf="produto.images && produto.images.length > 0" 
-        [src]="produto.images[0]" 
-        [alt]="produto.name"
-        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-      
-      <div *ngIf="!produto.images || produto.images.length === 0" 
-        class="w-full h-full flex items-center justify-center">
-        <svg class="h-16 w-16 sm:h-24 sm:w-24 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-        </svg>
+
+      <div *ngIf="produto.disponivel === 0" class="absolute inset-0 bg-white/70 backdrop-blur-[1px] z-20 flex items-center justify-center">
+        <span class="bg-ink text-white px-4 py-1.5 rounded-full text-xs font-bold tracking-wide shadow-lg">VENDIDO</span>
       </div>
     </div>
-    
+
     <!-- Conteúdo -->
-    <div class="flex flex-col flex-1 p-2 sm:p-4">
-      <div class="mb-1.5 sm:mb-2">
-        <h3 class="font-bold text-[11px] sm:text-base line-clamp-2 leading-snug mb-1" style="color: #23292A;">
-          {{ produto.name | capitalize }}
-        </h3>
-        <span class="inline-block px-2 py-0.5 rounded text-[9px] sm:text-xs font-semibold" style="background-color: #E6EBEF; color: #23292A;">
-          {{ produto.category | capitalize }}
-        </span>
-      </div>
-      
-      <p *ngIf="produto.description" class="hidden lg:block text-xs sm:text-sm line-clamp-2 mb-2 leading-relaxed" style="color: #6B7785;">
-        {{ produto.description }}
+    <div class="flex flex-col flex-1 p-3.5 sm:p-5">
+      <p class="text-[11px] font-bold uppercase tracking-wide text-muted mb-1.5 truncate">
+        {{ produto.category | capitalize }}<ng-container *ngIf="produto.brand"> · {{ produto.brand }}</ng-container>
       </p>
-      
-      <!-- Footer fixo embaixo -->
-      <div class="mt-auto">
-        <div class="mb-2 space-y-0.5">
-          <div *ngIf="getDiscountPercent(produto) > 0" class="flex items-center gap-1.5 sm:gap-2">
-            <span class="text-[10px] sm:text-sm line-through" style="color: #9BA8B7;">R$ {{ formatarPreco(produto.originalPrice) }}</span>
-            <span class="text-[9px] sm:text-xs font-bold px-1.5 py-0.5 rounded" style="background-color: #FEE2E2; color: #DC2626;">-{{ getDiscountPercent(produto) }}%</span>
-          </div>
-          <div class="text-base sm:text-xl font-bold leading-tight" [style.color]="getDiscountPercent(produto) > 0 ? '#16A34A' : '#23292A'">
-            R$ {{ formatarPreco(produto.price) }}
-          </div>
-          <div class="text-[10px] sm:text-sm leading-tight" style="color: #7588A8;">
-            <span class="font-semibold">12x</span> <span class="font-semibold">R$ {{ calculateInstallment12x(produto.price) }}</span>
-          </div>
-          <div *ngIf="isAdmin && produto.costPrice" class="text-[10px] sm:text-xs font-semibold" style="color: #5a8a6a;">
-            Lucro: R$ {{ formatarPreco(produto.price - produto.costPrice) }}
-          </div>
-        </div>
-        
-        <button 
-          (click)="verDetalhes(produto.id)"
-          class="w-full font-semibold py-1.5 sm:py-2 text-[10px] sm:text-sm rounded-lg transition-colors flex items-center justify-center gap-1 shadow-sm" style="background-color: #7588A8; color: #FFFFFF;" onmouseover="this.style.backgroundColor='#95A7C1'" onmouseout="this.style.backgroundColor='#7588A8'">
+      <h3 class="font-semibold text-[15px] sm:text-base leading-snug line-clamp-2 text-ink group-hover:text-brand-700 transition-colors">
+        {{ produto.name | capitalize }}
+      </h3>
+
+      <div class="mt-auto pt-3">
+        <p *ngIf="getDiscountPercent(produto) > 0" class="text-[11px] sm:text-xs line-through text-subtle">R$ {{ formatarPreco(produto.originalPrice) }}</p>
+        <p class="font-display text-[22px] sm:text-[26px] font-extrabold leading-tight tracking-tight text-ink">
+          R$ {{ formatarPreco(produto.price) }}
+        </p>
+        <p class="text-xs sm:text-[13px] text-muted mt-1">
+          em até <span class="font-semibold text-brand-700">12x de R$ {{ calculateInstallment12x(produto.price) }}</span>
+        </p>
+        <p *ngIf="isAdmin && produto.costPrice" class="inline-flex mt-1.5 px-2 py-0.5 rounded-md bg-success-50 text-success-700 text-[11px] font-semibold">
+          Lucro: R$ {{ formatarPreco(produto.price - produto.costPrice) }}
+        </p>
+        <button (click)="verDetalhes(produto.id)" class="btn-primary w-full mt-3.5 h-10 sm:h-11 text-sm">
           Ver detalhes
         </button>
       </div>
-      
-      <div *ngIf="isAdmin" class="grid grid-cols-3 gap-1.5 sm:gap-2 mt-2 pt-2" style="border-top: 1px solid #E6EBEF;">
-        <button 
-          (click)="openEditModal(produto); $event.stopPropagation()"
-          class="py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors border" style="color: #23292A; background-color: transparent; border-color: #D7DDE3;" onmouseover="this.style.backgroundColor='#F5F7FA'; this.style.borderColor='#7588A8';" onmouseout="this.style.backgroundColor='transparent'; this.style.borderColor='#D7DDE3';"
-          title="Editar">
-          ✏️
+
+      <!-- Ações admin -->
+      <div *ngIf="isAdmin" class="grid grid-cols-3 gap-1.5 mt-3 pt-3 border-t border-line">
+        <button (click)="openEditModal(produto); $event.stopPropagation()" class="btn-secondary h-8 p-0" title="Editar" aria-label="Editar">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
         </button>
-        
-        <button 
-          *ngIf="produto.disponivel === 1"
-          (click)="marcarComoVendido(produto.id, $event)"
-          class="py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors border" style="color: #23292A; background-color: transparent; border-color: #D7DDE3;" onmouseover="this.style.backgroundColor='#F5F7FA'; this.style.borderColor='#7588A8';" onmouseout="this.style.backgroundColor='transparent'; this.style.borderColor='#D7DDE3';"
-          title="Vender">
-          ✓
+        <button *ngIf="produto.disponivel === 1" (click)="marcarComoVendido(produto.id, $event)" class="btn-secondary h-8 p-0 hover:border-success-600 hover:text-success-700" title="Marcar como vendido" aria-label="Marcar como vendido">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
         </button>
-        
-        <button 
-          *ngIf="produto.disponivel === 0"
-          (click)="reativarProduto(produto.id, $event)"
-          class="py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors border" style="color: #23292A; background-color: transparent; border-color: #D7DDE3;" onmouseover="this.style.backgroundColor='#F5F7FA'; this.style.borderColor='#7588A8';" onmouseout="this.style.backgroundColor='transparent'; this.style.borderColor='#D7DDE3';"
-          title="Reativar">
-          ↻
+        <button *ngIf="produto.disponivel === 0" (click)="reativarProduto(produto.id, $event)" class="btn-secondary h-8 p-0" title="Reativar" aria-label="Reativar">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
         </button>
-        
-        <button 
-          (click)="removerProduto(produto.id, $event)"
-          class="py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors border" style="color: #23292A; background-color: transparent; border-color: #D7DDE3;" onmouseover="this.style.backgroundColor='#F5F7FA'; this.style.borderColor='#7588A8';" onmouseout="this.style.backgroundColor='transparent'; this.style.borderColor='#D7DDE3';"
-          title="Deletar">
-          🗑️
+        <button (click)="removerProduto(produto.id, $event)" class="btn-secondary h-8 p-0 hover:border-danger-600 hover:text-danger-600 hover:bg-danger-50" title="Excluir" aria-label="Excluir">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
         </button>
       </div>
     </div>
@@ -846,38 +530,8 @@
 </ng-template>
 
 <!-- Modais -->
-<app-product-form-modal
-  [isOpen]="showCreateModal"
-  (closeModal)="closeCreateModal()"
-  (submitForm)="onCreateProduct($event)">
-</app-product-form-modal>
-
-<app-product-form-modal
-  [isOpen]="showEditModal"
-  [product]="selectedProduct"
-  (closeModal)="closeEditModal()"
-  (submitForm)="onUpdateProduct($event)">
-</app-product-form-modal>
-
-<app-marketplace-publish-modal
-  [isOpen]="showMarketplacePublishModal"
-  [product]="marketplaceDraftProduct"
-  [copiedFullText]="marketplaceTextCopied"
-  (closeModal)="closeMarketplacePublishModal()">
-</app-marketplace-publish-modal>
-
-<!-- Modal de Login Admin -->
-<app-admin-login-modal
-  *ngIf="showAdminLoginModal"
-  (closeModal)="closeAdminLoginModal()"
-  (adminAuthenticated)="onAdminAuthenticated($event)">
-</app-admin-login-modal>
-
-<!-- Modal de Boas-vindas -->
-<app-welcome-modal
-  *ngIf="showWelcomeModal"
-  (closeModal)="closeWelcomeModal()">
-</app-welcome-modal>
-
-<!-- PWA Install Prompt -->
+<app-product-form-modal [isOpen]="showCreateModal" (closeModal)="closeCreateModal()" (submitForm)="onCreateProduct($event)"></app-product-form-modal>
+<app-product-form-modal [isOpen]="showEditModal" [product]="selectedProduct" (closeModal)="closeEditModal()" (submitForm)="onUpdateProduct($event)"></app-product-form-modal>
+<app-marketplace-publish-modal [isOpen]="showMarketplacePublishModal" [product]="marketplaceDraftProduct" [copiedFullText]="marketplaceTextCopied" (closeModal)="closeMarketplacePublishModal()"></app-marketplace-publish-modal>
+<app-welcome-modal *ngIf="showWelcomeModal" (closeModal)="closeWelcomeModal()"></app-welcome-modal>
 <app-pwa-install-prompt></app-pwa-install-prompt>

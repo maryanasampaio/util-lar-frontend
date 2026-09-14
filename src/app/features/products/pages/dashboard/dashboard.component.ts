@@ -7,9 +7,9 @@ import { Product, ProductResponse, ProductFormSubmission } from '../../models/pr
 import { AdminModeService } from '../../../../core/services/admin-mode.service';
 import { ProductTrackerService } from '../../../../core/services/product-tracker.service';
 import { SidebarService } from '../../../../core/services/sidebar.service';
+import { CatalogService } from '../../../../core/services/catalog.service';
 import { MarketplacePublishModalComponent } from '../../components/marketplace-publish-modal/marketplace-publish-modal.component';
 import { ProductFormModalComponent } from '../../components/product-form-modal/product-form-modal.component';
-import { AdminLoginModalComponent } from '../../../../shared/components/admin-login-modal/admin-login-modal.component';
 import { WelcomeModalComponent } from '../../../../shared/components/welcome-modal/welcome-modal.component';
 import { PwaInstallPromptComponent } from '../../../../shared/components/pwa-install-prompt/pwa-install-prompt.component';
 import { CapitalizePipe } from '../../../../shared/pipes/capitalize.pipe';
@@ -23,7 +23,7 @@ import { finalize, Subject, takeUntil, forkJoin, debounceTime, distinctUntilChan
   selector: 'app-dashboard',
   standalone: true,
   templateUrl: './dashboard.component.html',
-  imports: [CommonModule, FormsModule, ProductFormModalComponent, MarketplacePublishModalComponent, AdminLoginModalComponent, WelcomeModalComponent, PwaInstallPromptComponent, CapitalizePipe]
+  imports: [CommonModule, FormsModule, ProductFormModalComponent, MarketplacePublishModalComponent, WelcomeModalComponent, PwaInstallPromptComponent, CapitalizePipe]
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   @ViewChild('featuredCarousel') featuredCarousel?: ElementRef<HTMLDivElement>;
@@ -120,6 +120,79 @@ export class DashboardComponent implements OnInit, OnDestroy {
     { label: 'Maior preço', value: 'maior-preco' },
     { label: 'Mais recentes', value: 'recentes' }
   ];
+
+  /** Diferenciais exibidos no hero e na faixa de confiança (ícones em path SVG) */
+  readonly heroHighlights = [
+    { title: 'Qualidade garantida', text: 'Produtos revisados e testados antes de anunciar.', icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z' },
+    { title: 'Até 12x no cartão', text: 'Parcele sua compra e leve hoje.', icon: 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z' },
+    { title: 'Entrega rápida', text: 'Combinamos a entrega na sua região.', icon: 'M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0zM13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0' },
+    { title: 'Atendimento humano', text: 'Tire dúvidas direto no WhatsApp.', icon: 'M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z' }
+  ];
+
+  /** Rola até a grade de produtos (usado pelas categorias da página inicial) */
+  scrollToProducts(): void {
+    document.getElementById('produtos')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // ---------------------------------------------------------------------------
+  // Banner rotativo do início (um destaque por slide, estilo vitrine de loja)
+  // ---------------------------------------------------------------------------
+  heroIndex = 0;
+  private heroAutoplayId: any = null;
+
+  /** Até 5 destaques disponíveis viram slides do banner */
+  get heroSlides(): ProductResponse[] {
+    return this.featuredProducts.filter(p => p.disponivel === 1).slice(0, 5);
+  }
+
+  /** Últimos produtos cadastrados (seção "Novidades") */
+  get recentProducts(): ProductResponse[] {
+    return [...this.produtos]
+      .filter(p => p.disponivel === 1)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, 8);
+  }
+
+  goHero(index: number): void {
+    const total = this.heroSlides.length;
+    if (total === 0) return;
+    this.heroIndex = ((index % total) + total) % total;
+    this.restartHeroAutoplay();
+  }
+
+  nextHero(): void {
+    this.goHero(this.heroIndex + 1);
+  }
+
+  prevHero(): void {
+    this.goHero(this.heroIndex - 1);
+  }
+
+  /** Deslizar com o dedo no celular troca o slide */
+  private heroTouchStartX: number | null = null;
+
+  onHeroTouchStart(event: TouchEvent): void {
+    this.heroTouchStartX = event.changedTouches[0]?.clientX ?? null;
+  }
+
+  onHeroTouchEnd(event: TouchEvent): void {
+    if (this.heroTouchStartX === null) return;
+    const delta = (event.changedTouches[0]?.clientX ?? this.heroTouchStartX) - this.heroTouchStartX;
+    this.heroTouchStartX = null;
+    if (Math.abs(delta) < 40) return;
+    delta < 0 ? this.nextHero() : this.prevHero();
+  }
+
+  private restartHeroAutoplay(): void {
+    if (this.heroAutoplayId) clearInterval(this.heroAutoplayId);
+    this.heroAutoplayId = setInterval(() => {
+      const total = this.heroSlides.length;
+      if (total > 1) {
+        this.heroIndex = (this.heroIndex + 1) % total;
+        this.cdr.detectChanges();
+      }
+    }, 6000);
+  }
   
   // Modais
   showCreateModal = false;
@@ -153,11 +226,29 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private readonly productTracker: ProductTrackerService,
     private readonly favoritesService: FavoritesService,
     private readonly simulationService: SimulationService,
-    private readonly sidebarService: SidebarService
+    private readonly sidebarService: SidebarService,
+    private readonly catalog: CatalogService
   ) {}
 
   ngOnInit(): void {
     console.log('[Dashboard] ngOnInit - iniciando componente');
+
+    this.restartHeroAutoplay();
+
+    // Busca e categoria vindas do header da loja
+    this.catalog.search$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(q => {
+        if (q !== this.searchQueryInternal) this.searchQuery = q;
+      });
+    this.catalog.category$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(cat => {
+        if (cat !== this.selectedCategory) {
+          this.selectedCategory = cat;
+          this.cdr.detectChanges();
+        }
+      });
     
     // Configura debounce para busca (300ms)
     this.searchSubject$.pipe(
@@ -251,6 +342,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     console.log('[Dashboard] ngOnDestroy - limpando subscrições');
+    if (this.heroAutoplayId) clearInterval(this.heroAutoplayId);
     this.stopFeaturedAutoplay();
     this.destroy$.next();
     this.destroy$.complete();
@@ -402,6 +494,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
    */
   setCategory(category: string): void {
     this.selectedCategory = category;
+    this.catalog.setCategory(category);
   }
 
   /**
@@ -638,6 +731,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   clearAllFilters(): void {
+    this.catalog.setCategory('Todas');
+    this.catalog.setSearch('');
     this.selectedCategory = 'Todas';
     this.selectedCondition = 'Todas';
     this.selectedBrand = '';

@@ -17,7 +17,7 @@ interface BeforeInstallPromptEvent extends Event {
         <div class="flex items-start gap-3">
           <!-- Ícone -->
           <div class="bg-white rounded-lg p-2 flex-shrink-0">
-            <img src="logo-utilar.png" alt="Util Lar" class="w-10 h-10">
+            <img src="logo-utilar-transparente.png" alt="Util Lar" class="w-14 h-10 object-contain">
           </div>
           
           <!-- Conteúdo -->

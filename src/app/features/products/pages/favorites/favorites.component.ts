@@ -12,133 +12,102 @@ import { Subject, takeUntil, skip } from 'rxjs';
   standalone: true,
   imports: [CommonModule, CapitalizePipe],
   template: `
-    <div class="min-h-screen" style="background-color: #EEF2F5;">
-      <!-- Header -->
-      <header style="background: linear-gradient(to right, #7588A8, #7588A8, #95A7C1);">
-        <div class="max-w-7xl mx-auto px-3 py-6 sm:px-4 sm:py-10">
-          <button (click)="goToDashboard()" class="flex items-center gap-1.5 text-white/80 hover:text-white text-sm mb-3 transition-colors">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-            </svg>
-            Voltar
-          </button>
-          <h1 class="text-xl sm:text-3xl font-bold text-white flex items-center gap-3">
-            <svg class="w-7 h-7 sm:w-8 sm:h-8" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-            </svg>
-            Meus Favoritos
-          </h1>
-          <p class="text-white/80 mt-2 text-sm sm:text-base">Produtos que você salvou para ver depois</p>
+    <div class="bg-canvas min-h-[60vh]">
+      <!-- Cabeçalho -->
+      <div class="bg-white border-b border-line">
+        <div class="container-store py-6 sm:py-8">
+          <p class="section-kicker mb-1">Sua lista</p>
+          <h1 class="section-title">Meus favoritos</h1>
+          <p class="text-sm text-muted mt-1">Produtos que você salvou para ver depois.</p>
         </div>
-      </header>
+      </div>
 
-      <div class="max-w-7xl mx-auto px-2 sm:px-4 py-4 sm:py-6">
+      <div class="container-store py-8">
         <!-- Loading -->
-        <div *ngIf="isLoading" class="flex justify-center items-center py-20">
-          <div class="text-center">
-            <div class="animate-spin rounded-full h-16 w-16 border-b-4 mx-auto mb-4" style="border-color: #7588A8;"></div>
-            <p class="text-gray-600 text-lg">Carregando favoritos...</p>
+        <div *ngIf="isLoading" class="grid grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3 sm:gap-5">
+          <div *ngFor="let i of [1,2,3,4]" class="card overflow-hidden">
+            <div class="skeleton rounded-none w-full aspect-square"></div>
+            <div class="p-4 space-y-3">
+              <div class="skeleton h-4 w-3/4"></div>
+              <div class="skeleton h-3 w-1/3"></div>
+              <div class="skeleton h-6 w-1/2 mt-3"></div>
+              <div class="skeleton h-9 w-full"></div>
+            </div>
           </div>
         </div>
 
-        <!-- Lista Vazia -->
-        <div *ngIf="!isLoading && favoriteProducts.length === 0" 
-          class="bg-white rounded-xl p-16 text-center shadow-sm">
-          <svg class="w-24 h-24 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-          </svg>
-          <p class="text-gray-500 text-xl font-semibold mb-2">Nenhum favorito ainda</p>
-          <p class="text-gray-400 mb-6">Clique no coração dos produtos para salvá-los aqui</p>
-          <button (click)="goToDashboard()" 
-            class="px-6 py-2.5 rounded-lg font-semibold text-white transition-colors"
-            style="background-color: #7588A8;">
-            Ver Produtos
-          </button>
+        <!-- Vazio -->
+        <div *ngIf="!isLoading && favoriteProducts.length === 0" class="card p-10 sm:p-16 text-center">
+          <div class="w-20 h-20 rounded-2xl bg-accent-50 text-accent-400 flex items-center justify-center mx-auto mb-5">
+            <svg class="w-10 h-10" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+            </svg>
+          </div>
+          <p class="text-lg font-bold text-ink mb-1.5">Nenhum favorito ainda</p>
+          <p class="text-sm text-muted mb-6">Toque no coração dos produtos para salvá-los aqui</p>
+          <button (click)="goToDashboard()" class="btn-primary h-11 px-6 text-sm">Ver produtos</button>
         </div>
 
-        <!-- Grid de Favoritos -->
-        <div *ngIf="!isLoading && favoriteProducts.length > 0" 
-          class="grid grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-5">
-          
-          <article 
+        <!-- Grid -->
+        <div *ngIf="!isLoading && favoriteProducts.length > 0" class="grid grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3 sm:gap-5">
+          <article
             *ngFor="let produto of favoriteProducts; trackBy: trackByProductId"
             (click)="verDetalhes(produto.id)"
-            class="rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer" style="background-color: #FFFFFF; border: 1px solid #D7DDE3;">
-            
-            <!-- Imagem -->
-            <div class="aspect-[4/3] bg-gray-100 relative overflow-hidden">
-              <div class="absolute top-2 left-2 z-10 flex flex-col gap-1">
-                <span 
-                  *ngIf="produto.condition === 'novo'"
-                  class="px-3 py-1 rounded-full text-xs font-bold uppercase shadow-md"
-                  style="background-color: #d4f4dd; color: #2d6a3f;">
-                  Novo
-                </span>
-                <span 
-                  *ngIf="produto.condition === 'seminovo'"
-                  class="px-3 py-1 rounded-full text-xs font-bold uppercase shadow-md"
-                  style="background-color: #f5ebd4; color: #8b6914;">
-                  Seminovo
-                </span>
+            class="card-hover flex flex-col overflow-hidden group cursor-pointer animate-fade-up">
+
+            <div class="relative aspect-square bg-white border-b border-line overflow-hidden">
+              <div class="absolute top-2 left-2 z-10 flex flex-col items-start gap-1">
+                <span *ngIf="produto.condition === 'novo'" class="badge-new shadow-sm">Novo</span>
+                <span *ngIf="produto.condition === 'seminovo'" class="badge-used shadow-sm">Seminovo</span>
               </div>
 
-              <!-- Botão Remover Favorito -->
-              <button 
+              <button
                 (click)="removeFavorite(produto.id, $event)"
-                class="absolute bottom-2 right-2 z-10 w-9 h-9 rounded-full flex items-center justify-center shadow-md transition-all duration-200 hover:scale-110"
-                style="background-color: #DC2626;"
-                title="Remover dos favoritos">
-                <svg class="w-5 h-5" fill="white" stroke="white" viewBox="0 0 24 24" stroke-width="2">
+                class="overlay-btn is-active absolute top-2 right-2 z-10 w-8 h-8 sm:w-9 sm:h-9"
+                title="Remover dos favoritos" aria-label="Remover dos favoritos">
+                <svg class="w-4 h-4 sm:w-[18px] sm:h-[18px]" fill="currentColor" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
                 </svg>
               </button>
 
-              <div *ngIf="produto.disponivel === 0" 
-                class="absolute inset-0 bg-black/60 z-20 flex items-center justify-center">
-                <span class="bg-gray-700 text-white px-6 py-3 rounded-lg text-xl font-bold shadow-xl">
-                  ✓ VENDIDO
-                </span>
+              <div *ngIf="produto.disponivel === 0" class="absolute inset-0 bg-white/70 backdrop-blur-[1px] z-20 flex items-center justify-center">
+                <span class="bg-ink text-white px-4 py-1.5 rounded-full text-xs font-bold tracking-wide shadow-lg">VENDIDO</span>
               </div>
-              
-              <img 
-                *ngIf="produto.images && produto.images.length > 0" 
-                [src]="produto.images[0]" 
+
+              <img
+                *ngIf="produto.images && produto.images.length > 0"
+                [src]="produto.images[0]"
                 [alt]="produto.name"
-                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-              
-              <div *ngIf="!produto.images || produto.images.length === 0" 
-                class="w-full h-full flex items-center justify-center">
-                <svg class="h-24 w-24 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                loading="lazy"
+                class="w-full h-full object-contain p-3 group-hover:scale-[1.04] transition-transform duration-500">
+
+              <div *ngIf="!produto.images || produto.images.length === 0" class="w-full h-full flex items-center justify-center text-brand-300">
+                <svg class="h-20 w-20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                 </svg>
               </div>
             </div>
-            
-            <!-- Conteúdo -->
-            <div class="p-2.5 sm:p-4">
-              <div class="mb-1.5">
-                <h3 class="font-bold text-sm sm:text-base line-clamp-2 leading-tight" style="color: #23292A;">
-                  {{ produto.name | capitalize }}
-                </h3>
-                <span class="inline-block mt-1 px-1.5 py-0.5 rounded text-[10px] sm:text-xs font-semibold" style="background-color: #E6EBEF; color: #23292A;">
-                  {{ produto.category | capitalize }}
-                </span>
-              </div>
-              
-              <div class="mb-2">
-                <div class="text-base sm:text-xl font-bold" style="color: #23292A;">
+
+            <div class="flex flex-col flex-1 p-3.5 sm:p-5">
+              <span class="text-[11px] font-bold uppercase tracking-wide text-muted mb-1.5">
+                {{ produto.category | capitalize }}
+              </span>
+              <h3 class="font-semibold text-[15px] sm:text-base leading-snug line-clamp-2 text-ink mb-2 group-hover:text-brand-700 transition-colors">
+                {{ produto.name | capitalize }}
+              </h3>
+
+              <div class="mt-auto">
+                <div class="font-display text-[22px] sm:text-[26px] font-extrabold tracking-tight text-ink leading-tight">
                   R$ {{ formatarPreco(produto.price) }}
                 </div>
-                <div class="text-xs sm:text-sm" style="color: #7588A8;">
-                  ou até <span class="font-semibold">12x</span> de <span class="font-semibold">R$ {{ calculateInstallment12x(produto.price) }}</span>
+                <div class="text-xs sm:text-[13px] text-muted mt-1">
+                  em até <span class="font-semibold text-brand-700">12x de R$ {{ calculateInstallment12x(produto.price) }}</span>
                 </div>
+                <button (click)="verDetalhes(produto.id)" class="btn-primary w-full mt-3.5 h-10 sm:h-11 text-sm">
+                  Ver detalhes
+                  <svg class="w-4 h-4 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                </button>
               </div>
-              
-              <button 
-                (click)="verDetalhes(produto.id)"
-                class="w-full font-semibold py-1.5 sm:py-2 text-xs sm:text-sm rounded-lg transition-colors flex items-center justify-center gap-1 shadow-sm" style="background-color: #7588A8; color: #FFFFFF;" onmouseover="this.style.backgroundColor='#95A7C1'" onmouseout="this.style.backgroundColor='#7588A8'">
-                Ver detalhes
-              </button>
             </div>
           </article>
         </div>

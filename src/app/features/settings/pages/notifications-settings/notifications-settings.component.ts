@@ -24,26 +24,20 @@ interface NotificationSettings {
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div class="min-h-screen" style="background-color: #EEF2F5;">
-      <!-- Header com gradiente -->
-      <header style="background: linear-gradient(to right, #7588A8, #95A7C1, #9AB6C8);">
-        <div class="max-w-4xl mx-auto px-4 py-5 sm:py-8">
-          <button (click)="goBack()" class="flex items-center gap-1.5 text-white/80 hover:text-white text-sm mb-3 transition-colors">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-            </svg>
-            Voltar
-          </button>
-          <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1 sm:mb-2">Configurações de Notificações</h1>
-          <p class="text-white/90 text-sm sm:text-base">Escolha como deseja receber atualizações sobre novos produtos</p>
+    <div class="bg-canvas min-h-[60vh]">
+      <div class="bg-white border-b border-line">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+          <p class="section-kicker mb-1">Fique por dentro</p>
+          <h1 class="section-title">Notificações</h1>
+          <p class="text-sm text-muted mt-1">Escolha como quer receber avisos de novos produtos e promoções.</p>
         </div>
-      </header>
+      </div>
 
       <div class="max-w-4xl mx-auto px-4 py-5 sm:py-8">
         <!-- Loading -->
         <div *ngIf="isLoading" class="flex justify-center items-center py-20">
           <div class="text-center">
-            <div class="animate-spin rounded-full h-16 w-16 border-b-4 mx-auto mb-4" style="border-color: #7588A8;"></div>
+            <div class="animate-spin rounded-full h-12 w-12 border-4 border-brand-100 border-t-brand-700 mx-auto mb-4"></div>
             <p class="text-lg" style="color: #6B7785;">Carregando preferências...</p>
           </div>
         </div>
