@@ -1,100 +1,35 @@
 <div class="bg-canvas">
   <!-- ======================================================================
-       BANNER ROTATIVO — largura total, um destaque por slide
+       BANNER PRINCIPAL
        ====================================================================== -->
-  <section class="relative overflow-hidden bg-gradient-to-br from-brand-600 via-brand-500 to-brand-700 text-white" aria-roledescription="carrossel" aria-label="Destaques da loja" (touchstart)="onHeroTouchStart($event)" (touchend)="onHeroTouchEnd($event)">
-    <ng-container *ngIf="!isLoading && heroSlides.length > 0; else heroFallback">
-      <div class="flex transition-transform duration-700 ease-out" [style.transform]="'translateX(-' + (heroIndex * 100) + '%)'">
-        <article *ngFor="let produto of heroSlides; let i = index; trackBy: trackByProductId"
-                 class="w-full shrink-0" [attr.aria-hidden]="i !== heroIndex">
-          <div class="container-store grid grid-cols-1 md:grid-cols-12 items-center gap-6 md:gap-10 py-10 sm:py-14 lg:py-16 min-h-[420px] lg:min-h-[500px]">
-            <!-- Texto -->
-            <div class="md:col-span-5 order-2 md:order-1 md:pl-10">
-              <p class="section-kicker text-brand-200 mb-3">Destaque da semana</p>
-              <h1 class="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-[1.05] tracking-tight text-white mb-3">
-                {{ produto.name | capitalize }}
-              </h1>
-              <p class="text-sm sm:text-base text-white/80 leading-relaxed mb-5 line-clamp-2 max-w-md">{{ produto.description }}</p>
-              <div class="flex items-end gap-3 mb-6">
-                <p class="font-display text-3xl sm:text-4xl font-extrabold tracking-tight text-white leading-none">R$ {{ formatarPreco(produto.price) }}</p>
-                <p class="text-xs sm:text-sm text-white/75 pb-1">ou 12x de R$ {{ calculateInstallment12x(produto.price) }}</p>
-              </div>
-              <div class="flex flex-wrap gap-3">
-                <button (click)="verDetalhes(produto.id)" class="btn h-12 px-7 text-sm uppercase tracking-wide bg-white text-ink shadow-md hover:bg-brand-50">Comprar</button>
-                <a href="#produtos" class="btn h-12 px-6 text-sm border border-white/40 text-white hover:bg-white/10">Ver todos os produtos</a>
-              </div>
-            </div>
-            <!-- Foto inteira, sem corte -->
-            <div class="md:col-span-7 order-1 md:order-2 flex items-center justify-center md:pr-10">
-              <div class="relative w-full h-[260px] sm:h-[340px] lg:h-[420px] rounded-2xl bg-white shadow-float p-4 sm:p-6 flex items-center justify-center cursor-pointer" (click)="verDetalhes(produto.id)">
-                <img *ngIf="produto.images && produto.images.length > 0" [src]="produto.images[0]" [alt]="produto.name"
-                     class="max-w-full max-h-full w-auto h-auto object-contain">
-                <div *ngIf="!produto.images || produto.images.length === 0" class="flex items-center justify-center text-brand-200">
-                  <svg class="w-16 h-16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                </div>
-              </div>
-            </div>
-          </div>
-        </article>
-      </div>
-
-      <!-- Setas -->
-      <ng-container *ngIf="heroSlides.length > 1">
-        <button (click)="prevHero()" class="overlay-btn hidden sm:flex absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 w-11 h-11 z-10" aria-label="Banner anterior">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
-        </button>
-        <button (click)="nextHero()" class="overlay-btn hidden sm:flex absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 w-11 h-11 z-10" aria-label="Próximo banner">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-        </button>
-        <!-- Bolinhas -->
-        <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
-          <button *ngFor="let s of heroSlides; let i = index" (click)="goHero(i)"
-                  class="h-2 rounded-full transition-all duration-300"
-                  [class.w-6]="i === heroIndex" [class.w-2]="i !== heroIndex"
-                  [class.bg-white]="i === heroIndex" [class.bg-white/40]="i !== heroIndex"
-                  [attr.aria-label]="'Ir para o banner ' + (i + 1)"></button>
-        </div>
-      </ng-container>
-    </ng-container>
-
-    <!-- Sem destaques: banner institucional -->
-    <ng-template #heroFallback>
-      <div class="container-store grid grid-cols-1 md:grid-cols-12 items-center gap-8 py-12 sm:py-16 lg:py-20 min-h-[420px]">
-        <div class="md:col-span-7 md:pl-10">
-          <p class="section-kicker text-brand-200 mb-3">Móveis · Eletrodomésticos · Novos e seminovos</p>
-          <h1 class="font-display text-4xl sm:text-5xl lg:text-[3.4rem] font-extrabold leading-[1.05] tracking-tight text-white mb-4">
-            Sua casa completa,<br class="hidden sm:block"> <span class="text-brand-200">pelo preço certo.</span>
-          </h1>
-          <p class="text-base sm:text-lg text-white/80 leading-relaxed max-w-xl mb-7">
-            Sofás, geladeiras, mesas, guarda-roupas e muito mais — produtos revisados, com garantia e parcelamento em até 12x no cartão.
-          </p>
-          <div class="flex flex-wrap gap-3">
-            <a href="#produtos" class="btn h-12 px-7 text-sm uppercase tracking-wide bg-white text-ink shadow-md hover:bg-brand-50">Ver produtos</a>
-            <button *ngIf="isAdmin" (click)="openCreateModal()" class="btn h-12 px-5 text-sm border border-white/40 text-white hover:bg-white/10">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"/></svg>
-              Adicionar produto
-            </button>
-          </div>
-        </div>
-        <div class="md:col-span-5 grid grid-cols-2 gap-3">
-          <div *ngFor="let item of heroHighlights" class="bg-white/10 border border-white/15 rounded-2xl p-5">
-            <div class="w-10 h-10 rounded-lg bg-white/15 text-white flex items-center justify-center mb-3">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" [attr.d]="item.icon"/></svg>
-            </div>
-            <p class="font-display font-bold text-sm leading-tight text-white">{{ item.title }}</p>
-          </div>
+  <section class="relative overflow-hidden bg-gradient-to-br from-brand-600 via-brand-500 to-brand-700 text-white">
+    <div class="container-store grid grid-cols-1 md:grid-cols-12 items-center gap-8 py-12 sm:py-16 lg:py-20 min-h-[420px]">
+      <div class="md:col-span-7 md:pl-10">
+        <p class="section-kicker text-brand-200 mb-3">Móveis · Eletrodomésticos · Novos e seminovos</p>
+        <h1 class="font-display text-4xl sm:text-5xl lg:text-[3.4rem] font-extrabold leading-[1.05] tracking-tight text-white mb-4">
+          Sua casa completa,<br class="hidden sm:block"> <span class="text-brand-200">pelo preço certo.</span>
+        </h1>
+        <p class="text-base sm:text-lg text-white/80 leading-relaxed max-w-xl mb-7">
+          Sofás, geladeiras, mesas, guarda-roupas e muito mais — produtos revisados, com garantia e parcelamento em até 12x no cartão.
+        </p>
+        <div class="flex flex-wrap gap-3">
+          <a href="#produtos" class="btn h-12 px-7 text-sm uppercase tracking-wide bg-white text-ink shadow-md hover:bg-brand-50">Ver produtos</a>
+          <button *ngIf="isAdmin" (click)="openCreateModal()" class="btn h-12 px-5 text-sm border border-white/40 text-white hover:bg-white/10">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"/></svg>
+            Adicionar produto
+          </button>
         </div>
       </div>
-    </ng-template>
+      <div class="md:col-span-5 grid grid-cols-2 gap-3">
+        <div *ngFor="let item of heroHighlights" class="bg-white/10 border border-white/15 rounded-2xl p-5">
+          <div class="w-10 h-10 rounded-lg bg-white/15 text-white flex items-center justify-center mb-3">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" [attr.d]="item.icon"/></svg>
+          </div>
+          <p class="font-display font-bold text-sm leading-tight text-white">{{ item.title }}</p>
+        </div>
+      </div>
+    </div>
   </section>
-
-  <!-- Admin: atalho para cadastrar (fica fora do banner para não poluir a vitrine) -->
-  <div *ngIf="isAdmin && !isLoading && heroSlides.length > 0" class="container-store pt-4 flex justify-end">
-    <button (click)="openCreateModal()" class="btn-secondary h-10 px-4 text-sm">
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"/></svg>
-      Adicionar produto
-    </button>
-  </div>
 
   <!-- ======================================================================
        FAIXA DE SERVIÇOS
@@ -116,7 +51,7 @@
   <!-- ======================================================================
        NOVIDADES
        ====================================================================== -->
-  <section *ngIf="!isLoading && recentProducts.length > 0" class="container-store pt-12 sm:pt-16">
+  <section *ngIf="!isLoading && heroPages.length > 0" class="container-store pt-12 sm:pt-16" aria-roledescription="carrossel" aria-label="Novidades" (touchstart)="onHeroTouchStart($event)" (touchend)="onHeroTouchEnd($event)">
     <div class="flex items-end justify-between gap-4 mb-5">
       <div>
         <p class="section-kicker mb-1">Acabaram de chegar</p>
@@ -124,10 +59,50 @@
       </div>
       <a href="#produtos" class="text-sm font-semibold text-brand-600 hover:text-brand-700 whitespace-nowrap">Ver todos →</a>
     </div>
-    <div class="flex gap-3 sm:gap-5 overflow-x-auto snap-x snap-mandatory hide-scrollbar pb-1 -mx-4 px-4 sm:mx-0 sm:px-0">
-      <div *ngFor="let produto of recentProducts; trackBy: trackByProductId" class="shrink-0 snap-start w-[72%] sm:w-[47%] lg:w-[31.5%]">
-        <ng-container *ngTemplateOutlet="productCard; context: { $implicit: produto }"></ng-container>
+    <!-- Páginas de 3 imagens (1 no celular) -->
+    <div class="overflow-hidden -mx-1">
+      <div class="flex transition-transform duration-700 ease-out" [style.transform]="'translateX(-' + (heroIndex * 100) + '%)'">
+        <div *ngFor="let page of heroPages; let p = index" class="w-full shrink-0 px-1" [attr.aria-hidden]="p !== heroIndex">
+          <div class="grid gap-3 sm:gap-5" [class.grid-cols-1]="heroPerPage === 1" [class.grid-cols-3]="heroPerPage === 3">
+            <article *ngFor="let produto of page; trackBy: trackByProductId"
+                     (click)="verDetalhes(produto.id)"
+                     class="relative rounded-2xl overflow-hidden bg-white shadow-float cursor-pointer group h-[300px] sm:h-[260px] md:h-[320px] lg:h-[380px]">
+              <!-- Foto inteira, sem corte -->
+              <div class="absolute inset-0 p-4 sm:p-5 pb-20 sm:pb-24 flex items-center justify-center">
+                <img *ngIf="produto.images && produto.images.length > 0" [src]="produto.images[0]" [alt]="produto.name"
+                     class="max-w-full max-h-full w-auto h-auto object-contain transition-transform duration-700 group-hover:scale-[1.04]">
+                <svg *ngIf="!produto.images || produto.images.length === 0" class="w-16 h-16 text-brand-200" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+              </div>
+              <span class="absolute top-3 left-3 badge-new shadow">Novo</span>
+              <!-- Nome e preço -->
+              <div class="absolute inset-x-0 bottom-0 px-4 py-3 sm:px-5 sm:py-4 bg-white border-t border-line">
+                <p class="font-semibold text-sm sm:text-[15px] leading-tight text-ink line-clamp-1">{{ produto.name | capitalize }}</p>
+                <div class="flex items-baseline justify-between gap-2 mt-0.5">
+                  <p class="font-display font-extrabold text-lg sm:text-xl text-brand-600">R$ {{ formatarPreco(produto.price) }}</p>
+                  <span class="text-[11px] sm:text-xs font-semibold text-muted hidden sm:inline">12x de R$ {{ calculateInstallment12x(produto.price) }}</span>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
       </div>
+    </div>
+
+    <!-- Setas + bolinhas -->
+    <div *ngIf="heroPages.length > 1" class="flex items-center justify-center gap-4 mt-5">
+      <button (click)="prevHero()" class="overlay-btn w-9 h-9" aria-label="Anterior">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+      </button>
+      <div class="flex gap-2">
+        <button *ngFor="let pg of heroPages; let i = index" (click)="goHero(i)"
+                class="h-2 rounded-full transition-all duration-300"
+                [class.w-6]="i === heroIndex" [class.w-2]="i !== heroIndex"
+                [class.bg-brand-500]="i === heroIndex" [class.bg-line-strong]="i !== heroIndex"
+                [attr.aria-label]="'Ir para a página ' + (i + 1)"></button>
+      </div>
+      <button (click)="nextHero()" class="overlay-btn w-9 h-9" aria-label="Próximo">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+      </button>
     </div>
   </section>
 
@@ -147,42 +122,6 @@
               [class.chip-active]="selectedCategory === cat.value">
         {{ cat.label }}
       </button>
-    </div>
-  </section>
-
-  <!-- ======================================================================
-       DESTAQUES (carrossel)
-       ====================================================================== -->
-  <section *ngIf="!isLoading && featuredProducts.length > 3" class="container-store pt-12 sm:pt-16">
-    <div class="flex flex-wrap items-end justify-between gap-4 mb-5">
-      <div>
-        <p class="section-kicker mb-1">Selecionados para você</p>
-        <h2 class="section-title">Destaques da semana</h2>
-      </div>
-      <div class="flex items-center gap-2">
-        <button *ngIf="isAdmin" (click)="clearAllFeatured()" class="btn-danger-soft h-9 px-3 text-xs">Limpar destaques</button>
-        <button (click)="scrollFeatured('left')" class="btn-secondary w-9 h-9 p-0 rounded-full" aria-label="Anterior">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
-        </button>
-        <button (click)="scrollFeatured('right')" class="btn-secondary w-9 h-9 p-0 rounded-full" aria-label="Próximo">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-        </button>
-      </div>
-    </div>
-
-    <div #featuredCarousel class="flex gap-3 sm:gap-5 overflow-x-auto snap-x snap-mandatory scroll-smooth hide-scrollbar pb-1">
-      <div *ngFor="let produto of featuredProducts; trackBy: trackByProductId"
-           class="shrink-0 snap-start w-[72%] sm:w-[47%] lg:w-[calc(33.333%-0.85rem)]">
-        <ng-container *ngTemplateOutlet="productCard; context: { $implicit: produto }"></ng-container>
-      </div>
-    </div>
-
-    <div class="hidden lg:flex justify-center gap-1.5 mt-4">
-      <button *ngFor="let page of carouselPages; let i = index" (click)="goToFeaturedPage(i)"
-              class="h-1.5 rounded-full transition-all duration-300"
-              [class.w-6]="i === currentCarouselPage" [class.w-1.5]="i !== currentCarouselPage"
-              [class.bg-accent-500]="i === currentCarouselPage" [class.bg-line-strong]="i !== currentCarouselPage"
-              [attr.aria-label]="'Página ' + (i + 1)"></button>
     </div>
   </section>
 
@@ -220,7 +159,7 @@
 
     <div class="flex gap-8 items-start">
       <!-- Filtros (desktop) -->
-      <aside class="hidden lg:block w-64 shrink-0 sticky top-36">
+      <aside class="hidden lg:block w-64 shrink-0">
         <div class="card divide-y divide-line">
           <div class="p-4 flex items-center justify-between">
             <h3 class="font-display font-bold text-ink">Filtrar</h3>

@@ -1,7 +1,7 @@
-import { Component, OnInit, ChangeDetectorRef, OnDestroy, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, OnDestroy, ViewChild, ElementRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { ProductService } from '../../services/product.service';
 import { Product, ProductResponse, ProductFormSubmission } from '../../models/product.model';
 import { AdminModeService } from '../../../../core/services/admin-mode.service';
@@ -18,7 +18,6 @@ import { FavoritesService } from '../../../../core/services/favorites.service';
 import { SimulationService } from '../../../simulations/services/simulation.service';
 import { finalize, Subject, takeUntil, forkJoin, debounceTime, distinctUntilChanged } from 'rxjs';
 
-
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -27,11 +26,11 @@ import { finalize, Subject, takeUntil, forkJoin, debounceTime, distinctUntilChan
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   @ViewChild('featuredCarousel') featuredCarousel?: ElementRef<HTMLDivElement>;
-  
+
   errorMessage = '';
   isLoading = false;
-  isLoadingMore = false; // Indica se está carregando mais produtos
-  isInitialLoad = true; // Indica se é o primeiro carregamento
+  isLoadingMore = false;
+  isInitialLoad = true;
   produtos: ProductResponse[] = [];
   cachedFeaturedProducts: ProductResponse[] = [];
   isAdmin = false;
@@ -39,22 +38,19 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();
   private readonly searchSubject$ = new Subject<string>();
   private searchQueryInternal: string = '';
-  
-  // Cache para filtros (memoização)
+
   private filteredProductsCache: ProductResponse[] | null = null;
   private lastFilterSignature: string = '';
-  
+
   currentFeaturedIndex = 0;
   currentCarouselPage = 0;
   readonly itemsPerPage = 3;
   private featuredAutoplayId: any = null;
-  
-  // Filtros
+
   selectedCategory: string = 'Todas';
   selectedCondition: string = 'Todas';
   selectedSort: string = 'populares';
-  
-  // Propriedade com debounce para busca
+
   get searchQuery(): string {
     return this.searchQueryInternal;
   }
@@ -62,7 +58,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.searchQueryInternal = value;
     this.searchSubject$.next(value);
   }
-  
+
   selectedBrand: string = '';
   priceMin: number | null = null;
   priceMax: number | null = null;
@@ -75,8 +71,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     price: true,
     condition: true
   } as { [key: string]: boolean; category: boolean; brand: boolean; price: boolean; condition: boolean };
-  
-  /** Marcas dinâmicas: derivadas dos produtos cadastrados, ordenadas alfabeticamente */
+
   get brands(): { name: string }[] {
     const seen = new Set<string>();
     return this.produtos
@@ -91,7 +86,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       .map(name => ({ name }));
   }
 
-  /** Categorias dinâmicas: "Todas" + categorias únicas dos produtos cadastrados */
   get categories(): { label: string; value: string }[] {
     const seen = new Set<string>();
     const dynamic = this.produtos
@@ -107,13 +101,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     return [{ label: 'Todas', value: 'Todas' }, ...dynamic];
   }
-  
+
   conditions = [
     { label: 'Todas', value: 'Todas' },
     { label: 'Novo', value: 'novo' },
     { label: 'Seminovo', value: 'seminovo' }
   ];
-  
+
   sortOptions = [
     { label: 'Mais populares', value: 'populares' },
     { label: 'Menor preço', value: 'menor-preco' },
@@ -121,7 +115,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     { label: 'Mais recentes', value: 'recentes' }
   ];
 
-  /** Diferenciais exibidos no hero e na faixa de confiança (ícones em path SVG) */
   readonly heroHighlights = [
     { title: 'Qualidade garantida', text: 'Produtos revisados e testados antes de anunciar.', icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z' },
     { title: 'Até 12x no cartão', text: 'Parcele sua compra e leve hoje.', icon: 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z' },
@@ -129,32 +122,47 @@ export class DashboardComponent implements OnInit, OnDestroy {
     { title: 'Atendimento humano', text: 'Tire dúvidas direto no WhatsApp.', icon: 'M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z' }
   ];
 
-  /** Rola até a grade de produtos (usado pelas categorias da página inicial) */
   scrollToProducts(): void {
     document.getElementById('produtos')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  // ---------------------------------------------------------------------------
-  // Banner rotativo do início (um destaque por slide, estilo vitrine de loja)
-  // ---------------------------------------------------------------------------
   heroIndex = 0;
+  heroPerPage = 3;
   private heroAutoplayId: any = null;
+  private heroPagesCache: { key: string; pages: ProductResponse[][] } | null = null;
 
-  /** Até 5 destaques disponíveis viram slides do banner */
-  get heroSlides(): ProductResponse[] {
-    return this.featuredProducts.filter(p => p.disponivel === 1).slice(0, 5);
+  get heroPages(): ProductResponse[][] {
+    const items = this.recentProducts;
+    const key = `${this.heroPerPage}:${items.map(p => p.id).join(',')}`;
+    if (this.heroPagesCache?.key === key) return this.heroPagesCache.pages;
+    const pages: ProductResponse[][] = [];
+    for (let i = 0; i < items.length; i += this.heroPerPage) {
+      pages.push(items.slice(i, i + this.heroPerPage));
+    }
+    this.heroPagesCache = { key, pages };
+    if (this.heroIndex >= pages.length) this.heroIndex = 0;
+    return pages;
   }
 
-  /** Últimos produtos cadastrados (seção "Novidades") */
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    const perPage = window.innerWidth < 640 ? 1 : 3;
+    if (perPage !== this.heroPerPage) {
+      this.heroPerPage = perPage;
+      this.heroIndex = 0;
+      this.cdr.detectChanges();
+    }
+  }
+
   get recentProducts(): ProductResponse[] {
     return [...this.produtos]
       .filter(p => p.disponivel === 1)
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-      .slice(0, 8);
+      .slice(0, 9);
   }
 
   goHero(index: number): void {
-    const total = this.heroSlides.length;
+    const total = this.heroPages.length;
     if (total === 0) return;
     this.heroIndex = ((index % total) + total) % total;
     this.restartHeroAutoplay();
@@ -168,7 +176,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.goHero(this.heroIndex - 1);
   }
 
-  /** Deslizar com o dedo no celular troca o slide */
   private heroTouchStartX: number | null = null;
 
   onHeroTouchStart(event: TouchEvent): void {
@@ -186,15 +193,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private restartHeroAutoplay(): void {
     if (this.heroAutoplayId) clearInterval(this.heroAutoplayId);
     this.heroAutoplayId = setInterval(() => {
-      const total = this.heroSlides.length;
+      const total = this.heroPages.length;
       if (total > 1) {
         this.heroIndex = (this.heroIndex + 1) % total;
         this.cdr.detectChanges();
       }
-    }, 6000);
+    }, 3000);
   }
-  
-  // Modais
+
   showCreateModal = false;
   showEditModal = false;
   showAdminLoginModal = false;
@@ -206,7 +212,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   marketplaceTextCopied = false;
   selectedProduct?: Product;
 
-  // PWA Installation
   canInstallPwa = false;
   private deferredPrompt: any = null;
 
@@ -214,8 +219,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return globalThis.matchMedia?.('(display-mode: standalone)').matches
       || (globalThis.navigator as any)?.standalone === true;
   }
-  
-  // Contador de cliques para admin (triple-click na logo)
 
   constructor(
     private readonly productService: ProductService,
@@ -227,15 +230,32 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private readonly favoritesService: FavoritesService,
     private readonly simulationService: SimulationService,
     private readonly sidebarService: SidebarService,
-    private readonly catalog: CatalogService
+    private readonly catalog: CatalogService,
+    private readonly route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
     console.log('[Dashboard] ngOnInit - iniciando componente');
 
+    this.onWindowResize();
+
+    this.route.queryParamMap
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(params => {
+        const categoria = params.get('categoria');
+        if (categoria) {
+          this.setCategory(categoria);
+          setTimeout(() => this.scrollToProducts(), 300);
+        }
+        if (params.get('novo') === '1') {
+          setTimeout(() => { if (this.isAdmin) this.openCreateModal(); }, 300);
+        }
+        if (categoria || params.get('novo')) {
+          this.router.navigate([], { queryParams: {}, replaceUrl: true });
+        }
+      });
     this.restartHeroAutoplay();
 
-    // Busca e categoria vindas do header da loja
     this.catalog.search$
       .pipe(takeUntil(this.destroy$))
       .subscribe(q => {
@@ -249,18 +269,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
           this.cdr.detectChanges();
         }
       });
-    
-    // Configura debounce para busca (300ms)
+
     this.searchSubject$.pipe(
       debounceTime(300),
       distinctUntilChanged(),
       takeUntil(this.destroy$)
     ).subscribe(() => {
-      // Força detecção de mudanças quando a busca é atualizada
       this.cdr.detectChanges();
     });
-    
-    // Inscreve para mudanças no modo admin
+
     this.adminModeService.isAdmin$
       .pipe(takeUntil(this.destroy$))
       .subscribe((isAdmin: boolean) => {
@@ -269,7 +286,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.cdr.detectChanges();
       });
 
-    // Inscreve no contador de favoritos
     this.favoritesService.count$
       .pipe(takeUntil(this.destroy$))
       .subscribe(count => {
@@ -277,12 +293,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.cdr.detectChanges();
       });
 
-    // Verificar atualizações de produtos (notificações automáticas)
     this.productTracker.getUpdates()
       .pipe(takeUntil(this.destroy$))
       .subscribe();
 
-    // Verificar se prompt foi capturado antes do Angular carregar
     const earlyPrompt = (globalThis as any).__pwaInstallPrompt;
     if (earlyPrompt) {
       this.deferredPrompt = earlyPrompt;
@@ -292,13 +306,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
       }
     }
 
-    // iOS Safari não dispara beforeinstallprompt — mostrar botão manualmente
     const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
     if (isIOS && !this.isRunningAsStandalone) {
       this.canInstallPwa = true;
     }
 
-    // Capturar evento se ainda não tiver sido disparado (Chrome/Edge/Android)
     globalThis.addEventListener('beforeinstallprompt', (e: any) => {
       console.log('[Dashboard] beforeinstallprompt event capturado');
       e.preventDefault();
@@ -307,7 +319,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       this.cdr.detectChanges();
     });
 
-    // Ocultar botão após instalação
     globalThis.addEventListener('appinstalled', () => {
       console.log('[Dashboard] App instalado com sucesso');
       this.canInstallPwa = false;
@@ -315,21 +326,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
       this.cdr.detectChanges();
     });
 
-    // Verificar se deve mostrar modal de boas-vindas
     this.checkWelcomeModal();
 
     console.log('[Dashboard] Chamando loadProdutos');
-    this.loadProdutos(false); // Não força reload - usa cache se disponível
+    this.loadProdutos(false);
 
-    // Reatividade em tempo real: qualquer mudança no cache do ProductService
-    // (criar / atualizar / remover / marcar vendido / reativar — vinda deste
-    // componente OU de outras telas como o detalhe do produto) atualiza o
-    // dashboard automaticamente, sem precisar de refresh manual.
     this.productService.getProdutosCache$()
       .pipe(takeUntil(this.destroy$))
       .subscribe(produtos => {
-        // Ignora a emissão inicial vazia da BehaviorSubject antes do
-        // primeiro carregamento (evita "piscar" para tela vazia).
         if (produtos.length === 0 && this.produtos.length === 0) {
           return;
         }
@@ -348,21 +352,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  /**
-   * Carrega produtos do service
-   * @param forceReload - Se true, força busca do backend. Se false, usa cache se disponível.
-   */
   private loadProdutos(forceReload = false) {
     console.log('[Dashboard] loadProdutos - começando (forceReload:', forceReload, ')');
-    
-    // Só mostra loading skeleton no carregamento inicial ou se não houver produtos
+
     if (this.isInitialLoad || this.produtos.length === 0) {
       this.isLoading = true;
     }
-    
+
     this.errorMessage = '';
     this.cdr.detectChanges();
-    
+
     this.productService.buscarProdutos(forceReload)
       .pipe(
         takeUntil(this.destroy$),
@@ -377,35 +376,26 @@ export class DashboardComponent implements OnInit, OnDestroy {
         next: (resp: ProductResponse[]) => {
           console.log('[Dashboard] loadProdutos - produtos recebidos:', resp.length);
           this.produtos = resp;
-          
-          // Invalida cache de filtros quando produtos mudam
+
           this.invalidateFilterCache();
-          
-          // Reseta produtos exibidos (lazy loading) se for reload forçado
-          // Não precisa mais, pois o backend já gerencia paginação
-          
-          // Atualiza cache de produtos featured
+
           this.updateFeaturedProductsCache();
-          
-          // Log para debug de featured
+
           console.log('[Dashboard] Produtos featured disponíveis:', this.cachedFeaturedProducts.length);
-          
-          // Inicializar faixa de preço
+
           const available = resp.filter(p => p.disponivel === 1);
           if (available.length > 0 && this.priceMin == null && this.priceMax == null) {
             this.priceMin = Math.min(...available.map(p => p.price)) / 100;
             this.priceMax = Math.max(...available.map(p => p.price)) / 100;
           }
           this.checkForNewProducts();
-          
-          // Força detecção de mudanças antes de iniciar autoplay
+
           this.cdr.detectChanges();
-          
-          // Inicia autoplay apenas se houver produtos featured
+
           if (this.cachedFeaturedProducts.length > 0) {
             this.startFeaturedAutoplay();
           }
-          
+
           this.cdr.detectChanges();
         },
         error: (err) => {
@@ -435,18 +425,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return this.favoritesService.isFavorite(productId);
   }
 
-  /**
-   * Calcula o valor da parcela em 12x usando a simulação Infinity (com repasse)
-   * Taxa de 16.66% para 12 parcelas, conforme configurado no SimulationService
-   */
   calculateInstallment12x(priceInCents: number): string {
     const priceInReais = priceInCents / 100;
-    const rate = 16.66 / 100; // Taxa para 12 parcelas
-    
-    // COM REPASSE (Infinity): valorCliente = valorBase ÷ (1 - taxa)
+    const rate = 16.66 / 100;
+
     const finalAmount = priceInReais / (1 - rate);
     const installmentValue = finalAmount / 12;
-    
+
     return (Math.round(installmentValue * 100) / 100).toLocaleString('pt-BR', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
@@ -489,29 +474,19 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.selectedBrand = this.selectedBrand === brand ? '' : brand;
   }
 
-  /**
-   * Define a categoria selecionada
-   */
   setCategory(category: string): void {
     this.selectedCategory = category;
     this.catalog.setCategory(category);
   }
 
-  /**
-   * Define a condição selecionada
-   */
   setCondition(condition: string): void {
     this.selectedCondition = condition;
   }
 
-  /**
-   * Define a ordenação
-   */
   setSort(sort: string): void {
     this.selectedSort = sort;
   }
 
-  // Índice onde inserir a seção de marcas (após a 1ª fileira: 2 colunas mobile = 4 itens, 3 colunas xl = 6 itens)
   readonly brandsInsertIndex = 8;
 
   get productsBeforeBrands(): ProductResponse[] {
@@ -522,16 +497,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return this.filteredProducts.slice(this.brandsInsertIndex);
   }
 
-  /**
-   * Verifica se há mais produtos para carregar do backend
-   */
   get hasMoreProducts(): boolean {
     return this.productService.temMaisPaginas();
   }
 
-  /**
-   * Carrega mais produtos do backend (próxima página)
-   */
   loadMoreProducts(): void {
     if (this.isLoadingMore || !this.hasMoreProducts) {
       return;
@@ -560,24 +529,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
       });
   }
 
-  /**
-   * Atualiza o cache de produtos featured
-   * Chamado sempre que os produtos mudam
-   * 
-   * IMPORTANTE: Em produção, o ChangeDetection do Angular pode não detectar 
-   * mudanças em getters. Por isso, usamos um cache explícito.
-   * Criamos um NOVO array para garantir que o Angular detecte a mudança.
-   */
   private updateFeaturedProductsCache(): void {
-    // Limite máximo de produtos no carrossel: 3 páginas × itemsPerPage (3) = 9
     const maxFeatured = this.itemsPerPage * 3;
 
-    // Tenta buscar produtos marcados como featured
     let featured = this.produtos
       .filter(p => !!p.featured && p.disponivel === 1)
       .slice(0, maxFeatured);
-    
-    // FALLBACK: Se não houver produtos featured, usa os mais recentes disponíveis
+
     if (featured.length === 0 && this.produtos.length > 0) {
       console.warn('[Dashboard] Nenhum produto featured encontrado. Usando fallback com produtos recentes.');
       featured = this.produtos
@@ -585,15 +543,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
         .sort((a, b) => b.id - a.id)
         .slice(0, maxFeatured);
     }
-    
-    // CRÍTICO: Criar um NOVO array para garantir que o Angular detecte a mudança
-    // Isso força o Change Detection a atualizar o template em produção
+
     this.cachedFeaturedProducts = [...featured];
-    
-    // Força detecção de mudanças explicitamente
+
     this.cdr.detectChanges();
-    
-    // Log para debug em produção
+
     if (this.cachedFeaturedProducts.length === 0 && this.produtos.length > 0) {
       console.warn('[Dashboard] Nenhum produto disponível para o carrossel.');
       console.warn('[Dashboard] Total de produtos:', this.produtos.length);
@@ -606,13 +560,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   get featuredProducts(): ProductResponse[] {
-    // Retorna o cache atualizado
     return this.cachedFeaturedProducts;
   }
 
-  // Filtros combinados com memoização
   get filteredProducts(): ProductResponse[] {
-    // Criar assinatura dos filtros para detectar mudanças
     const currentSignature = JSON.stringify({
       search: this.searchQueryInternal,
       brand: this.selectedBrand,
@@ -624,15 +575,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
       productsLength: this.produtos.length
     });
 
-    // Se a assinatura não mudou, retorna cache
     if (this.lastFilterSignature === currentSignature && this.filteredProductsCache) {
       return this.filteredProductsCache;
     }
 
-    // Recalcula os filtros
     let filtered = [...this.produtos];
-    
-    // Filtro de busca - tolerante a acentos, maiúsculas/minúsculas e múltiplas palavras
+
     if (this.searchQueryInternal.trim()) {
       const tokens = this.normalizeSearchText(this.searchQueryInternal)
         .split(/\s+/)
@@ -643,31 +591,27 @@ export class DashboardComponent implements OnInit, OnDestroy {
           const haystack = this.normalizeSearchText(
             `${p.name ?? ''} ${p.category ?? ''} ${p.brand ?? ''} ${p.description ?? ''}`
           );
-          // Todos os tokens precisam estar presentes (busca AND)
+
           return tokens.every(token => haystack.includes(token));
         });
       }
     }
-    
-    // Filtro de marca
+
     if (this.selectedBrand) {
       const brand = this.normalizeSearchText(this.selectedBrand);
-      filtered = filtered.filter(p => 
+      filtered = filtered.filter(p =>
         this.normalizeSearchText(p.brand ?? '').includes(brand)
       );
     }
-    
-    // Filtro de categoria
+
     if (this.selectedCategory !== 'Todas') {
       filtered = filtered.filter(p => p.category === this.selectedCategory);
     }
-    
-    // Filtro de condição
+
     if (this.selectedCondition !== 'Todas') {
       filtered = filtered.filter(p => p.condition === this.selectedCondition);
     }
 
-    // Filtro de preço
     if (this.priceMinApplied != null) {
       const minCentavos = this.priceMinApplied * 100;
       filtered = filtered.filter(p => p.price >= minCentavos);
@@ -676,8 +620,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       const maxCentavos = this.priceMaxApplied * 100;
       filtered = filtered.filter(p => p.price <= maxCentavos);
     }
-    
-    // Ordenação
+
     switch (this.selectedSort) {
       case 'menor-preco':
         filtered.sort((a, b) => a.price - b.price);
@@ -696,19 +639,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
           return b.id - a.id;
         });
     }
-    
-    // Atualiza cache e assinatura
+
     this.filteredProductsCache = filtered;
     this.lastFilterSignature = currentSignature;
-    
+
     return filtered;
   }
 
   get hasActiveFilters(): boolean {
-    return this.selectedCategory !== 'Todas' || 
-           this.selectedCondition !== 'Todas' || 
-           !!this.selectedBrand || 
-           this.priceMinApplied != null || 
+    return this.selectedCategory !== 'Todas' ||
+           this.selectedCondition !== 'Todas' ||
+           !!this.selectedBrand ||
+           this.priceMinApplied != null ||
            this.priceMaxApplied != null;
   }
 
@@ -744,10 +686,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.invalidateFilterCache();
   }
 
-  /**
-   * Invalida o cache de filtros
-   * Deve ser chamado quando os produtos são alterados
-   */
   private invalidateFilterCache(): void {
     this.filteredProductsCache = null;
     this.lastFilterSignature = '';
@@ -791,22 +729,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
   onSliderMaxInput(event: Event): void {
     this.priceMax = +(event.target as HTMLInputElement).value;
   }
-  
-  // Gerar avaliação fictícia baseada no ID do produto (para consistência)
+
   getProductRating(productId: number): number {
-    return 5; // Sempre 5 estrelas para simplicidade
+    return 5;
   }
-  
+
   getProductReviewCount(productId: number): number {
-    // Gera número de avaliações baseado no ID (para ser consistente)
     const counts = [45, 42, 34, 28, 56, 38, 51];
     return counts[productId % counts.length];
   }
 
-  // Instalar PWA
   async installPwa(): Promise<void> {
     if (this.deferredPrompt) {
-      // Chrome / Edge / Android — prompt nativo
       console.log('[Dashboard] Mostrando prompt de instalação do PWA');
       this.deferredPrompt.prompt();
 
@@ -821,7 +755,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // iOS Safari — não tem prompt automático, mostrar instrução
     this.alertService.success(
       'Adicionar à Tela de Início',
       'Toque em Compartilhar (□↑) na barra do Safari e depois em "Adicionar à Tela de Início".'
@@ -829,10 +762,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   checkWelcomeModal(): void {
-    // Verifica se o usuário já viu o modal de boas-vindas
     const hasSeenWelcome = localStorage.getItem('welcomeModalShown');
     if (!hasSeenWelcome) {
-      // Aguarda 1 segundo para mostrar o modal após a página carregar
       setTimeout(() => {
         this.showWelcomeModal = true;
         this.cdr.detectChanges();
@@ -841,22 +772,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   checkForNewProducts(): void {
-    // Usar o ProductTrackerService para verificar novos produtos e mudanças de preço
     const updates = this.productTracker.checkForUpdates(this.produtos);
-    
+
     if (updates.length > 0) {
       console.log(`[Dashboard] ${updates.length} atualizações encontradas`, updates);
     }
   }
 
   markNotificationsAsRead(): void {
-    // Marcar todas as notificações como lidas
     this.productTracker.markAllAsRead();
   }
 
-  // Admin login (ativado por double-click na logo)
   onLogoDoubleClick(): void {
-    // Double-click detectado - mostrar modal de admin
     if (!this.isAdmin) {
       this.showAdminLoginModal = true;
     }
@@ -877,8 +804,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
           },
           error: (error) => {
             console.error('[Dashboard] Erro ao autenticar admin:', error);
-          
-          // Mensagem específica baseada no erro
+
           let message: string;
 
           if (error?.status === 401) {
@@ -890,7 +816,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
           } else {
             message = 'Erro ao conectar com o servidor. Verifique se o backend está rodando.';
           }
-          
+
           this.alertService.error('Erro ao fazer login', message);
           this.cdr.detectChanges();
         }
@@ -928,7 +854,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Modal de criação
   openCreateModal(): void {
     this.selectedProduct = undefined;
     this.showCreateModal = true;
@@ -939,7 +864,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.selectedProduct = undefined;
   }
 
-  // Navegação para página de detalhes
   verDetalhes(id: number): void {
     this.router.navigate(['/dashboard/produto', id]);
   }
@@ -949,15 +873,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (!carousel) return;
 
     const totalPages = Math.ceil(this.featuredProducts.length / this.itemsPerPage);
-    
-    // Atualizar página
+
     if (direction === 'left') {
       this.currentCarouselPage = Math.max(0, this.currentCarouselPage - 1);
     } else {
       this.currentCarouselPage = Math.min(totalPages - 1, this.currentCarouselPage + 1);
     }
 
-    // Rolar para a página
     const scrollAmount = carousel.offsetWidth;
     const targetScroll = scrollAmount * this.currentCarouselPage;
 
@@ -966,7 +888,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       behavior: 'smooth'
     });
 
-    // Reiniciar autoplay após interação manual
     this.restartFeaturedAutoplay();
   }
 
@@ -976,8 +897,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     this.featuredAutoplayId = setInterval(() => {
       const totalPages = Math.ceil(this.featuredProducts.length / this.itemsPerPage);
-      
-      // Volta ao início se chegou no fim, senão avança
+
       if (this.currentCarouselPage >= totalPages - 1) {
         this.currentCarouselPage = 0;
         const carousel = this.featuredCarousel?.nativeElement;
@@ -1037,10 +957,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return new Array(totalPages).fill(0).map((_, i) => i);
   }
 
-  // Modal de edição
   openEditModal(produto: Product): void {
     console.log('[Dashboard] Abrindo modal de edição para produto:', produto);
-    this.selectedProduct = { ...produto }; // Cria uma cópia para evitar mutação
+    this.selectedProduct = { ...produto };
     this.showEditModal = true;
   }
 
@@ -1049,7 +968,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.selectedProduct = undefined;
   }
 
-  // CRUD Actions
   onCreateProduct(submission: ProductFormSubmission): void {
     this.productService.criarProduto(submission.product)
       .pipe(
@@ -1059,13 +977,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (product) => {
           this.closeCreateModal();
-          
-          // ⚡ Atualização otimista: adiciona o produto localmente
+
           const newProduct = {
             ...product,
             images: product.images || null
           } as ProductResponse;
-          
+
           this.produtos = [newProduct, ...this.produtos];
           this.invalidateFilterCache();
           this.updateFeaturedProductsCache();
@@ -1084,20 +1001,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   onUpdateProduct(submission: ProductFormSubmission): void {
     if (!this.selectedProduct) return;
-    
+
     const productData = { ...submission.product };
-    
-    // Se o preço novo é menor que o atual, guardar o preço original para mostrar desconto
+
     const currentPrice = this.selectedProduct.price;
     const newPrice = productData.price;
     if (newPrice < currentPrice) {
-      // Manter o originalPrice mais alto (caso já tenha tido redução anterior)
       (productData as any).originalPrice = this.selectedProduct.originalPrice || currentPrice;
     } else if (newPrice >= (this.selectedProduct.originalPrice || currentPrice)) {
-      // Se o preço subiu ou voltou ao original, remover o originalPrice
       (productData as any).originalPrice = null;
     }
-    
+
     this.productService.atualizarProduto(this.selectedProduct.id, productData)
       .pipe(
         takeUntil(this.destroy$),
@@ -1106,7 +1020,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (updated) => {
           this.closeEditModal();
-          // ⚡ Atualização local imediata sem esperar reload
+
           if (this.selectedProduct) {
             const idx = this.produtos.findIndex(p => p.id === this.selectedProduct!.id);
             if (idx !== -1) {
@@ -1131,7 +1045,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       'Remover Produto',
       'Tem certeza que deseja remover este produto? Esta ação não pode ser desfeita.',
       () => {
-        // ⚡ Atualização otimista: remove da UI imediatamente
         const backupProdutos = [...this.produtos];
         this.produtos = this.produtos.filter(p => p.id !== id);
         this.invalidateFilterCache();
@@ -1145,10 +1058,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
           )
           .subscribe({
             next: () => {
-              // Sucesso: estado já atualizado otimisticamente.
             },
             error: (err) => {
-              // ⚠️ Reverte em caso de erro
               this.produtos = backupProdutos;
               this.invalidateFilterCache();
               this.updateFeaturedProductsCache();
@@ -1166,7 +1077,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       'Marcar como Vendido',
       'Confirma que este produto foi vendido?',
       () => {
-        // ⚡ Atualização otimista
         const produto = this.produtos.find(p => p.id === id);
         const previousState = produto?.disponivel;
         if (produto) {
@@ -1187,7 +1097,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             },
             error: (err) => {
               console.error('[Dashboard] Erro ao marcar como vendido:', err);
-              // ⚠️ Reverte em caso de erro
+
               if (produto && previousState !== undefined) {
                 produto.disponivel = previousState;
                 this.invalidateFilterCache();
@@ -1203,12 +1113,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   reativarProduto(id: number, event: Event): void {
     event.stopPropagation();
-    
+
     this.alertService.confirm(
       'Reativar Produto',
       'Deseja reativar este produto para venda?',
       () => {
-        // ⚡ Atualização otimista
         const produto = this.produtos.find(p => p.id === id);
         const previousState = produto?.disponivel;
         if (produto) {
@@ -1229,7 +1138,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             },
             error: (err) => {
               console.error('[Dashboard] Erro ao reativar produto:', err);
-              // ⚠️ Reverte em caso de erro
+
               if (produto && previousState !== undefined) {
                 produto.disponivel = previousState;
                 this.invalidateFilterCache();
@@ -1247,24 +1156,20 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return (preco / 100).toFixed(2).replace('.', ',');
   }
 
-  /**
-   * Normaliza texto para busca: remove acentos, converte para minúsculas
-   * e colapsa espaços múltiplos. Tolerante a "Ç", "ã", "É", etc.
-   */
   private normalizeSearchText(text: string): string {
     if (!text) return '';
     return text
       .toString()
-      .normalize('NFD')                 // separa caracteres dos acentos
-      .replaceAll(/[\u0300-\u036f]/g, '')  // remove diacríticos
+      .normalize('NFD')
+      .replaceAll(/[\u0300-\u036f]/g, '')
       .toLowerCase()
-      .replaceAll(/\s+/g, ' ')             // colapsa espaços
+      .replaceAll(/\s+/g, ' ')
       .trim();
   }
 
   clearAllFeatured(): void {
     const featuredProducts = this.cachedFeaturedProducts;
-    
+
     if (featuredProducts.length === 0) {
       this.alertService.info('Carrossel Vazio', 'Não há produtos em destaque para remover.');
       return;
@@ -1275,8 +1180,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       `Deseja remover todos os ${featuredProducts.length} produtos do carrossel de destaques?`,
       () => {
         console.log('[Dashboard] Limpando todos os destaques...');
-        
-        // ⚡ Atualização otimista: atualiza localmente
+
         const backupProdutos = [...this.produtos];
         this.produtos = this.produtos.map(p => {
           if (p.featured) {
@@ -1287,13 +1191,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.invalidateFilterCache();
         this.updateFeaturedProductsCache();
         this.cdr.detectChanges();
-        
-        // Cria um array de observables para todas as atualizações
-        const updates$ = featuredProducts.map(produto => 
+
+        const updates$ = featuredProducts.map(produto =>
           this.productService.atualizarProduto(produto.id, { featured: false } as any)
         );
 
-        // Executa todas as atualizações em paralelo
         forkJoin(updates$)
           .pipe(
             takeUntil(this.destroy$),
@@ -1306,7 +1208,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             },
             error: (err) => {
               console.error('[Dashboard] Erro ao limpar destaques:', err);
-              // ⚠️ Reverte em caso de erro
+
               this.produtos = backupProdutos;
               this.invalidateFilterCache();
               this.updateFeaturedProductsCache();
@@ -1380,5 +1282,3 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }).format(valueInCents / 100);
   }
 }
-
-

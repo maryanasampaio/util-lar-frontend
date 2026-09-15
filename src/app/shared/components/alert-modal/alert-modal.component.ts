@@ -52,7 +52,7 @@ export interface AlertConfig {
             </div>
 
             <div class="flex-1 min-w-0 pt-0.5">
-              <h3 class="text-lg font-bold text-ink tracking-tight mb-1.5">{{ config.title }}</h3>
+              <h3 class="font-display text-lg font-extrabold text-ink tracking-tight mb-1.5">{{ config.title }}</h3>
               <p class="text-sm leading-relaxed text-muted">{{ config.message }}</p>
             </div>
           </div>
@@ -128,7 +128,7 @@ export class AlertModalComponent {
     switch (this.config.type) {
       case 'success': return 'bg-success-600';
       case 'error': return 'bg-danger-600';
-      case 'warning': return 'bg-amber-500';
+      case 'warning': return 'bg-warning-600';
       default: return 'bg-brand-500';
     }
   }
@@ -137,7 +137,7 @@ export class AlertModalComponent {
     switch (this.config.type) {
       case 'success': return 'bg-success-100 text-success-700';
       case 'error': return 'bg-danger-100 text-danger-600';
-      case 'warning': return 'bg-amber-100 text-amber-700';
+      case 'warning': return 'bg-warning-100 text-warning-700';
       default: return 'bg-brand-100 text-brand-600';
     }
   }
@@ -145,8 +145,8 @@ export class AlertModalComponent {
   get confirmButtonClass(): string {
     switch (this.config.type) {
       case 'success': return 'bg-success-600 hover:bg-success-700 shadow-success-600/25';
-      case 'error': return 'bg-danger-600 hover:bg-red-700 shadow-danger-600/25';
-      case 'warning': return 'bg-amber-500 hover:bg-amber-600 shadow-amber-500/25';
+      case 'error': return 'bg-danger-600 hover:bg-danger-700 shadow-danger-600/25';
+      case 'warning': return 'bg-warning-600 hover:bg-warning-700 shadow-warning-600/25';
       default: return 'bg-brand-500 hover:bg-brand-600 shadow-brand-500/25';
     }
   }

@@ -280,6 +280,9 @@
   .table-store tbody tr:last-child td {
     @apply border-b-0;
   }
+  .table-store tfoot td {
+    @apply py-3 px-3 border-t-2 border-line text-ink bg-canvas;
+  }
 
   /* --- KPI --- */
   .kpi {
@@ -290,6 +293,26 @@
   }
   .kpi-value {
     @apply font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-ink;
+  }
+
+  /* KPI colorido (Gerenciamento): fundo sólido, texto branco */
+  .kpi-color {
+    @apply rounded-2xl p-4 sm:p-5 text-white shadow-lg flex flex-col gap-1.5 min-w-0;
+  }
+  .kpi-color-label {
+    @apply text-[11px] sm:text-sm font-semibold uppercase tracking-wide text-white/85;
+  }
+  .kpi-color-value {
+    @apply font-display text-2xl sm:text-3xl font-extrabold tracking-tight leading-none mt-1;
+  }
+  .kpi-color-sub {
+    @apply text-xs sm:text-sm text-white/85;
+  }
+  .kpi-color-pill {
+    @apply inline-block w-fit max-w-full text-[11px] sm:text-xs font-semibold px-2 py-1 rounded-md bg-white/20 mt-1;
+  }
+  .kpi-color-pill-bad {
+    @apply bg-danger-700/60;
   }
 }
 

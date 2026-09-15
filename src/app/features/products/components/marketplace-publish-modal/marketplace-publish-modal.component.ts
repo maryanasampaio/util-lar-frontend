@@ -12,128 +12,102 @@ type StatusTone = 'success' | 'error' | 'info';
   template: `
     <app-modal [isOpen]="isOpen" title="Publicar no Facebook Marketplace" (closeModal)="close()">
       <div *ngIf="product" class="space-y-6">
-        <div class="rounded-xl p-4" style="background-color: #F5F7FA; border: 1px solid #D7DDE3;">
-          <p class="text-sm leading-relaxed" style="color: #23292A;">
-            O Facebook não permite que outro site preencha automaticamente os campos do Marketplace. Por isso, este painel prepara tudo para colar e enviar mais rápido.
-          </p>
-          <p *ngIf="copiedFullText" class="text-xs mt-2 font-medium" style="color: #5a8a6a;">
-            O texto completo do anúncio já foi copiado automaticamente quando o produto foi criado.
-          </p>
+        <div class="rounded-xl p-4 bg-canvas border border-line flex gap-3">
+          <svg class="w-5 h-5 shrink-0 text-brand-600 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <div>
+            <p class="text-sm leading-relaxed text-ink">
+              O Facebook não permite que outro site preencha os campos do Marketplace automaticamente. Este painel deixa tudo pronto para copiar e colar.
+            </p>
+            <p *ngIf="copiedFullText" class="text-xs mt-1.5 font-semibold text-success-700">
+              O texto completo do anúncio já foi copiado quando o produto foi criado.
+            </p>
+          </div>
         </div>
 
-        <div *ngIf="statusMessage" class="rounded-xl px-4 py-3 text-sm font-medium" [style]="getStatusStyle()">
+        <div *ngIf="statusMessage" class="rounded-xl px-4 py-3 text-sm font-semibold border" [ngClass]="statusClass">
           {{ statusMessage }}
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-[1fr_1.1fr] gap-6">
+          <!-- Fotos -->
           <div class="space-y-4">
+            <p class="section-kicker">Fotos</p>
             <div *ngIf="product.images?.length" class="grid grid-cols-2 gap-3">
-              <div *ngFor="let image of product.images; let i = index" class="rounded-xl overflow-hidden border" style="border-color: #D7DDE3; background-color: #F5F7FA;">
-                <img [src]="image" [alt]="product.name + ' ' + (i + 1)" class="w-full aspect-square object-cover">
-                <div class="px-3 py-2 text-xs font-medium" style="color: #6B7785;">Foto {{ i + 1 }}</div>
+              <div *ngFor="let image of product.images; let i = index" class="rounded-xl overflow-hidden border border-line bg-white">
+                <div class="aspect-square flex items-center justify-center p-2 bg-canvas">
+                  <img [src]="image" [alt]="product.name + ' ' + (i + 1)" class="max-w-full max-h-full w-auto h-auto object-contain">
+                </div>
+                <div class="px-3 py-2 text-xs font-semibold text-muted">Foto {{ i + 1 }}</div>
               </div>
             </div>
 
-            <div *ngIf="!product.images?.length" class="rounded-xl p-6 text-sm text-center" style="background-color: #F5F7FA; border: 1px dashed #D7DDE3; color: #6B7785;">
+            <div *ngIf="!product.images?.length" class="rounded-xl p-6 text-sm text-center text-muted bg-canvas border border-dashed border-line-strong">
               Este produto não tem fotos para enviar ao Marketplace.
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <button
-                type="button"
-                (click)="downloadImages()"
-                class="px-4 py-3 rounded-xl font-semibold transition-colors"
-                style="background-color: #7588A8; color: #FFFFFF;">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <button type="button" (click)="downloadImages()" class="btn-primary h-11 text-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                 Baixar fotos
               </button>
-
-              <button
-                *ngIf="canShareImages"
-                type="button"
-                (click)="shareImages()"
-                class="px-4 py-3 rounded-xl font-semibold transition-colors"
-                style="background-color: #E6EBEF; color: #23292A; border: 1px solid #D7DDE3;">
+              <button *ngIf="canShareImages" type="button" (click)="shareImages()" class="btn-secondary h-11 text-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
                 Compartilhar fotos
               </button>
             </div>
           </div>
 
+          <!-- Campos do anúncio -->
           <div class="space-y-3">
-            <div class="rounded-xl p-4" style="background-color: #FFFFFF; border: 1px solid #D7DDE3;">
-              <div class="flex items-start justify-between gap-3">
-                <div>
-                  <div class="text-xs font-semibold uppercase tracking-wide mb-1" style="color: #6B7785;">Título</div>
-                  <div class="text-sm font-semibold" style="color: #23292A;">{{ product.name }}</div>
+            <p class="section-kicker">Campos do anúncio</p>
+
+            <div class="rounded-xl border border-line divide-y divide-line bg-white">
+              <div class="flex items-start justify-between gap-3 p-4">
+                <div class="min-w-0">
+                  <p class="label mb-0.5">Título</p>
+                  <p class="text-sm font-semibold text-ink">{{ product.name }}</p>
                 </div>
-                <button type="button" (click)="copyField(product.name, 'Título copiado.')" class="px-3 py-2 rounded-lg text-sm font-semibold" style="background-color: #E6EBEF; color: #23292A;">
-                  Copiar
-                </button>
+                <button type="button" (click)="copyField(product.name, 'Título copiado.')" class="btn-soft h-9 px-3 text-xs shrink-0">Copiar</button>
+              </div>
+
+              <div class="flex items-start justify-between gap-3 p-4">
+                <div class="min-w-0">
+                  <p class="label mb-0.5">Preço</p>
+                  <p class="text-sm font-semibold text-ink">R$ {{ marketplacePrice }}</p>
+                </div>
+                <button type="button" (click)="copyField(marketplacePrice, 'Preço copiado.')" class="btn-soft h-9 px-3 text-xs shrink-0">Copiar</button>
+              </div>
+
+              <div class="flex items-start justify-between gap-3 p-4">
+                <div class="min-w-0">
+                  <p class="label mb-0.5">Categoria sugerida</p>
+                  <p class="text-sm font-semibold text-ink">{{ suggestedMarketplaceCategory }}</p>
+                </div>
+                <button type="button" (click)="copyField(suggestedMarketplaceCategory, 'Categoria sugerida copiada.')" class="btn-soft h-9 px-3 text-xs shrink-0">Copiar</button>
+              </div>
+
+              <div class="flex items-start justify-between gap-3 p-4">
+                <div class="min-w-0">
+                  <p class="label mb-0.5">Condição</p>
+                  <p class="text-sm font-semibold text-ink">{{ marketplaceCondition }}</p>
+                </div>
+                <button type="button" (click)="copyField(marketplaceCondition, 'Condição copiada.')" class="btn-soft h-9 px-3 text-xs shrink-0">Copiar</button>
+              </div>
+
+              <div class="flex items-start justify-between gap-3 p-4">
+                <div class="min-w-0">
+                  <p class="label mb-0.5">Descrição</p>
+                  <p class="text-sm leading-relaxed whitespace-pre-line text-ink">{{ marketplaceDescription }}</p>
+                </div>
+                <button type="button" (click)="copyField(marketplaceDescription, 'Descrição copiada.')" class="btn-soft h-9 px-3 text-xs shrink-0">Copiar</button>
               </div>
             </div>
 
-            <div class="rounded-xl p-4" style="background-color: #FFFFFF; border: 1px solid #D7DDE3;">
-              <div class="flex items-start justify-between gap-3">
-                <div>
-                  <div class="text-xs font-semibold uppercase tracking-wide mb-1" style="color: #6B7785;">Preço</div>
-                  <div class="text-sm font-semibold" style="color: #23292A;">{{ marketplacePrice }}</div>
-                </div>
-                <button type="button" (click)="copyField(marketplacePrice, 'Preço copiado.')" class="px-3 py-2 rounded-lg text-sm font-semibold" style="background-color: #E6EBEF; color: #23292A;">
-                  Copiar
-                </button>
-              </div>
-            </div>
-
-            <div class="rounded-xl p-4" style="background-color: #FFFFFF; border: 1px solid #D7DDE3;">
-              <div class="flex items-start justify-between gap-3">
-                <div>
-                  <div class="text-xs font-semibold uppercase tracking-wide mb-1" style="color: #6B7785;">Categoria sugerida</div>
-                  <div class="text-sm font-semibold" style="color: #23292A;">{{ suggestedMarketplaceCategory }}</div>
-                </div>
-                <button type="button" (click)="copyField(suggestedMarketplaceCategory, 'Categoria sugerida copiada.')" class="px-3 py-2 rounded-lg text-sm font-semibold" style="background-color: #E6EBEF; color: #23292A;">
-                  Copiar
-                </button>
-              </div>
-            </div>
-
-            <div class="rounded-xl p-4" style="background-color: #FFFFFF; border: 1px solid #D7DDE3;">
-              <div class="flex items-start justify-between gap-3">
-                <div>
-                  <div class="text-xs font-semibold uppercase tracking-wide mb-1" style="color: #6B7785;">Condição</div>
-                  <div class="text-sm font-semibold" style="color: #23292A;">{{ marketplaceCondition }}</div>
-                </div>
-                <button type="button" (click)="copyField(marketplaceCondition, 'Condição copiada.')" class="px-3 py-2 rounded-lg text-sm font-semibold" style="background-color: #E6EBEF; color: #23292A;">
-                  Copiar
-                </button>
-              </div>
-            </div>
-
-            <div class="rounded-xl p-4" style="background-color: #FFFFFF; border: 1px solid #D7DDE3;">
-              <div class="flex items-start justify-between gap-3 mb-3">
-                <div>
-                  <div class="text-xs font-semibold uppercase tracking-wide mb-1" style="color: #6B7785;">Descrição</div>
-                  <div class="text-sm leading-relaxed whitespace-pre-line" style="color: #23292A;">{{ marketplaceDescription }}</div>
-                </div>
-                <button type="button" (click)="copyField(marketplaceDescription, 'Descrição copiada.')" class="px-3 py-2 rounded-lg text-sm font-semibold flex-shrink-0" style="background-color: #E6EBEF; color: #23292A;">
-                  Copiar
-                </button>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
-              <button
-                type="button"
-                (click)="copyFullListing()"
-                class="px-4 py-3 rounded-xl font-semibold transition-colors"
-                style="background-color: #E6EBEF; color: #23292A; border: 1px solid #D7DDE3;">
-                Copiar anúncio completo
-              </button>
-
-              <button
-                type="button"
-                (click)="openMarketplace()"
-                class="px-4 py-3 rounded-xl font-semibold transition-colors"
-                style="background-color: #7588A8; color: #FFFFFF;">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+              <button type="button" (click)="copyFullListing()" class="btn-secondary h-11 text-sm">Copiar anúncio completo</button>
+              <button type="button" (click)="openMarketplace()" class="btn-accent h-11 text-sm">
                 Abrir Marketplace
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
               </button>
             </div>
           </div>
@@ -288,14 +262,14 @@ export class MarketplacePublishModalComponent {
     globalThis.open('https://www.facebook.com/marketplace/create/item', '_blank', 'noopener,noreferrer');
   }
 
-  getStatusStyle(): string {
+  get statusClass(): string {
     switch (this.statusTone) {
       case 'success':
-        return 'background-color: #ECF7EF; border: 1px solid #B7DEC1; color: #2D6A3F;';
+        return 'bg-success-50 border-success-100 text-success-700';
       case 'error':
-        return 'background-color: #FDEDED; border: 1px solid #F5C2C7; color: #A33A3A;';
+        return 'bg-danger-50 border-danger-200 text-danger-700';
       default:
-        return 'background-color: #EEF2F5; border: 1px solid #D7DDE3; color: #44515C;';
+        return 'bg-canvas border-line text-muted';
     }
   }
 

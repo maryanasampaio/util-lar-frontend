@@ -17,7 +17,7 @@ import { FormsModule } from '@angular/forms';
         
         <!-- Header -->
         <div class="flex items-center justify-between mb-6">
-          <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-ink">Acesso Admin</h2>
+          <h2 class="font-display text-xl sm:text-2xl font-extrabold tracking-tight text-ink">Acesso admin</h2>
           <button 
             (click)="onClose()"
             class="btn-ghost w-9 h-9 rounded-lg p-0" aria-label="Fechar">
@@ -30,14 +30,14 @@ import { FormsModule } from '@angular/forms';
         <!-- Form -->
         <form (ngSubmit)="onSubmit()">
           <div class="mb-6">
-            <label class="block text-sm font-semibold text-ink mb-2">
+            <label class="label">
               Senha de Administrador
             </label>
             <input 
               type="password"
               [(ngModel)]="password"
               name="password"
-              placeholder="Digite a senha secreta"
+              placeholder="Senha de administrador"
               class="input px-4 py-3"
               autofocus>
           </div>
@@ -49,7 +49,7 @@ import { FormsModule } from '@angular/forms';
           <button 
             type="submit"
             [disabled]="isLoading"
-            class="btn-primary w-full py-3 px-6 text-sm">
+            class="btn-accent w-full h-11 text-sm">
             {{ isLoading ? 'Verificando...' : 'Entrar como Admin' }}
           </button>
         </form>

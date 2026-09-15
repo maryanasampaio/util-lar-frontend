@@ -18,8 +18,8 @@ import { CommonModule } from '@angular/common';
           (click)="$event.stopPropagation()">
 
           <!-- Header -->
-          <div class="sticky top-0 px-4 sm:px-6 py-3.5 sm:py-4 rounded-t-2xl flex items-center justify-between z-10 bg-white/95 backdrop-blur border-b border-brand-200">
-            <h2 class="text-lg sm:text-xl font-bold text-ink tracking-tight">{{ title }}</h2>
+          <div class="sticky top-0 px-4 sm:px-6 py-3.5 sm:py-4 rounded-t-2xl flex items-center justify-between z-10 bg-white/95 backdrop-blur border-b border-line">
+            <h2 class="font-display text-lg sm:text-xl font-extrabold text-ink tracking-tight">{{ title }}</h2>
             <button
               (click)="close()"
               class="btn-ghost w-9 h-9 rounded-lg p-0"
