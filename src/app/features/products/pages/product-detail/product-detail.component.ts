@@ -129,7 +129,7 @@ import { Subject, takeUntil, finalize } from 'rxjs';
           </div>
 
           <!-- ================= CAIXA DE COMPRA ================= -->
-          <aside class="lg:col-span-5 lg:sticky lg:top-36 space-y-4">
+          <aside class="lg:col-span-5 space-y-4">
             <div class="card p-5 sm:p-6">
               <div class="flex flex-wrap items-center gap-2 mb-3">
                 <span *ngIf="produto.condition === 'novo'" class="badge-new">Novo</span>
