@@ -1,7 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { NotificationPreferences } from '../../../../core/models/notification-preferences.model';
 
@@ -24,20 +24,20 @@ interface NotificationSettings {
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div class="min-h-screen" style="background-color: #EEF2F5;">
-      <!-- Header com gradiente -->
-      <header style="background: linear-gradient(to right, #7588A8, #95A7C1, #9AB6C8);">
-        <div class="max-w-4xl mx-auto px-4 py-5 sm:py-8">
-          <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1 sm:mb-2">Configurações de Notificações</h1>
-          <p class="text-white/90 text-sm sm:text-base">Escolha como deseja receber atualizações sobre novos produtos</p>
+    <div class="bg-canvas min-h-[60vh]">
+      <div class="bg-white border-b border-line">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+          <p class="section-kicker mb-1">Fique por dentro</p>
+          <h1 class="section-title">Notificações</h1>
+          <p class="text-sm text-muted mt-1">Escolha como quer receber avisos de novos produtos e promoções.</p>
         </div>
-      </header>
+      </div>
 
       <div class="max-w-4xl mx-auto px-4 py-5 sm:py-8">
         <!-- Loading -->
         <div *ngIf="isLoading" class="flex justify-center items-center py-20">
           <div class="text-center">
-            <div class="animate-spin rounded-full h-16 w-16 border-b-4 mx-auto mb-4" style="border-color: #7588A8;"></div>
+            <div class="animate-spin rounded-full h-12 w-12 border-4 border-brand-100 border-t-brand-700 mx-auto mb-4"></div>
             <p class="text-lg" style="color: #6B7785;">Carregando preferências...</p>
           </div>
         </div>
@@ -233,6 +233,7 @@ export class NotificationsSettingsComponent implements OnInit {
 
   constructor(
     private readonly route: ActivatedRoute,
+    private readonly router: Router,
     private readonly notificationService: NotificationService,
     private readonly cdr: ChangeDetectorRef
   ) {
@@ -243,6 +244,10 @@ export class NotificationsSettingsComponent implements OnInit {
       email: localPrefs.email,
       push: localPrefs.push
     };
+  }
+
+  goBack(): void {
+    this.router.navigate(['/dashboard']);
   }
 
   ngOnInit(): void {

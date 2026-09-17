@@ -1,8 +1,20 @@
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Injectable } from '@angular/core';
 import { environment } from "../../../../environments/environment";
 import { Product, ProductResponse, ProductFormData } from "../models/product.model";
 import { Observable } from "rxjs";
+import { map } from "rxjs/operators";
+
+/**
+ * Cabeçalhos usados em todos os GETs públicos de produtos.
+ * Garante que navegadores/CDNs/proxies não devolvam versões antigas
+ * (ex.: produto que acabou de ser marcado como vendido voltando a aparecer
+ * como disponível após um F5).
+ */
+const NO_CACHE_HEADERS = new HttpHeaders({
+  'Cache-Control': 'no-cache',
+  'Pragma': 'no-cache'
+});
 
 /**
  * Repository para comunicação com API de produtos
@@ -18,11 +30,29 @@ export class ProductsRepository {
   constructor(private readonly http: HttpClient) {}
 
   /**
-   * Buscar todos os produtos (PÚBLICO - sem token)
-   * GET /produtos
+   * Buscar produtos com paginação (PÚBLICO - sem token)
+   * GET /produtos?page=0&size=24
+   * 
+   * @param page - Número da página (começa em 0)
+   * @param size - Quantidade de itens por página (padrão: 24)
+   * @returns Array de produtos da página solicitada
+   * 
+   * NOTA: Backend retorna apenas a lista de produtos, sem metadados.
+   * Para saber se há mais páginas, verificar se o tamanho retornado < size
    */
-  buscarProdutos(): Observable<ProductResponse[]> {
-    return this.http.get<ProductResponse[]>(`${this.apiUrl}/produtos`);
+  buscarProdutos(page: number = 0, size: number = 24): Observable<ProductResponse[]> {
+    return this.http.get<ProductResponse[]>(`${this.apiUrl}/produtos`, {
+      headers: NO_CACHE_HEADERS,
+      params: {
+        page: page.toString(),
+        size: size.toString(),
+        // cache-buster: garante que qualquer cache intermediário (browser/CDN)
+        // não devolva uma resposta antiga após um POST de venda/reativação.
+        _t: Date.now().toString()
+      }
+    }).pipe(
+      map(produtos => produtos.map(produto => this.normalizeProductImages(produto)))
+    );
   }
 
   /**
@@ -30,7 +60,12 @@ export class ProductsRepository {
    * GET /produtos/:id
    */
   buscarProdutoPorId(id: number): Observable<ProductResponse> {
-    return this.http.get<ProductResponse>(`${this.apiUrl}/produtos/${id}`);
+    return this.http.get<ProductResponse>(`${this.apiUrl}/produtos/${id}`, {
+      headers: NO_CACHE_HEADERS,
+      params: { _t: Date.now().toString() }
+    }).pipe(
+      map(produto => this.normalizeProductImages(produto))
+    );
   }
 
   /**
@@ -63,7 +98,9 @@ export class ProductsRepository {
    * Define: disponivel = 0, stock = 0
    */
   marcarComoVendido(id: number): Observable<Product> {
-    return this.http.post<Product>(`${this.apiUrl}/produtos/${id}/sold`, {});
+    return this.http.post<Product>(`${this.apiUrl}/produtos/${id}/sold`, {}).pipe(
+      map(produto => this.normalizeProductImages(produto))
+    );
   }
 
   /**
@@ -74,7 +111,41 @@ export class ProductsRepository {
    * @param stock - Estoque opcional (padrão: 1 ou mantém >0 existente)
    */
   reativarProduto(id: number, stock?: number): Observable<Product> {
-    const body = stock !== undefined ? { stock } : {};
-    return this.http.post<Product>(`${this.apiUrl}/produtos/${id}/available`, body);
+    let body = {};
+    if (stock) {
+      body = { stock };
+    }
+    return this.http.post<Product>(`${this.apiUrl}/produtos/${id}/available`, body).pipe(
+      map(produto => this.normalizeProductImages(produto))
+    );
+  }
+
+  /**
+   * Normaliza as imagens do produto
+   * Se images vier como string JSON, parseia para array
+   * Se vier null ou vazio, retorna null
+   */
+  private normalizeProductImages(produto: ProductResponse): ProductResponse {
+    if (!produto.images) {
+      return { ...produto, images: null };
+    }
+
+    // Se images for string (JSON), tentar parsear
+    if (typeof produto.images === 'string') {
+      try {
+        const parsed = JSON.parse(produto.images as any);
+        return { ...produto, images: Array.isArray(parsed) ? parsed : null };
+      } catch {
+        return { ...produto, images: null };
+      }
+    }
+
+    // Se já for array, retornar como está
+    if (Array.isArray(produto.images)) {
+      return produto;
+    }
+
+    // Caso não seja nem string nem array, retornar null
+    return { ...produto, images: null };
   }
 }

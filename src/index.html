@@ -11,20 +11,22 @@
   
   <!-- PWA -->
   <link rel="manifest" href="manifest.webmanifest">
-  <meta name="theme-color" content="#7588A8">
+  <meta name="theme-color" content="#B9452B">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Util Lar">
-  <link rel="apple-touch-icon" href="apple-touch-icon.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png?v=3">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=3">
   <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152x152.png">
   <link rel="apple-touch-icon" sizes="144x144" href="icons/icon-144x144.png">
   <link rel="apple-touch-icon" sizes="128x128" href="icons/icon-128x128.png">
   
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192x192.png">
-  <link rel="icon" type="image/png" sizes="96x96" href="icons/icon-96x96.png">
-  <link rel="icon" type="image/png" href="logo-utilar.png">
+  <!-- Favicon (v3: fundo terracota; o ?v= força o navegador a descartar o ícone antigo em cache) -->
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=3">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=3">
+  <link rel="icon" type="image/png" sizes="64x64" href="favicon.png?v=3">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192x192.png?v=3">
+  <link rel="shortcut icon" href="favicon-32.png?v=3">
   
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website">
@@ -36,6 +38,11 @@
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="Util Lar - Móveis e Eletrodomésticos">
   <meta name="twitter:description" content="Móveis e eletrodomésticos novos e seminovos de alta qualidade">
+
+  <!-- Fonte -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
   <script>
     // Captura o evento de instalação do PWA antes do Angular carregar
     window.addEventListener('beforeinstallprompt', function(e) {

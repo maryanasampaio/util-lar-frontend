@@ -1,1 +1,368 @@
 @import "tailwindcss";
+
+/* ============================================================================
+ * DESIGN TOKENS — "Util Lar" store
+ *
+ *  brand   → terracota (identidade: destaques, links ativos, botões de ação)
+ *  accent  → mesma escala terracota (alias para CTAs e selos)
+ *  canvas  → bege claro da página; cards brancos por cima
+ *  ink / muted / subtle → hierarquia de texto
+ * ========================================================================== */
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Manrope', 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+  --color-brand-50: #FBF1EC;
+  --color-brand-100: #F5DED3;
+  --color-brand-200: #EBBBA8;
+  --color-brand-300: #DE9078;
+  --color-brand-400: #CF674C;
+  --color-brand-500: #B9452B;
+  --color-brand-600: #9E3921;
+  --color-brand-700: #7F2E1B;
+  --color-brand-800: #5C2215;
+  --color-brand-900: #2E1912;
+
+  --color-accent-50: #FBF1EC;
+  --color-accent-100: #F5DED3;
+  --color-accent-200: #EBBBA8;
+  --color-accent-300: #DE9078;
+  --color-accent-400: #CF674C;
+  --color-accent-500: #B9452B;
+  --color-accent-600: #9E3921;
+  --color-accent-700: #7F2E1B;
+  --color-accent-800: #5C2215;
+
+  --color-canvas: #F5F0E9;
+  --color-canvas-deep: #E9DFD3;
+  --color-line: #DFD3C5;
+  --color-line-strong: #C7B7A5;
+
+  --color-ink: #1E1714;
+  --color-muted: #64584F;
+  --color-subtle: #9A8D80;
+
+  --color-success-50: #ECFDF3;
+  --color-success-100: #D1FAE0;
+  --color-success-600: #16A34A;
+  --color-success-700: #15803D;
+
+  --color-whatsapp: #25D366;
+  --color-whatsapp-dark: #1DB954;
+
+  --color-warning-50: #FFFBEB;
+  --color-warning-100: #FEF3C7;
+  --color-warning-600: #D97706;
+  --color-warning-700: #B45309;
+
+  --color-danger-50: #FEF2F2;
+  --color-danger-100: #FEE2E2;
+  --color-danger-200: #FECACA;
+  --color-danger-600: #DC2626;
+  --color-danger-700: #B91C1C;
+
+  --shadow-card: 0 1px 2px rgba(63, 35, 24, 0.04), 0 2px 8px rgba(63, 35, 24, 0.05);
+  --shadow-card-hover: 0 4px 10px rgba(63, 35, 24, 0.06), 0 18px 36px rgba(63, 35, 24, 0.12);
+  --shadow-float: 0 10px 30px rgba(63, 35, 24, 0.22);
+  --shadow-header: 0 1px 0 rgba(63, 35, 24, 0.06), 0 4px 16px rgba(63, 35, 24, 0.05);
+
+  --animate-fade-up: fade-up 0.4s ease-out both;
+  --animate-fade-in: fade-in 0.2s ease-out both;
+  --animate-shimmer: shimmer 1.6s linear infinite;
+  --animate-pulse-ring: pulse-ring 2s ease-out infinite;
+
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fade-in {
+    from { opacity: 0; transform: scale(0.97); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  @keyframes shimmer {
+    from { background-position: -200% 0; }
+    to { background-position: 200% 0; }
+  }
+  @keyframes pulse-ring {
+    0% { transform: scale(1); opacity: 0.6; }
+    100% { transform: scale(1.6); opacity: 0; }
+  }
+}
+
+/* ============================================================================
+ * BASE
+ * ========================================================================== */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-canvas text-ink font-sans antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-display;
+  }
+
+  ::selection {
+    @apply bg-accent-200 text-ink;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-brand-500/60 ring-offset-2 ring-offset-canvas;
+  }
+
+  button, [role="button"] {
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
+
+  img {
+    @apply select-none;
+  }
+}
+
+/* ============================================================================
+ * PRIMITIVOS (@utility para poderem ser reusados via @apply)
+ * ========================================================================== */
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg font-semibold
+         transition-all duration-200 select-none whitespace-nowrap
+         disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none
+         active:scale-[0.98];
+}
+
+@utility card {
+  @apply bg-white rounded-2xl border border-line shadow-card;
+}
+
+@utility badge {
+  @apply inline-flex items-center rounded-md px-2 py-0.5 text-[10px] sm:text-[11px]
+         font-bold uppercase tracking-wide leading-5;
+}
+
+@utility container-store {
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+/* ============================================================================
+ * COMPONENTES REUTILIZÁVEIS
+ * ========================================================================== */
+@layer components {
+  /* --- Botões --- */
+  .btn-primary {
+    @apply btn bg-ink text-white shadow-sm
+           hover:bg-black hover:shadow-md;
+  }
+  .btn-accent {
+    @apply btn bg-accent-500 text-white shadow-md shadow-accent-500/25
+           hover:bg-accent-600 hover:shadow-lg hover:shadow-accent-500/30;
+  }
+  .btn-dark {
+    @apply btn bg-brand-900 text-white hover:bg-black;
+  }
+  .btn-secondary {
+    @apply btn bg-white text-ink border border-line-strong
+           hover:border-brand-500 hover:text-brand-700 hover:bg-brand-50;
+  }
+  .btn-ghost {
+    @apply btn bg-transparent text-muted hover:bg-canvas-deep hover:text-ink;
+  }
+  .btn-soft {
+    @apply btn bg-brand-50 text-brand-700 border border-brand-100
+           hover:bg-brand-100 hover:border-brand-200;
+  }
+  .btn-danger-soft {
+    @apply btn bg-danger-50 text-danger-600 border border-danger-200
+           hover:bg-danger-100;
+  }
+  .btn-whatsapp {
+    @apply btn bg-whatsapp text-white shadow-md shadow-whatsapp/30
+           hover:bg-whatsapp-dark hover:shadow-lg hover:shadow-whatsapp/40;
+  }
+
+  /* --- Cards --- */
+  .card-hover {
+    @apply card transition-all duration-300
+           hover:shadow-card-hover hover:-translate-y-0.5 hover:border-line-strong;
+  }
+
+  /* --- Inputs --- */
+  .input {
+    @apply w-full rounded-lg border border-line-strong bg-white text-ink text-sm
+           placeholder:text-subtle transition-all duration-200
+           focus:outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-500/15
+           disabled:opacity-50 disabled:bg-canvas;
+  }
+  .label {
+    @apply block text-xs font-semibold uppercase tracking-wide text-muted mb-1.5;
+  }
+
+  /* --- Chips / Badges --- */
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold
+           border transition-all duration-200 cursor-pointer select-none whitespace-nowrap
+           bg-white text-ink border-line-strong hover:border-brand-500 hover:text-brand-700;
+  }
+  .chip-active {
+    @apply bg-ink text-white border-ink shadow-sm
+           hover:bg-brand-900 hover:border-brand-900 hover:text-white;
+  }
+
+  .badge-new { @apply badge bg-success-100 text-success-700; }
+  .badge-used { @apply badge bg-warning-100 text-warning-700; }
+  .badge-discount { @apply badge bg-accent-500 text-white; }
+  .badge-soft { @apply badge normal-case tracking-normal bg-canvas-deep text-muted; }
+  .badge-brand { @apply badge bg-brand-100 text-brand-700; }
+
+  /* --- Botão de ação sobre imagens (favoritar, compartilhar) --- */
+  .overlay-btn {
+    @apply flex items-center justify-center rounded-full bg-white/95 backdrop-blur-sm
+           text-muted shadow-md transition-all duration-200
+           hover:bg-white hover:text-brand-700 hover:scale-110;
+  }
+  .overlay-btn.is-active {
+    @apply bg-accent-500 text-white hover:bg-accent-500 hover:text-white;
+  }
+  .overlay-btn.is-featured {
+    @apply bg-warning-100 text-warning-600 hover:bg-warning-100 hover:text-warning-700;
+  }
+
+  /* --- Glass --- */
+  .glass {
+    @apply bg-white/12 backdrop-blur-md border border-white/20;
+  }
+
+  /* --- Títulos de seção --- */
+  .section-title {
+    @apply font-display text-xl sm:text-2xl font-extrabold text-ink tracking-tight;
+  }
+  .section-kicker {
+    @apply text-[11px] font-bold uppercase tracking-[0.18em] text-accent-600;
+  }
+
+  /* --- Skeleton --- */
+  .skeleton {
+    @apply rounded-lg bg-canvas-deep;
+    background-image: linear-gradient(90deg, #EFEBE6 0%, #F9F7F4 50%, #EFEBE6 100%);
+    background-size: 200% 100%;
+    animation: var(--animate-shimmer);
+  }
+
+  /* --- Link de navegação da sidebar admin --- */
+  .nav-link {
+    @apply flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium text-brand-200
+           transition-all duration-200 hover:bg-white/10 hover:text-white;
+  }
+  .nav-link.active {
+    @apply bg-white/15 text-white font-semibold;
+  }
+  .nav-link.active svg {
+    @apply text-accent-400;
+  }
+
+  /* --- Tabela --- */
+  .table-store {
+    @apply w-full text-sm;
+  }
+  .table-store thead th {
+    @apply text-left text-[11px] font-bold uppercase tracking-wide text-muted py-3 px-3 border-b border-line;
+  }
+  .table-store tbody td {
+    @apply py-3 px-3 border-b border-line text-ink;
+  }
+  .table-store tbody tr:last-child td {
+    @apply border-b-0;
+  }
+  .table-store tfoot td {
+    @apply py-3 px-3 border-t-2 border-line text-ink bg-canvas;
+  }
+
+  /* --- KPI --- */
+  .kpi {
+    @apply card p-4 sm:p-5 flex flex-col gap-2;
+  }
+  .kpi-label {
+    @apply text-[11px] font-bold uppercase tracking-wide text-muted;
+  }
+  .kpi-value {
+    @apply font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-ink;
+  }
+
+  /* KPI colorido (Gerenciamento): fundo sólido, texto branco */
+  .kpi-color {
+    @apply rounded-2xl p-4 sm:p-5 text-white shadow-lg flex flex-col gap-1.5 min-w-0;
+  }
+  .kpi-color-label {
+    @apply text-[11px] sm:text-sm font-semibold uppercase tracking-wide text-white/85;
+  }
+  .kpi-color-value {
+    @apply font-display text-2xl sm:text-3xl font-extrabold tracking-tight leading-none mt-1;
+  }
+  .kpi-color-sub {
+    @apply text-xs sm:text-sm text-white/85;
+  }
+  .kpi-color-pill {
+    @apply inline-block w-fit max-w-full text-[11px] sm:text-xs font-semibold px-2 py-1 rounded-md bg-white/20 mt-1;
+  }
+  .kpi-color-pill-bad {
+    @apply bg-danger-700/60;
+  }
+}
+
+/* ============================================================================
+ * UTILITÁRIOS
+ * ========================================================================== */
+@utility hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+}
+
+/* Slider duplo de preço */
+.price-range-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  position: absolute;
+  width: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  pointer-events: none;
+  height: 6px;
+  margin: 0;
+  padding: 0;
+  outline: none;
+}
+.price-range-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  pointer-events: auto;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: white;
+  border: 2px solid #B9452B;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(27, 31, 38, 0.2);
+  transition: transform 0.15s ease;
+}
+.price-range-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+.price-range-slider::-moz-range-thumb {
+  pointer-events: auto;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: white;
+  border: 2px solid #B9452B;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(27, 31, 38, 0.2);
+}

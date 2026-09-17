@@ -8,6 +8,7 @@ export interface Product {
 	slug: string;
 	description: string;
 	price: number; // Preço em centavos (ex: 50000 = R$ 500,00)
+	originalPrice?: number; // Preço original antes do desconto (centavos)
 	costPrice?: number; // Preço de custo (para cálculo de lucro)
 	condition: 'novo' | 'seminovo'; // Condição do móvel
 	category: string; // Ex: 'sofá', 'mesa', 'cadeira', 'cama', 'armário'

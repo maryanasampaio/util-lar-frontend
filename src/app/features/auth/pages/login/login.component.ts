@@ -34,6 +34,7 @@ export class LoginComponent {
   password = '';
   isLoading = false;
   errorMessage = '';
+  currentYear = new Date().getFullYear();
 
   constructor(
     private authService: AuthService,
