@@ -295,7 +295,6 @@
     @apply font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-ink;
   }
 
-  /* KPI colorido (Gerenciamento): fundo sólido, texto branco */
   .kpi-color {
     @apply rounded-2xl p-4 sm:p-5 text-white shadow-lg flex flex-col gap-1.5 min-w-0;
   }

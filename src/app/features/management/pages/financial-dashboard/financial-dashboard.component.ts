@@ -69,6 +69,9 @@ interface ChartMonth {
             <p class="text-sm text-muted mt-1">
               Vendas, lucro, estoque e pendências em um só lugar
               <span *ngIf="lastUpdatedLabel"> · atualizado às {{ lastUpdatedLabel }}</span>
+              <span *ngIf="refreshing" class="inline-flex items-center gap-1.5 text-brand-600 font-semibold">
+                · <span class="w-3 h-3 rounded-full border-2 border-brand-200 border-t-brand-600 animate-spin"></span> atualizando
+              </span>
             </p>
           </div>
           <div class="flex flex-wrap gap-2">
@@ -92,6 +95,36 @@ interface ChartMonth {
           <p class="text-sm font-semibold">{{ error }}</p>
         </div>
 
+        <ng-container *ngIf="initialLoading">
+          <div class="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-5" aria-busy="true" aria-label="Carregando indicadores">
+            <div *ngFor="let i of [1,2,3,4]" class="card p-4 sm:p-5 space-y-3">
+              <div class="skeleton h-3 w-24"></div>
+              <div class="skeleton h-8 w-32"></div>
+              <div class="skeleton h-3 w-40"></div>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+            <div class="card p-5 lg:col-span-2 space-y-4">
+              <div class="skeleton h-4 w-40"></div>
+              <div class="flex items-end gap-2 h-48">
+                <div *ngFor="let h of [40,65,50,80,60,90,70,55,75,85,65,95]" class="skeleton flex-1" [style.height.%]="h"></div>
+              </div>
+            </div>
+            <div class="card p-5 space-y-4">
+              <div class="skeleton h-4 w-32"></div>
+              <div *ngFor="let i of [1,2,3]" class="flex items-center gap-3">
+                <div class="skeleton w-11 h-11 rounded-lg"></div>
+                <div class="flex-1 space-y-2"><div class="skeleton h-3 w-3/4"></div><div class="skeleton h-3 w-1/3"></div></div>
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center justify-center gap-2 py-4 text-sm text-muted">
+            <span class="w-4 h-4 rounded-full border-2 border-brand-200 border-t-brand-600 animate-spin"></span>
+            Carregando dados financeiros...
+          </div>
+        </ng-container>
+
+        <ng-container *ngIf="dashboard">
         <!-- ================= KPIs DO MÊS ================= -->
         <div class="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-5">
           <!-- Lucro do mês -->
@@ -229,7 +262,7 @@ interface ChartMonth {
                 </div>
               </div>
             </div>
-            <ng-template #noStock><p class="text-sm text-muted text-center py-8">Nenhum produto disponível em estoque.</p></ng-template>
+            <ng-template #noStock><p class="text-sm text-muted text-center py-8">{{ catalogLoading ? 'Lendo o estoque...' : 'Nenhum produto disponível em estoque.' }}</p></ng-template>
           </section>
 
           <section class="card p-5 sm:p-6 lg:col-span-2 space-y-5">
@@ -312,7 +345,8 @@ interface ChartMonth {
               </details>
             </div>
             <ng-template #noPend>
-              <div class="rounded-xl bg-success-50 border border-success-100 p-5 text-center">
+              <p *ngIf="catalogLoading" class="text-sm text-muted text-center py-8">Verificando o catálogo...</p>
+              <div *ngIf="!catalogLoading" class="rounded-xl bg-success-50 border border-success-100 p-5 text-center">
                 <p class="font-semibold text-success-700">Catálogo em dia</p>
                 <p class="text-xs text-success-700/80 mt-0.5">Todos os produtos têm foto, custo, categoria e descrição.</p>
               </div>
@@ -387,6 +421,7 @@ interface ChartMonth {
             </table>
           </div>
         </section>
+        </ng-container>
       </div>
 
       <!-- Modal: vendidos no mês -->
@@ -433,6 +468,8 @@ export class FinancialDashboardComponent implements OnInit, OnDestroy {
   lowMarginProducts: ProductFinancial[] = [];
 
   loading = true;
+  /** Catálogo completo ainda sendo lido (métricas derivadas: estoque por categoria, idade, pendências) */
+  catalogLoading = false;
   error: string | null = null;
   lastUpdatedAt: Date | null = null;
 
@@ -489,8 +526,14 @@ export class FinancialDashboardComponent implements OnInit, OnDestroy {
       : '';
   }
 
+  get initialLoading(): boolean { return this.loading && !this.dashboard; }
+  get refreshing(): boolean { return this.loading && !!this.dashboard; }
+
   ngOnInit(): void {
-    this.loadData(true, true);
+    this.restoreSnapshot();
+    // Primeira carga aproveita o cache do backend (rápido); o botão Atualizar e
+    // o intervalo de 60 s forçam o recálculo.
+    this.loadData(false, true);
 
     interval(60000)
       .pipe(takeUntil(this.destroy$))
@@ -503,8 +546,11 @@ export class FinancialDashboardComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Carrega tudo em paralelo: números do backend + catálogo completo
-   * (o catálogo falhar não derruba o painel — as métricas derivadas ficam vazias).
+   * Carrega em duas etapas para a tela preencher o quanto antes:
+   * 1) números do backend (rápidos) — cards, gráfico, listas;
+   * 2) catálogo completo (percorre todas as páginas, é o mais lento) — só para
+   *    as métricas derivadas, sem segurar o restante do painel.
+   * O catálogo falhar não derruba o painel — as métricas derivadas ficam vazias.
    */
   loadData(forceRefresh: boolean = false, showLoading: boolean = true): void {
     if (showLoading) this.loading = true;
@@ -514,35 +560,75 @@ export class FinancialDashboardComponent implements OnInit, OnDestroy {
       dashboard: this.financialService.getDashboard(forceRefresh),
       evolution: this.financialService.getEvolution(24, forceRefresh),
       topProducts: this.financialService.getProducts('top', 3, forceRefresh),
-      lowMargin: this.financialService.getProducts('baixa-margem', 5, forceRefresh),
-      produtos: this.productService.buscarTodosProdutos().pipe(catchError(() => of([] as ProductResponse[])))
-    }).subscribe({
-      next: (data) => {
-        this.dashboard = data.dashboard;
-        this.monthlyStats = data.evolution.meses;
-        this.maxMonthProfit = data.evolution.lucroMaximoMes;
-        this.topProducts = data.topProducts.produtos;
-        this.lowMarginProducts = data.lowMargin.produtos;
-        this.lastUpdatedAt = new Date();
+      lowMargin: this.financialService.getProducts('baixa-margem', 5, forceRefresh)
+    })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data) => {
+          this.dashboard = data.dashboard;
+          this.monthlyStats = data.evolution.meses;
+          this.maxMonthProfit = data.evolution.lucroMaximoMes;
+          this.topProducts = data.topProducts.produtos;
+          this.lowMarginProducts = data.lowMargin.produtos;
+          this.lastUpdatedAt = new Date();
 
-        this.recomputeChart();
-        this.recomputeCatalogMetrics(data.produtos);
+          this.recomputeChart();
+          this.saveSnapshot(data.evolution, data.topProducts, data.lowMargin);
 
-        this.loading = false;
-        this.cdr.markForCheck();
-      },
-      error: (err) => {
-        if (err.status === 401) {
-          this.error = 'Sessão expirada. Faça login novamente.';
-        } else if (err.status === 0) {
-          this.error = 'Não foi possível conectar ao servidor. Verifique sua conexão.';
-        } else {
-          this.error = 'Erro ao carregar dados financeiros. Tente novamente.';
+          this.loading = false;
+          this.cdr.markForCheck();
+        },
+        error: (err) => {
+          if (err.status === 401) {
+            this.error = 'Sessão expirada. Faça login novamente.';
+          } else if (err.status === 0) {
+            this.error = 'Não foi possível conectar ao servidor. Verifique sua conexão.';
+          } else {
+            this.error = 'Erro ao carregar dados financeiros. Tente novamente.';
+          }
+          this.loading = false;
+          this.cdr.markForCheck();
         }
-        this.loading = false;
+      });
+
+    this.catalogLoading = true;
+    this.productService.buscarTodosProdutos()
+      .pipe(catchError(() => of([] as ProductResponse[])), takeUntil(this.destroy$))
+      .subscribe((produtos) => {
+        this.recomputeCatalogMetrics(produtos);
+        this.catalogLoading = false;
         this.cdr.markForCheck();
-      }
-    });
+      });
+  }
+
+  private static readonly SNAPSHOT_KEY = 'utilar:financeiro:snapshot';
+
+  private saveSnapshot(evolution: unknown, topProducts: unknown, lowMargin: unknown): void {
+    try {
+      sessionStorage.setItem(FinancialDashboardComponent.SNAPSHOT_KEY, JSON.stringify({
+        dashboard: this.dashboard,
+        evolution,
+        topProducts,
+        lowMargin,
+        at: this.lastUpdatedAt?.toISOString()
+      }));
+    } catch { }
+  }
+
+  private restoreSnapshot(): void {
+    try {
+      const raw = sessionStorage.getItem(FinancialDashboardComponent.SNAPSHOT_KEY);
+      if (!raw) return;
+      const snap = JSON.parse(raw);
+      if (!snap?.dashboard) return;
+      this.dashboard = snap.dashboard;
+      this.monthlyStats = snap.evolution?.meses ?? [];
+      this.maxMonthProfit = snap.evolution?.lucroMaximoMes ?? 0;
+      this.topProducts = snap.topProducts?.produtos ?? [];
+      this.lowMarginProducts = snap.lowMargin?.produtos ?? [];
+      this.lastUpdatedAt = snap.at ? new Date(snap.at) : null;
+      this.recomputeChart();
+    } catch { }
   }
 
   refreshNow(): void {

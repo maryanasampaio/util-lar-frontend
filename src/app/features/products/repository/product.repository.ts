@@ -73,7 +73,9 @@ export class ProductsRepository {
    * POST /produtos
    */
   criarProduto(data: ProductFormData): Observable<Product> {
-    return this.http.post<Product>(`${this.apiUrl}/produtos`, data);
+    return this.http.post<Product>(`${this.apiUrl}/produtos`, data).pipe(
+      map(produto => this.normalizeProductImages(produto))
+    );
   }
 
   /**
@@ -81,7 +83,9 @@ export class ProductsRepository {
    * PUT /produtos/:id
    */
   atualizarProduto(id: number, data: Partial<ProductFormData>): Observable<Product> {
-    return this.http.put<Product>(`${this.apiUrl}/produtos/${id}`, data);
+    return this.http.put<Product>(`${this.apiUrl}/produtos/${id}`, data).pipe(
+      map(produto => this.normalizeProductImages(produto))
+    );
   }
 
   /**
@@ -130,22 +134,26 @@ export class ProductsRepository {
       return { ...produto, images: null };
     }
 
+    let images: unknown = produto.images;
+
     // Se images for string (JSON), tentar parsear
-    if (typeof produto.images === 'string') {
+    if (typeof images === 'string') {
       try {
-        const parsed = JSON.parse(produto.images as any);
-        return { ...produto, images: Array.isArray(parsed) ? parsed : null };
+        images = JSON.parse(images);
       } catch {
         return { ...produto, images: null };
       }
     }
 
-    // Se já for array, retornar como está
-    if (Array.isArray(produto.images)) {
-      return produto;
+    if (!Array.isArray(images)) {
+      return { ...produto, images: null };
     }
 
-    // Caso não seja nem string nem array, retornar null
-    return { ...produto, images: null };
+    return { ...produto, images: images.map(img => this.toAbsoluteImageUrl(img)) };
+  }
+
+  private toAbsoluteImageUrl(image: string): string {
+    if (typeof image !== 'string') return image;
+    return image.startsWith('/produtos/') ? `${this.apiUrl}${image}` : image;
   }
 }

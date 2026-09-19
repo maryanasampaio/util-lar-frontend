@@ -281,29 +281,69 @@ export class ProductFormModalComponent implements OnInit, OnChanges {
       
       for (let i = 0; i < filesToAdd; i++) {
         const file = input.files[i];
-        const reader = new FileReader();
-        
-        reader.onload = (e: ProgressEvent<FileReader>) => {
-          if (e.target?.result) {
-            const imageUrl = e.target.result as string;
-            console.log(`[ProductFormModal] Imagem carregada, tamanho: ${imageUrl.length} chars`);
-            
-            // Adiciona imagem dentro da zona do Angular
-            this.imageUrls.push(imageUrl);
-            
-            // Força detecção de mudanças imediatamente
-            this.cdr.detectChanges();
-            
-            console.log(`[ProductFormModal] Total de imagens agora: ${this.imageUrls.length}`);
-          }
-        };
-        
-        reader.readAsDataURL(file);
+
+        this.compressImage(file).then(imageUrl => {
+          console.log(`[ProductFormModal] Imagem carregada, tamanho: ${imageUrl.length} chars`);
+          this.imageUrls.push(imageUrl);
+          this.cdr.detectChanges();
+          console.log(`[ProductFormModal] Total de imagens agora: ${this.imageUrls.length}`);
+        }).catch(err => {
+          console.error('[ProductFormModal] Falha ao processar imagem:', err);
+        });
       }
       
       // Limpa o input para permitir selecionar o mesmo arquivo novamente
       input.value = '';
     }
+  }
+
+  private compressImage(file: File, maxSide = 1600, quality = 0.85): Promise<string> {
+    const readOriginal = () => new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = e => resolve(e.target?.result as string);
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(file);
+    });
+
+    if (!file.type.startsWith('image/') || typeof document === 'undefined') {
+      return readOriginal();
+    }
+
+    return new Promise<string>((resolve) => {
+      const objectUrl = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        URL.revokeObjectURL(objectUrl);
+        const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+        const width = Math.round(img.width * scale);
+        const height = Math.round(img.height * scale);
+
+        if (scale === 1 && file.size < 300 * 1024) {
+          readOriginal().then(resolve);
+          return;
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          readOriginal().then(resolve);
+          return;
+        }
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, width, height);
+        ctx.drawImage(img, 0, 0, width, height);
+        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+        console.log(`[ProductFormModal] Foto comprimida: ${Math.round(file.size / 1024)} KB -> ${Math.round(dataUrl.length * 0.75 / 1024)} KB (${width}x${height})`);
+        resolve(dataUrl);
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        readOriginal().then(resolve);
+      };
+      img.src = objectUrl;
+    });
   }
 
   removeImage(index: number): void {

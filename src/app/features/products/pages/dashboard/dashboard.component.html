@@ -13,7 +13,7 @@
           Sofás, geladeiras, mesas, guarda-roupas e muito mais — produtos revisados, com garantia e parcelamento em até 12x no cartão.
         </p>
         <div class="flex flex-wrap gap-3">
-          <a href="#produtos" class="btn h-12 px-7 text-sm uppercase tracking-wide bg-white text-ink shadow-md hover:bg-brand-50">Ver produtos</a>
+          <button type="button" (click)="scrollToProducts()" class="btn h-12 px-7 text-sm uppercase tracking-wide bg-white text-ink shadow-md hover:bg-brand-50">Ver produtos</button>
           <button *ngIf="isAdmin" (click)="openCreateModal()" class="btn h-12 px-5 text-sm border border-white/40 text-white hover:bg-white/10">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"/></svg>
             Adicionar produto
@@ -57,7 +57,7 @@
         <p class="section-kicker mb-1">Acabaram de chegar</p>
         <h2 class="section-title">Novidades</h2>
       </div>
-      <a href="#produtos" class="text-sm font-semibold text-brand-600 hover:text-brand-700 whitespace-nowrap">Ver todos →</a>
+      <button type="button" (click)="scrollToProducts()" class="text-sm font-semibold text-brand-600 hover:text-brand-700 whitespace-nowrap">Ver todos →</button>
     </div>
     <!-- Páginas de 3 imagens (1 no celular) -->
     <div class="overflow-hidden -mx-1">
