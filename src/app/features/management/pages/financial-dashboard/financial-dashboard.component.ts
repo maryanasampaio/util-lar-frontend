@@ -95,7 +95,6 @@ interface ChartMonth {
           <p class="text-sm font-semibold">{{ error }}</p>
         </div>
 
-        <!-- ================= SKELETON (primeiro carregamento) ================= -->
         <ng-container *ngIf="initialLoading">
           <div class="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-5" aria-busy="true" aria-label="Carregando indicadores">
             <div *ngFor="let i of [1,2,3,4]" class="card p-4 sm:p-5 space-y-3">
@@ -346,7 +345,8 @@ interface ChartMonth {
               </details>
             </div>
             <ng-template #noPend>
-              <div class="rounded-xl bg-success-50 border border-success-100 p-5 text-center">
+              <p *ngIf="catalogLoading" class="text-sm text-muted text-center py-8">Verificando o catálogo...</p>
+              <div *ngIf="!catalogLoading" class="rounded-xl bg-success-50 border border-success-100 p-5 text-center">
                 <p class="font-semibold text-success-700">Catálogo em dia</p>
                 <p class="text-xs text-success-700/80 mt-0.5">Todos os produtos têm foto, custo, categoria e descrição.</p>
               </div>
@@ -526,9 +526,7 @@ export class FinancialDashboardComponent implements OnInit, OnDestroy {
       : '';
   }
 
-  /** Primeiro carregamento sem nada em tela: mostra skeleton em vez de zeros */
   get initialLoading(): boolean { return this.loading && !this.dashboard; }
-  /** Já há dados (atuais ou do snapshot) e uma atualização está em andamento */
   get refreshing(): boolean { return this.loading && !!this.dashboard; }
 
   ngOnInit(): void {
@@ -603,9 +601,6 @@ export class FinancialDashboardComponent implements OnInit, OnDestroy {
       });
   }
 
-  // ---- snapshot local (sessionStorage) ---------------------------------------
-  // Guarda a última resposta para o painel abrir já preenchido na próxima visita
-  // enquanto os números frescos chegam do backend.
   private static readonly SNAPSHOT_KEY = 'utilar:financeiro:snapshot';
 
   private saveSnapshot(evolution: unknown, topProducts: unknown, lowMargin: unknown): void {
@@ -617,7 +612,7 @@ export class FinancialDashboardComponent implements OnInit, OnDestroy {
         lowMargin,
         at: this.lastUpdatedAt?.toISOString()
       }));
-    } catch { /* storage cheio ou indisponível: ignora */ }
+    } catch { }
   }
 
   private restoreSnapshot(): void {
@@ -633,7 +628,7 @@ export class FinancialDashboardComponent implements OnInit, OnDestroy {
       this.lowMarginProducts = snap.lowMargin?.produtos ?? [];
       this.lastUpdatedAt = snap.at ? new Date(snap.at) : null;
       this.recomputeChart();
-    } catch { /* snapshot inválido: segue com o carregamento normal */ }
+    } catch { }
   }
 
   refreshNow(): void {
